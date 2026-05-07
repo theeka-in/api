@@ -1,14 +1,16 @@
+use std::sync::Arc;
+
 use poem_openapi::{OpenApi, param::Query, payload::PlainText};
 
 use super::UsersService;
 
 pub struct UsersController {
-    service: UsersService,
+    service: Arc<UsersService>,
 }
 
 #[OpenApi(prefix_path = "/users")]
 impl UsersController {
-    pub fn new(service: UsersService) -> Self {
+    pub fn new(service: Arc<UsersService>) -> Self {
         Self { service }
     }
 

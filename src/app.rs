@@ -1,14 +1,19 @@
 use poem::Route;
 use poem_openapi::OpenApiService;
 
-use crate::modules::{
-    auth::{AuthController, AuthService},
-    users::{UsersController, UsersService},
+use crate::{
+    database::get_connection_url,
+    modules::{
+        auth::{AuthController, AuthService},
+        database::DatabaseService,
+        users::{UsersController, UsersService},
+    },
 };
 
-pub fn init() -> Route {
+pub async fn init(port: &str) -> Route {
+    let database_service = DatabaseService::new(get_connection_url()).await;
     let users_service = UsersService::new();
-    let auth_service = AuthService::new(users_service.clone());
+    let auth_service = AuthService::new(database_service, users_service.clone());
 
     let the_api = OpenApiService::new(
         (
@@ -18,7 +23,7 @@ pub fn init() -> Route {
         "Theeka",
         "1.0",
     )
-    .server("http://localhost:3000/api");
+    .server(format!("http://localhost:{port}/api"));
 
     let the_json_spec = the_api.spec_endpoint();
     let the_yaml_spec = the_api.spec_endpoint_yaml();

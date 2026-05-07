@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+dotenvy = "0.15.7"
 poem = "3.1.12"
 poem-openapi = { version = "5.1.16", features = ["scalar"] }
+sea-orm = { version = "1", features = [
+    "sqlx-postgres",
+    "runtime-tokio-rustls",
+    "macros",
+] }
 tokio = { version = "1.52.2", features = ["full"] }

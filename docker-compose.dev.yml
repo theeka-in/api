@@ -1,4 +1,45 @@
 services:
+    migrate:
+        build:
+            dockerfile: Dockerfile.migrate
+        environment:
+            - DB_HOST=${DB_HOST}
+            - DB_PORT=${DB_PORT}
+            - DB_USER=${DB_USER}
+            - DB_PASSWORD=${DB_PASSWORD}
+            - DB_NAME=${DB_NAME}
+            - MIGRATE_ENV="prod"
+        depends_on:
+            db:
+                condition: service_healthy
+        volumes:
+            - ./prisma/migrations:/app/migrations
+            - migrate_node_modules:/app/node_modules
+        develop:
+            watch:
+                - action: rebuild
+                  path: prisma/latest-migrate.json
+
+    introspection:
+        build:
+            dockerfile: Dockerfile.introspection
+        environment:
+            - DB_HOST=${DB_HOST}
+            - DB_PORT=${DB_PORT}
+            - DB_USER=${DB_USER}
+            - DB_PASSWORD=${DB_PASSWORD}
+            - DB_NAME=${DB_NAME}
+        depends_on:
+            db:
+                condition: service_healthy
+            migrate:
+                condition: service_completed_successfully
+        volumes:
+            - ./src/entities:/app/src/entities
+        develop:
+            watch:
+                - action: rebuild
+                  path: prisma/migrations
     rest:
         build:
             dockerfile: Dockerfile.dev
@@ -11,6 +52,10 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            migrate:
+                condition: service_completed_successfully
+            introspection:
+                condition: service_completed_successfully
         develop:
             watch:
                 - action: sync
@@ -43,3 +88,4 @@ volumes:
     cargo_cache:
     target_cache:
     postgres_data:
+    migrate_node_modules:

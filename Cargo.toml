@@ -13,3 +13,4 @@ sea-orm = { version = "1", features = [
     "macros",
 ] }
 tokio = { version = "1.52.2", features = ["full"] }
+uuid = { version = "1.23.1", features = ["v4"] }

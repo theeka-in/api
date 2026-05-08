@@ -1,0 +1,11 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+COPY prisma/package.json prisma/package-lock.json ./
+
+RUN npm install
+
+COPY prisma ./
+
+CMD ["npm", "run", "migrate"]

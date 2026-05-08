@@ -4,6 +4,7 @@ use poem::{Server, listener::TcpListener};
 
 mod app;
 mod database;
+mod entities;
 mod modules;
 
 #[tokio::main]

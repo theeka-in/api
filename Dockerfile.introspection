@@ -1,0 +1,11 @@
+FROM rust:1.95.0
+
+RUN cargo install sea-orm-cli
+
+RUN rustup component add rustfmt
+
+WORKDIR /app
+
+RUN mkdir -p src/entities
+
+CMD ["sh", "-c", "sea-orm-cli generate entity --database-url postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME} --output-dir src/entities --ignore-tables _prisma_migrations --ignore-tables _prisma_migrations_lock -v"]

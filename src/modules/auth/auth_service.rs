@@ -1,8 +1,15 @@
 use std::sync::Arc;
 
-use sea_orm::ConnectionTrait;
+use sea_orm::{ActiveModelTrait, ConnectionTrait};
 
-use crate::modules::{database::DatabaseService, users::UsersService};
+use crate::{
+    entities::user,
+    modules::{
+        auth::auth_controller::{CreateUserRequest, UserDto},
+        database::DatabaseService,
+        users::UsersService,
+    },
+};
 
 #[derive(Debug)]
 pub struct AuthService {
@@ -25,7 +32,16 @@ impl AuthService {
         format!("{} from auth", self.users_service.hello(name))
     }
 
-    pub async fn db_health(&self) -> String {
+    pub async fn db_health(&self) -> Vec<user::Model> {
         self.database_service.health_check().await
+    }
+
+    pub async fn create_user(&self, body: CreateUserRequest) -> UserDto {
+        let user = user::ActiveModel::from(body)
+            .insert(self.database_service.db())
+            .await
+            .unwrap();
+
+        UserDto::from(user)
     }
 }

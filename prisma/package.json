@@ -1,0 +1,16 @@
+{
+    "name": "api-prisma-migrations",
+    "version": "1.0.0",
+    "description": "",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "scripts": {
+        "migrate": "node scripts/migrate.js",
+        "commit": "node scripts/commit.js"
+    },
+    "devDependencies": {
+        "@types/node": "^25.6.2",
+        "prisma": "^7.8.0"
+    }
+}

@@ -1,6 +1,7 @@
+use sea_orm::{ConnectionTrait, Database, DatabaseConnection, EntityTrait, TryGetable};
 use std::sync::Arc;
 
-use sea_orm::{ConnectionTrait, Database, DatabaseConnection, TryGetable};
+use crate::entities::user;
 
 #[derive(Debug)]
 pub struct DatabaseService {
@@ -13,19 +14,9 @@ impl DatabaseService {
         Arc::new(Self { db })
     }
 
-    pub async fn health_check(&self) -> String {
-        use sea_orm::{DbBackend, Statement};
-        let row = self
-            .db
-            .query_one(Statement::from_string(
-                DbBackend::Postgres,
-                "SELECT CAST((1 + 1 * 100 / 50 + 20 / 10) AS TEXT) as val".to_owned(),
-            ))
-            .await
-            .unwrap()
-            .unwrap();
-
-        String::try_get(&row, "", "val").unwrap()
+    pub async fn health_check(&self) -> Vec<user::Model> {
+        let users = user::Entity::find().all(&self.db).await.unwrap();
+        users
     }
 
     pub fn db(&self) -> &DatabaseConnection {

@@ -1,11 +1,11 @@
-FROM node:24-alpine
+FROM oven/bun:alpine
 
 WORKDIR /app
 
-COPY prisma/package.json prisma/package-lock.json ./
+COPY package.json prisma.config.ts migrations ./
 
-RUN npm install
+RUN bun install
 
 COPY prisma ./
 
-CMD ["npm", "run", "migrate"]
+CMD ["bun", "db:deploy"]

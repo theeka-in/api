@@ -12,6 +12,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub username: Option<String>,
+    pub age: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

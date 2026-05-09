@@ -1,7 +1,11 @@
+import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
 const dbUrl = () => {
-    const host = process.env.DB_HOST ?? "localhost";
+    const host =
+        process.env.ENV === "dev" ?
+            "localhost"
+        :   (process.env.DB_HOST ?? "localhost");
     const port = process.env.DB_PORT ?? "5432";
     const user =
         process.env.DB_USER ??
@@ -23,9 +27,9 @@ const dbUrl = () => {
 };
 
 export default defineConfig({
-    schema: "schema/schema.prisma",
+    schema: "prisma/schema.prisma",
     migrations: {
-        path: "migrations",
+        path: "./migrations",
     },
     datasource: {
         url: dbUrl(),

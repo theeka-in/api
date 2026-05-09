@@ -3,9 +3,7 @@ import { defineConfig } from "prisma/config";
 
 const dbUrl = () => {
     const host =
-        process.env.ENV === "dev" ?
-            "localhost"
-        :   (process.env.DB_HOST ?? "localhost");
+        process.env.ENV === "prod" ? process.env.DB_HOST! : "localhost";
     const port = process.env.DB_PORT ?? "5432";
     const user =
         process.env.DB_USER ??
@@ -29,7 +27,7 @@ const dbUrl = () => {
 export default defineConfig({
     schema: "prisma/schema.prisma",
     migrations: {
-        path: "./migrations",
+        path: "prisma/migrations",
     },
     datasource: {
         url: dbUrl(),

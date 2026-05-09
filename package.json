@@ -1,13 +1,17 @@
 {
-    "name": "api-prisma-migrations",
+    "name": "api",
     "version": "1.0.0",
     "description": "",
     "license": "ISC",
     "author": "",
     "type": "module",
     "scripts": {
-        "start": "docker compose -f docker-compose.dev.yml watch",
-        "stop": "docker compose -f docker-compose.dev.yml down",
+        "dev": "docker compose -f docker-compose.dev.yml watch",
+        "dev:build": "cross-env COMPOSE_BAKE=true docker compose -f docker-compose.dev.yml build",
+        "dev:stop": "docker compose -f docker-compose.dev.yml down",
+        "prod": "docker compose -f docker-compose.yml up",
+        "prod:build": "cross-env COMPOSE_BAKE=true docker compose -f docker-compose.yml build",
+        "prod:stop": "docker compose -f docker-compose.yml down",
         "db:migrate": "npx prisma migrate dev",
         "db:deploy": "npx prisma migrate deploy",
         "db:reset": "npx prisma migrate reset",
@@ -15,7 +19,8 @@
     },
     "devDependencies": {
         "@types/node": "^25.6.2",
-        "prisma": "^7.8.0",
-        "dotenv": "^17.4.2"
+        "cross-env": "^10.1.0",
+        "dotenv": "^17.4.2",
+        "prisma": "^7.8.0"
     }
 }

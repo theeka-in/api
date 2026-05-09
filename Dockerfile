@@ -1,4 +1,4 @@
-FROM rust:1.95.0 as builder
+FROM rust:1.95.0 AS builder
 
 WORKDIR /app
 
@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 COPY --from=builder /app/target/release/api /usr/local/bin/app
 
 ENV PORT=8080
+
+ENV ENV="prod"
 
 EXPOSE 8080
 

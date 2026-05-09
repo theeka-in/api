@@ -23,8 +23,8 @@ pub struct AuthController {
 pub struct UserDto {
     pub id: String,
     pub email: String,
-    pub name: Option<String>,
-    pub username: Option<String>,
+    pub name: String,
+    pub username: String,
 }
 
 impl From<user::Model> for UserDto {
@@ -41,7 +41,7 @@ impl From<user::Model> for UserDto {
 #[derive(Object)]
 pub struct CreateUserRequest {
     #[oai(validator(min_length = 3, max_length = 60))]
-    name: Option<String>,
+    name: String,
 
     #[oai(validator(pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"))]
     email: String,
@@ -56,7 +56,7 @@ impl From<CreateUserRequest> for user::ActiveModel {
             id: Set(Uuid::new_v4()),
             name: Set(req.name),
             email: Set(req.email),
-            username: Set(Some(req.username)),
+            username: Set(req.username),
             ..Default::default()
         }
     }

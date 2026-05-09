@@ -1,11 +1,15 @@
-FROM oven/bun:alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
-COPY package.json prisma.config.ts migrations ./
+COPY package.json package-lock.json ./
 
-RUN bun install
+RUN --mount=type=cache,target=/root/.npm npm ci --legacy-peer-deps
 
-COPY prisma ./
+COPY prisma.config.ts ./
 
-CMD ["bun", "db:deploy"]
+ENV ENV="prod"
+
+COPY prisma ./prisma
+
+CMD ["npm", "run", "db:deploy"]

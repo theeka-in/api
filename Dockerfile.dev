@@ -1,6 +1,9 @@
 FROM rust:1.95.0
 
-RUN cargo install cargo-watch
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/root/.cargo/bin \
+    cargo install cargo-watch
 
 WORKDIR /app
 

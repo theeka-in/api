@@ -1,65 +1,32 @@
+use super::AuthService;
+use crate::errors::DbError;
+use crate::modules::auth::auth_dto::{CreateUserDto, UserDto};
 use poem_openapi::{
-    Object, OpenApi,
-    param::Query,
-    payload::{Json, PlainText},
-};
-use sea_orm::{
-    ActiveModelTrait,
-    ActiveValue::{NotSet, Set},
-    Database,
+    param::Query, payload::{Json, PlainText}, ApiResponse,
+    Object,
+    OpenApi,
 };
 use std::sync::Arc;
-use uuid::Uuid;
-
-use crate::{entities::user, modules::database::DatabaseService};
-
-use super::AuthService;
 
 pub struct AuthController {
     service: Arc<AuthService>,
 }
 
-#[derive(Clone, Debug, Object)]
-pub struct UserDto {
-    pub id: String,
-    pub email: String,
-    pub name: String,
-    pub username: String,
+#[derive(Debug, Object)]
+pub struct ErrorDto {
+    pub message: String,
 }
 
-impl From<user::Model> for UserDto {
-    fn from(m: user::Model) -> Self {
-        Self {
-            id: m.id.to_string(),
-            name: m.name,
-            email: m.email,
-            username: m.username,
-        }
-    }
-}
+#[derive(ApiResponse)]
+pub enum CreateUserResponse {
+    #[oai(status = 201)]
+    Created(Json<UserDto>),
 
-#[derive(Object)]
-pub struct CreateUserRequest {
-    #[oai(validator(min_length = 3, max_length = 60))]
-    name: String,
+    #[oai(status = 409)]
+    Conflict(Json<ErrorDto>),
 
-    #[oai(validator(pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"))]
-    email: String,
-
-    #[oai(validator(min_length = 3, max_length = 60))]
-    username: String,
-}
-
-impl From<CreateUserRequest> for user::ActiveModel {
-    fn from(req: CreateUserRequest) -> Self {
-        Self {
-            id: Set(Uuid::new_v4()),
-            name: Set(req.name),
-            email: Set(req.email),
-            username: Set(req.username),
-            ..Default::default()
-        }
-    }
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
 }
 
 #[OpenApi(prefix_path = "/auth")]
@@ -80,12 +47,23 @@ impl AuthController {
     pub async fn db_health(&self) -> Json<Vec<UserDto>> {
         let users = self.service.db_health().await;
 
-        Json(users.into_iter().map(|m| UserDto::from(m)).collect())
+        Json(users)
     }
 
     #[oai(path = "/create-user", method = "post")]
-    pub async fn create_user(&self, body: Json<CreateUserRequest>) -> Json<UserDto> {
-        let user = self.service.create_user(body.0).await;
-        Json(user)
+    pub async fn create_user(&self, body: Json<CreateUserDto>) -> CreateUserResponse {
+        match self.service.create_user(body.0).await {
+            Ok(user) => CreateUserResponse::Created(Json(user)),
+
+            Err(DbError::UniqueViolation { constraint }) => {
+                CreateUserResponse::Conflict(Json(ErrorDto {
+                    message: format!("{constraint} already exists"),
+                }))
+            }
+
+            Err(e) => CreateUserResponse::InternalError(Json(ErrorDto {
+                message: e.to_string(),
+            })),
+        }
     }
 }

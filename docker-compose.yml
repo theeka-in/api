@@ -1,24 +1,17 @@
 name: api-prod
 
 services:
-    migrate:
-        build:
-            dockerfile: Dockerfile.migrate
-        env_file: .env
-        depends_on:
-            db:
-                condition: service_healthy
     rest:
         build:
             dockerfile: Dockerfile
         ports:
             - "8080:8080"
+        environment:
+            - DATABASE_URL=${DATABASE_URL_LOCAL}
         env_file: .env
         depends_on:
             db:
                 condition: service_healthy
-            migrate:
-                condition: service_completed_successfully
     db:
         image: postgres:18-alpine
         environment:

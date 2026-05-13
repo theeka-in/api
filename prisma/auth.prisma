@@ -1,0 +1,29 @@
+// ========================
+// AUTH MODULE
+// ========================
+
+model Account {
+    id        String   @id @db.Uuid
+    phone     BigInt   @unique
+    password  String
+    createdAt DateTime @default(now()) @map("created_at")
+
+    sessions Session[]
+    user     User?
+
+    @@map("accounts")
+    @@schema("auth")
+}
+
+model Session {
+    token     String   @id
+    userAgent String   @map("user_agent")
+    ipAddress String   @map("ip_address")
+    createdAt DateTime @default(now()) @map("created_at")
+
+    accountId String  @map("account_id") @db.Uuid
+    account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+    @@map("sessions")
+    @@schema("auth")
+}

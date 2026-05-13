@@ -1,54 +1,46 @@
-use crate::errors::DbError;
-use crate::modules::auth::auth_dto::{CreateUserDto, UserDto};
-use crate::modules::auth::auth_entity::UserEntity;
-use crate::modules::users::UsersService;
+use crate::errors::{DbError, ServiceError};
+use crate::modules::auth::auth_dto::{AccountDto, LoginDto, RegisterDto, SessionDto};
+use crate::modules::auth::auth_repository::AuthRepository;
 use sqlx::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct AuthService {
-    users_service: Arc<UsersService>,
-    pg: PgPool,
+    repo: AuthRepository,
 }
 
 impl AuthService {
-    pub fn new(users_service: Arc<UsersService>, pg: PgPool) -> Arc<Self> {
-        Arc::new(Self { users_service, pg })
+    pub fn new(repo: AuthRepository) -> Arc<Self> {
+        Arc::new(Self { repo })
     }
 
-    pub fn hello_from_auth(&self, name: &str) -> String {
-        format!("{} from auth", self.users_service.hello(name))
+    pub async fn register(&self, body: RegisterDto) -> Result<AccountDto, ServiceError> {
+        todo!()
     }
 
-    pub async fn db_health(&self) -> Vec<UserDto> {
-        let user_entities = sqlx::query_as!(
-            UserEntity,
-            r#"--sql
-                SELECT * FROM users;
-            "#
-        )
-        .fetch_all(&self.pg)
-        .await
-        .unwrap();
-
-        user_entities.into_iter().map(UserDto::from).collect()
+    pub async fn login(
+        &self,
+        body: LoginDto,
+        user_agent: String,
+        ip_address: String,
+    ) -> Result<SessionDto, ServiceError> {
+        todo!()
     }
 
-    pub async fn create_user(&self, body: CreateUserDto) -> Result<UserDto, DbError> {
-        let user_entity = sqlx::query_as!(
-            UserEntity,
-            r#"--sql
-            INSERT INTO users (id, name, email, username) VALUES ($1, $2, $3, $4) RETURNING id, name, email, username
-            "#,
-            Uuid::new_v4(),
-            body.name,
-            body.email,
-            body.username
-        )
-        .fetch_one(&self.pg)
-        .await.map_err(DbError::from)?;
+    pub async fn logout(&self, token: String) -> Result<(), ServiceError> {
+        todo!()
+    }
 
-        Ok(UserDto::from(user_entity))
+    pub async fn get_sessions(&self, account_id: Uuid) -> Result<Vec<SessionDto>, ServiceError> {
+        todo!()
+    }
+
+    pub async fn delete_session(
+        &self,
+        account_id: Uuid,
+        token: String,
+    ) -> Result<(), ServiceError> {
+        todo!()
     }
 }

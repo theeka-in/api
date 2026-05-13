@@ -1,30 +1,56 @@
 use super::AuthService;
-use crate::errors::DbError;
-use crate::modules::auth::auth_dto::{CreateUserDto, UserDto};
-use poem_openapi::{
-    param::Query, payload::{Json, PlainText}, ApiResponse,
-    Object,
-    OpenApi,
-};
+use crate::errors::{DbError, ErrorDto};
+use crate::modules::auth::auth_dto::{AccountDto, LoginDto, RegisterDto, SessionDto};
+use poem_openapi::{ApiResponse, Object, OpenApi, param::Path, payload::Json};
 use std::sync::Arc;
+use uuid::Uuid;
 
 pub struct AuthController {
     service: Arc<AuthService>,
 }
 
-#[derive(Debug, Object)]
-pub struct ErrorDto {
-    pub message: String,
+#[derive(ApiResponse)]
+pub enum RegisterResponse {
+    #[oai(status = 201)]
+    Created(Json<SessionDto>),
+    #[oai(status = 409)]
+    Conflict(Json<ErrorDto>),
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
 }
 
 #[derive(ApiResponse)]
-pub enum CreateUserResponse {
-    #[oai(status = 201)]
-    Created(Json<UserDto>),
+pub enum LoginResponse {
+    #[oai(status = 200)]
+    Ok(Json<SessionDto>),
+    #[oai(status = 401)]
+    Unauthorized(Json<ErrorDto>),
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
+}
 
-    #[oai(status = 409)]
-    Conflict(Json<ErrorDto>),
+#[derive(ApiResponse)]
+pub enum LogoutResponse {
+    #[oai(status = 204)]
+    NoContent,
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
+}
 
+#[derive(ApiResponse)]
+pub enum GetSessionsResponse {
+    #[oai(status = 200)]
+    Ok(Json<Vec<SessionDto>>),
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
+}
+
+#[derive(ApiResponse)]
+pub enum DeleteSessionResponse {
+    #[oai(status = 204)]
+    NoContent,
+    #[oai(status = 404)]
+    NotFound(Json<ErrorDto>),
     #[oai(status = 500)]
     InternalError(Json<ErrorDto>),
 }
@@ -35,35 +61,28 @@ impl AuthController {
         Self { service }
     }
 
-    #[oai(path = "/hello", method = "get")]
-    pub async fn hello_from_auth(
-        &self,
-        #[oai(validator(min_length = 2, max_length = 50))] name: Query<String>,
-    ) -> PlainText<String> {
-        PlainText(self.service.hello_from_auth(&name.0))
+    #[oai(path = "/register", method = "post")]
+    pub async fn register(&self, body: Json<RegisterDto>) -> RegisterResponse {
+        todo!()
     }
 
-    #[oai(path = "/db-health", method = "get")]
-    pub async fn db_health(&self) -> Json<Vec<UserDto>> {
-        let users = self.service.db_health().await;
-
-        Json(users)
+    #[oai(path = "/login", method = "post")]
+    pub async fn login(&self, body: Json<LoginDto>) -> LoginResponse {
+        todo!()
     }
 
-    #[oai(path = "/create-user", method = "post")]
-    pub async fn create_user(&self, body: Json<CreateUserDto>) -> CreateUserResponse {
-        match self.service.create_user(body.0).await {
-            Ok(user) => CreateUserResponse::Created(Json(user)),
+    #[oai(path = "/logout", method = "post")]
+    pub async fn logout(&self) -> LogoutResponse {
+        todo!()
+    }
 
-            Err(DbError::UniqueViolation { constraint }) => {
-                CreateUserResponse::Conflict(Json(ErrorDto {
-                    message: format!("{constraint} already exists"),
-                }))
-            }
+    #[oai(path = "/sessions", method = "get")]
+    pub async fn get_sessions(&self) -> GetSessionsResponse {
+        todo!()
+    }
 
-            Err(e) => CreateUserResponse::InternalError(Json(ErrorDto {
-                message: e.to_string(),
-            })),
-        }
+    #[oai(path = "/sessions/:token", method = "delete")]
+    pub async fn delete_session(&self, token: Path<String>) -> DeleteSessionResponse {
+        todo!()
     }
 }

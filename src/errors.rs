@@ -1,5 +1,56 @@
+use poem_openapi::Object;
 use sqlx::error::DatabaseError;
 use std::fmt;
+
+#[derive(Debug, Object)]
+pub struct ErrorDto {
+    pub message: String,
+}
+
+#[derive(Debug)]
+pub enum ServiceError {
+    NotFound(ErrorDto),
+
+    Conflict(ErrorDto),
+
+    Unauthorized(ErrorDto),
+
+    Forbidden(ErrorDto),
+
+    Internal(ErrorDto),
+}
+
+impl From<DbError> for ServiceError {
+    fn from(e: DbError) -> Self {
+        match e {
+            DbError::NotFound => ServiceError::NotFound(ErrorDto {
+                message: "row not found".to_owned(),
+            }),
+            DbError::UniqueViolation { constraint } => ServiceError::Conflict(ErrorDto {
+                message: format!("{constraint} already exists"),
+            }),
+            DbError::ForeignKeyViolation { constraint } => ServiceError::NotFound(ErrorDto {
+                message: format!("{constraint} not found"),
+            }),
+            DbError::CheckViolation { constraint } => ServiceError::Conflict(ErrorDto {
+                message: format!("{constraint} is invalid"),
+            }),
+            DbError::PoolTimedOut => ServiceError::Internal(ErrorDto {
+                message: "database pool timed out".to_owned(),
+            }),
+            DbError::PoolClosed => ServiceError::Internal(ErrorDto {
+                message: "database pool closed".to_owned(),
+            }),
+            DbError::ColumnNotFound(col) => ServiceError::Internal(ErrorDto {
+                message: format!("column {col} not found"),
+            }),
+            DbError::Decode(msg) => ServiceError::Internal(ErrorDto {
+                message: format!("decode error: {msg}"),
+            }),
+            DbError::Internal(msg) => ServiceError::Internal(ErrorDto { message: msg }),
+        }
+    }
+}
 
 #[derive(Debug)]
 pub enum DbError {
@@ -16,32 +67,6 @@ pub enum DbError {
     Decode(String),
 
     Internal(String),
-}
-
-impl fmt::Display for DbError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            DbError::NotFound => write!(f, "record not found"),
-
-            DbError::UniqueViolation { constraint } => {
-                write!(f, "unique constraint violation on: {}", constraint)
-            }
-            DbError::ForeignKeyViolation { constraint } => {
-                write!(f, "foreign key violation on: {}", constraint)
-            }
-            DbError::CheckViolation { constraint } => {
-                write!(f, "check constraint violation on: {}", constraint)
-            }
-
-            DbError::PoolTimedOut => write!(f, "database pool timed out"),
-            DbError::PoolClosed => write!(f, "database pool closed"),
-
-            DbError::ColumnNotFound(col) => write!(f, "column not found: {}", col),
-            DbError::Decode(e) => write!(f, "type decode error: {}", e),
-
-            DbError::Internal(msg) => write!(f, "database error: {}", msg),
-        }
-    }
 }
 
 fn get_constraint_from_error(e: Box<dyn DatabaseError>) -> String {

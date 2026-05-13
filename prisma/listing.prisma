@@ -1,0 +1,100 @@
+// ========================
+// LISTING MODULE
+// ========================
+model BusinessListing {
+    id          String   @id @db.Uuid
+    title       String
+    description String?
+    logo        String?
+    isActive    Boolean  @default(true) @map("is_active")
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
+
+    businessId String   @map("business_id") @db.Uuid
+    business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+    productListingId String?         @unique @map("product_listing_id") @db.Uuid
+    productListing   ProductListing? @relation(fields: [productListingId], references: [id])
+
+    serviceListingId String?         @unique @map("service_listing_id") @db.Uuid
+    serviceListing   ServiceListing? @relation(fields: [serviceListingId], references: [id])
+
+    categories ListingCategory[]
+    tags       ListingTag[]
+    media      ListingMedia[]
+    reviews    Review[]
+    views      View[]
+
+    @@map("business_listings")
+    @@schema("listing")
+}
+
+model ProductListing {
+    id    String @id @db.Uuid
+    price Float  @db.DoublePrecision
+    stock Int
+
+    productSpecs    ListingProductSpec[]
+    businessListing BusinessListing?
+
+    @@map("product_listings")
+    @@schema("listing")
+}
+
+model ServiceListing {
+    id        String  @id @db.Uuid
+    price     String
+    available Boolean
+
+    businessListing BusinessListing?
+
+    @@map("service_listings")
+    @@schema("listing")
+}
+
+model ListingCategory {
+    id    String @id @db.Uuid
+    value String
+
+    listingId String          @map("listing_id") @db.Uuid
+    listing   BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+    @@map("listing_categories")
+    @@schema("listing")
+}
+
+model ListingTag {
+    id    String @id @db.Uuid
+    value String
+
+    listingId String          @map("listing_id") @db.Uuid
+    listing   BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+    @@map("listing_tags")
+    @@schema("listing")
+}
+
+model ListingProductSpec {
+    id        String @id @db.Uuid
+    groupName String @map("group_name")
+    key       String
+    value     String
+
+    productListingId String         @map("product_listing_id") @db.Uuid
+    productListing   ProductListing @relation(fields: [productListingId], references: [id], onDelete: Cascade)
+
+    @@map("listing_product_specs")
+    @@schema("listing")
+}
+
+model ListingMedia {
+    id   String    @id @db.Uuid
+    type MediaType
+    url  String
+
+    listingId String          @map("listing_id") @db.Uuid
+    listing   BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+    @@map("listing_media")
+    @@schema("listing")
+}

@@ -1,10 +1,16 @@
-use crate::modules::{
-    auth::{AuthController, AuthService},
-    users::{UsersController, UsersService},
-};
 use poem::Route;
 use poem_openapi::OpenApiService;
 use sqlx::postgres::PgPoolOptions;
+
+use crate::modules::{
+    analytics::{AnalyticsController, AnalyticsRepository, AnalyticsService},
+    auth::{AuthController, AuthRepository, AuthService},
+    business::{BusinessController, BusinessRepository, BusinessService},
+    health::HealthController,
+    listing::{ListingController, ListingRepository, ListingService},
+    review::{ReviewController, ReviewRepository, ReviewService},
+    users::{UsersController, UsersRepository, UsersService},
+};
 
 pub async fn init(port: &str) -> Route {
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -22,13 +28,30 @@ pub async fn init(port: &str) -> Route {
             .expect("Migrations directory was not found");
     }
 
-    let users_service = UsersService::new();
-    let auth_service = AuthService::new(users_service.clone(), pg_pool.clone());
+    let auth_service = AuthService::new(AuthRepository::new(pg_pool.clone()));
+    let users_service = UsersService::new(UsersRepository::new(pg_pool.clone()));
+    let business_service = BusinessService::new(BusinessRepository::new(pg_pool.clone()));
+    let listing_service = ListingService::new(ListingRepository::new(pg_pool.clone()));
+    let review_service = ReviewService::new(ReviewRepository::new(pg_pool.clone()));
+    let analytics_service = AnalyticsService::new(AnalyticsRepository::new(pg_pool));
+
+    let auth_controller = AuthController::new(auth_service);
+    let users_controller = UsersController::new(users_service);
+    let business_controller = BusinessController::new(business_service);
+    let listing_controller = ListingController::new(listing_service);
+    let review_controller = ReviewController::new(review_service);
+    let analytics_controller = AnalyticsController::new(analytics_service);
+    let health_controller = HealthController::new();
 
     let the_api = OpenApiService::new(
         (
-            UsersController::new(users_service),
-            AuthController::new(auth_service),
+            auth_controller,
+            users_controller,
+            business_controller,
+            listing_controller,
+            review_controller,
+            analytics_controller,
+            health_controller,
         ),
         "Theeka",
         "1.0",

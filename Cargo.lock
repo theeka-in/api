@@ -1927,7 +1927,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "theeka-api"
+name = "theeka_api"
 version = "0.1.0"
 dependencies = [
  "dotenvy",

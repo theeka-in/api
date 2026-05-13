@@ -1,0 +1,29 @@
+name: publish openapi spec
+
+on:
+    push:
+        paths:
+            - "api/src/**"
+        branches:
+            - main
+
+jobs:
+    publish-spec:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: dtolnay/rust-toolchain@stable
+
+            - name: generate spec
+              run: cargo run --bin export-schema > openapi.json
+
+            - name: push to spec repo
+              uses: dmnemec/copy_file_to_another_repo_action@main
+              env:
+                  API_TOKEN_GITHUB: ${{ secrets.SPEC_REPO_TOKEN }}
+              with:
+                  source_file: openapi.json
+                  destination_repo: theeka-in/api-spec
+                  user_email: github-actions[bot]@users.noreply.github.com
+                  user_name: github-actions[bot]
+                  commit_message: "chore: update spec from api@${{ github.sha }}"

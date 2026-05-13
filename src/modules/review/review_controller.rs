@@ -58,22 +58,48 @@ impl ReviewController {
     }
 
     #[oai(path = "/:business_id/listings/:listing_id/reviews", method = "get")]
-    pub async fn get_by_listing(&self, business_id: Path<Uuid>, listing_id: Path<Uuid>) -> GetReviewsResponse {
+    pub async fn get_by_listing(
+        &self,
+        business_id: Path<Uuid>,
+        listing_id: Path<Uuid>,
+    ) -> GetReviewsResponse {
         todo!()
     }
 
     #[oai(path = "/:business_id/listings/:listing_id/reviews", method = "post")]
-    pub async fn create(&self, business_id: Path<Uuid>, listing_id: Path<Uuid>, body: Json<CreateReviewDto>) -> CreateReviewResponse {
+    pub async fn create(
+        &self,
+        business_id: Path<Uuid>,
+        listing_id: Path<Uuid>,
+        body: Json<CreateReviewDto>,
+    ) -> CreateReviewResponse {
         todo!()
     }
 
-    #[oai(path = "/:business_id/listings/:listing_id/reviews/:review_id", method = "patch")]
-    pub async fn update(&self, business_id: Path<Uuid>, listing_id: Path<Uuid>, review_id: Path<Uuid>, body: Json<UpdateReviewDto>) -> UpdateReviewResponse {
+    #[oai(
+        path = "/:business_id/listings/:listing_id/reviews/:review_id",
+        method = "patch"
+    )]
+    pub async fn update(
+        &self,
+        business_id: Path<Uuid>,
+        listing_id: Path<Uuid>,
+        review_id: Path<Uuid>,
+        body: Json<UpdateReviewDto>,
+    ) -> UpdateReviewResponse {
         todo!()
     }
 
-    #[oai(path = "/:business_id/listings/:listing_id/reviews/:review_id", method = "delete")]
-    pub async fn delete(&self, business_id: Path<Uuid>, listing_id: Path<Uuid>, review_id: Path<Uuid>) -> DeleteReviewResponse {
+    #[oai(
+        path = "/:business_id/listings/:listing_id/reviews/:review_id",
+        method = "delete"
+    )]
+    pub async fn delete(
+        &self,
+        business_id: Path<Uuid>,
+        listing_id: Path<Uuid>,
+        review_id: Path<Uuid>,
+    ) -> DeleteReviewResponse {
         todo!()
     }
 }

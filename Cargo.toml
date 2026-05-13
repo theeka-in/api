@@ -1,5 +1,5 @@
 [package]
-name = "theeka-api"
+name = "theeka_api"
 version = "0.1.0"
 edition = "2024"
 authors = ["4O4-wasd"]

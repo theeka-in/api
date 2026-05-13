@@ -1,3 +1,19 @@
+FROM node:24-alpine as migrator
+
+WORKDIR /app
+
+COPY package.json ./
+
+RUN npm install
+
+COPY prisma ./prisma
+
+COPY scripts ./scripts
+
+COPY migrations ./migrations
+
+RUN node scripts/sqlx-migrations.js && rm -rf migrations/_prisma
+
 FROM rust:1.95.0 AS builder
 
 WORKDIR /app
@@ -9,18 +25,17 @@ RUN rustup target add x86_64-unknown-linux-musl
 COPY Cargo.toml Cargo.lock ./
 
 RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
+RUN cargo build --release --target x86_64-unknown-linux-musl
 RUN rm -rf src
 
 COPY src ./src
-COPY migrations ./migrations
+COPY --from=migrator /app/migrations /app/migrations
+RUN ls -la /app/migrations/
 RUN touch src/main.rs && cargo build --release --target x86_64-unknown-linux-musl
 
-FROM alpine:latest
+FROM scratch
 
-# RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /app/target/release/api /usr/local/bin/app
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/theeka-api /usr/local/bin/app
 
 ENV PORT=8080
 

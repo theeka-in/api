@@ -17,7 +17,7 @@ impl HealthController {
     #[oai(path = "/", method = "get")]
     pub async fn check(&self) -> Json<HealthCheckResponse> {
         Json(HealthCheckResponse {
-            status: "Working 👍".to_owned(),
+            status: "Working".to_owned(),
         })
     }
 }

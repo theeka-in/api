@@ -2,10 +2,9 @@ name: publish openapi spec
 
 on:
     push:
+        branches: [main]
         paths:
-            - "api/src/**"
-        branches:
-            - main
+            - "src/**"
 
 jobs:
     publish-spec:

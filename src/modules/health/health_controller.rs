@@ -2,6 +2,7 @@ use poem_openapi::{Object, OpenApi, payload::Json};
 
 #[derive(Debug, Object)]
 pub struct HealthCheckResponse {
+    pub is_working: bool,
     pub status: String,
 }
 
@@ -17,6 +18,7 @@ impl HealthController {
     #[oai(path = "/", method = "get")]
     pub async fn check(&self) -> Json<HealthCheckResponse> {
         Json(HealthCheckResponse {
+            is_working: true,
             status: "Working".to_owned(),
         })
     }

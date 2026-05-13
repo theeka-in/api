@@ -1,4 +1,9 @@
-use poem_openapi::{OpenApi, payload::PlainText};
+use poem_openapi::{Object, OpenApi, payload::Json};
+
+#[derive(Debug, Object)]
+pub struct HealthCheckResponse {
+    pub status: String,
+}
 
 #[derive(Debug)]
 pub struct HealthController {}
@@ -10,7 +15,9 @@ impl HealthController {
     }
 
     #[oai(path = "/", method = "get")]
-    pub async fn check(&self) -> PlainText<String> {
-        PlainText("Working 👍".to_owned())
+    pub async fn check(&self) -> Json<HealthCheckResponse> {
+        Json(HealthCheckResponse {
+            status: "Working 👍".to_owned(),
+        })
     }
 }

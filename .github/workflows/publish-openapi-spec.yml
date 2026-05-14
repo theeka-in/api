@@ -1,10 +1,9 @@
 name: publish openapi spec
 
 on:
-    push:
-        branches: [main]
-        paths:
-            - "src/**"
+    workflow_run:
+        workflows: ["cargo check"]
+        types: [completed]
 
 jobs:
     publish-spec:

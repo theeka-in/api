@@ -29,13 +29,18 @@ RUN cargo build --release --target x86_64-unknown-linux-musl
 RUN rm -rf src
 
 COPY src ./src
+COPY .sqlx ./.sqlx
 COPY --from=migrator /app/migrations /app/migrations
 RUN ls -la /app/migrations/
+
+ENV SQLX_OFFLINE=true
+ENV RUSTFLAGS="-A warnings"
+
 RUN touch src/main.rs && cargo build --release --target x86_64-unknown-linux-musl
 
 FROM scratch
 
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/theeka-api /usr/local/bin/app
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/theeka_api /usr/local/bin/app
 
 ENV PORT=8080
 

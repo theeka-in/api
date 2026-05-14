@@ -22,6 +22,7 @@ impl UsersRepository {
     }
 
     pub async fn find_by_id(&self, id: Uuid) -> Result<Option<UserEntity>, DbError> {
+        let _ = sqlx::query_as!(UserEntity, r#"select * from users.users;"#);
         todo!()
     }
 

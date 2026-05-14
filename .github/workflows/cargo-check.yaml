@@ -1,4 +1,4 @@
-name: CI
+name: cargo check
 
 on:
     push:
@@ -17,4 +17,4 @@ jobs:
               uses: dtolnay/rust-toolchain@stable
 
             - name: Cargo check
-              run: cargo check
+              run: SQLX_OFFLINE=true cargo check

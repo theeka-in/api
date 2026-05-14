@@ -13,7 +13,7 @@ jobs:
             - uses: dtolnay/rust-toolchain@stable
 
             - name: generate spec
-              run: cargo run --bin export-schema > openapi.json
+              run: SQLX_OFFLINE=true cargo run --bin export-schema > openapi.json
 
             - name: push to spec repo
               uses: dmnemec/copy_file_to_another_repo_action@main

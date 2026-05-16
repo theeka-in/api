@@ -3,6 +3,7 @@ use crate::errors::{ErrorDto, ServiceError};
 use crate::guards::BearerAuth;
 use crate::modules::auth::auth_dto::{LoginDto, RegisterDto, SessionDto};
 use poem::{Request, web::RemoteAddr};
+use poem_openapi::param::Header;
 use poem_openapi::{ApiResponse, OpenApi, param::Path, payload::Json};
 use std::sync::Arc;
 
@@ -14,6 +15,8 @@ pub struct AuthController {
 pub enum RegisterResponse {
     #[oai(status = 201)]
     Created(Json<SessionDto>),
+    #[oai(status = 403)]
+    Forbidden(Json<ErrorDto>),
     #[oai(status = 409)]
     Conflict(Json<ErrorDto>),
     #[oai(status = 500)]
@@ -26,6 +29,8 @@ pub enum LoginResponse {
     Ok(Json<SessionDto>),
     #[oai(status = 401)]
     Unauthorized(Json<ErrorDto>),
+    #[oai(status = 403)]
+    Forbidden(Json<ErrorDto>),
     #[oai(status = 500)]
     InternalError(Json<ErrorDto>),
 }
@@ -70,7 +75,19 @@ impl AuthController {
         req: &Request,
         remote_addr: &RemoteAddr,
         body: Json<RegisterDto>,
+        #[oai(name = "Authorization")] bearer_token: Header<Option<String>>,
     ) -> RegisterResponse {
+        let token = bearer_token.0;
+
+        if token.is_some()
+            && let token = token.unwrap().trim_start_matches("Bearer ").to_owned()
+            && self.service.get_a_session(token).await.is_ok()
+        {
+            return RegisterResponse::Forbidden(Json(ErrorDto {
+                message: "you are already logged in".to_owned(),
+            }));
+        }
+
         let user_agent = req
             .headers()
             .get("user-agent")
@@ -98,7 +115,19 @@ impl AuthController {
         req: &Request,
         remote_addr: &RemoteAddr,
         body: Json<LoginDto>,
+        #[oai(name = "Authorization")] bearer_token: Header<Option<String>>,
     ) -> LoginResponse {
+        let token = bearer_token.0;
+
+        if token.is_some()
+            && let token = token.unwrap().trim_start_matches("Bearer ").to_owned()
+            && self.service.get_a_session(token).await.is_ok()
+        {
+            return LoginResponse::Forbidden(Json(ErrorDto {
+                message: "you are already logged in".to_owned(),
+            }));
+        }
+
         let user_agent = req
             .headers()
             .get("user-agent")

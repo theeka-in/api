@@ -2,14 +2,17 @@ use poem::{EndpointExt, Route};
 use poem_openapi::OpenApiService;
 use sqlx::{Pool, Postgres};
 
-use crate::modules::{
-    analytics::{AnalyticsController, AnalyticsRepository, AnalyticsService},
-    auth::{AuthController, AuthRepository, AuthService},
-    business::{BusinessController, BusinessRepository, BusinessService},
-    health::HealthController,
-    listing::{ListingController, ListingRepository, ListingService},
-    review::{ReviewController, ReviewRepository, ReviewService},
-    users::{UsersController, UsersRepository, UsersService},
+use crate::{
+    middleware::ErrorHandlerMiddleware,
+    modules::{
+        analytics::{AnalyticsController, AnalyticsRepository, AnalyticsService},
+        auth::{AuthController, AuthRepository, AuthService},
+        business::{BusinessController, BusinessRepository, BusinessService},
+        health::HealthController,
+        listing::{ListingController, ListingRepository, ListingService},
+        review::{ReviewController, ReviewRepository, ReviewService},
+        users::{UsersController, UsersRepository, UsersService},
+    },
 };
 
 pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
@@ -63,7 +66,8 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
                 "/api",
                 the_api
                     // exception: this is for the bearer auth to work
-                    .data(auth_service),
+                    .data(auth_service)
+                    .with(ErrorHandlerMiddleware),
             )
             .nest("/", the_ui)
             .nest("/openapi.json", the_json_spec)

@@ -64,7 +64,7 @@ impl AuthService {
     ) -> Result<SessionDto, ServiceError> {
         let account = self.repo.find_account_by_phone(body.phone).await?.ok_or(
             ServiceError::Unauthorized(ErrorDto {
-                message: "invalid credentials".to_owned(),
+                message: "invalid session".to_owned(),
             }),
         )?;
 
@@ -72,7 +72,7 @@ impl AuthService {
 
         if !is_valid {
             return Err(ServiceError::Unauthorized(ErrorDto {
-                message: "invalid credentials".to_owned(),
+                message: "invalid password".to_owned(),
             }));
         }
 
@@ -89,6 +89,18 @@ impl AuthService {
         self.repo.delete_session(token).await?;
 
         Ok(())
+    }
+
+    pub async fn get_a_session(&self, token: String) -> Result<SessionDto, ServiceError> {
+        let session =
+            self.repo
+                .find_session_by_token(token)
+                .await?
+                .ok_or(ServiceError::Unauthorized(ErrorDto {
+                    message: "invalid session".to_owned(),
+                }))?;
+
+        Ok(SessionDto::from(session))
     }
 
     pub async fn get_sessions(&self, account_id: Uuid) -> Result<Vec<SessionDto>, ServiceError> {

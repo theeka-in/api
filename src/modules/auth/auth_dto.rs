@@ -5,6 +5,7 @@ use crate::modules::auth::auth_entity::{AccountEntity, SessionEntity};
 
 #[derive(Debug, Object)]
 pub struct RegisterDto {
+    #[oai(validator(minimum(value = "1111111111"), maximum(value = "9999999999")))]
     pub phone: i64,
     #[oai(validator(min_length = 8))]
     pub password: String,
@@ -15,13 +16,16 @@ pub struct RegisterDto {
 
 #[derive(Debug, Object)]
 pub struct LoginDto {
+    #[oai(validator(minimum(value = "1111111111"), maximum(value = "9999999999")))]
     pub phone: i64,
+    #[oai(validator(min_length = 8))]
     pub password: String,
 }
 
 #[derive(Debug, Object)]
 pub struct AccountDto {
     pub id: Uuid,
+    #[oai(validator(minimum(value = "1111111111"), maximum(value = "9999999999")))]
     pub phone: i64,
     pub created_at: String,
 }

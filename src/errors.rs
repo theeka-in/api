@@ -1,8 +1,8 @@
 use poem_openapi::Object;
+use serde::Serialize;
 use sqlx::error::DatabaseError;
-use std::fmt;
 
-#[derive(Debug, Object)]
+#[derive(Debug, Object, Serialize)]
 pub struct ErrorDto {
     pub message: String,
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO users.users (id, account_id, name)\n               VALUES (gen_random_uuid(), $1, $2)\n               RETURNING id, name, avatar, account_id",
+  "query": "INSERT INTO auth.accounts (id, phone, password)\n               VALUES (gen_random_uuid(), $1, $2)\n               RETURNING id, phone, password, created_at",
   "describe": {
     "columns": [
       {
@@ -10,32 +10,32 @@
       },
       {
         "ordinal": 1,
-        "name": "name",
-        "type_info": "Text"
+        "name": "phone",
+        "type_info": "Int8"
       },
       {
         "ordinal": 2,
-        "name": "avatar",
+        "name": "password",
         "type_info": "Text"
       },
       {
         "ordinal": 3,
-        "name": "account_id",
-        "type_info": "Uuid"
+        "name": "created_at",
+        "type_info": "Timestamp"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
+        "Int8",
         "Text"
       ]
     },
     "nullable": [
       false,
       false,
-      true,
+      false,
       false
     ]
   },
-  "hash": "3eb1fbdae174868e35e77b8e54ffa311fb5f6aa01e72a39d5c5ad5fbcd9ece68"
+  "hash": "dc03a0a798d1c3fde3f413c39f44e3518062211789cc31fc4e02d14d8f0c0434"
 }

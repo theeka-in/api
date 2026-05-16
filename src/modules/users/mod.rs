@@ -7,3 +7,4 @@ mod users_service;
 pub use users_controller::UsersController;
 pub use users_repository::UsersRepository;
 pub use users_service::UsersService;
+pub use users_dto::*;

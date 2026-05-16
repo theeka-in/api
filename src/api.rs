@@ -14,7 +14,8 @@ use crate::modules::{
 
 pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
     let users_service = UsersService::new(UsersRepository::new(pg_pool.clone()));
-    let auth_service = AuthService::new(AuthRepository::new(pg_pool.clone()));
+    let auth_service =
+        AuthService::new(AuthRepository::new(pg_pool.clone()), users_service.clone());
     let business_service = BusinessService::new(BusinessRepository::new(pg_pool.clone()));
     let listing_service = ListingService::new(ListingRepository::new(pg_pool.clone()));
     let review_service = ReviewService::new(ReviewRepository::new(pg_pool.clone()));
@@ -26,6 +27,7 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
     let listing_controller = ListingController::new(listing_service);
     let review_controller = ReviewController::new(review_service);
     let analytics_controller = AnalyticsController::new(analytics_service);
+
     let health_controller = HealthController::new();
 
     let the_api = OpenApiService::new(

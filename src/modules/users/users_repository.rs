@@ -44,14 +44,15 @@ impl UsersRepository {
         Ok(user)
     }
 
-    pub async fn create(&self, account_id: Uuid, name: String) -> Result<UserEntity, DbError> {
+    pub async fn create(&self, account_id: Uuid, name: String, avatar: Option<String>) -> Result<UserEntity, DbError> {
         let user = sqlx::query_as!(
             UserEntity,
-            r#"INSERT INTO users.users (id, account_id, name)
-               VALUES (gen_random_uuid(), $1, $2)
+            r#"INSERT INTO users.users (id, account_id, name, avatar)
+               VALUES (gen_random_uuid(), $1, $2, $3)
                RETURNING id, name, avatar, account_id"#,
             account_id,
-            name
+            name,
+            avatar
         )
         .fetch_one(&self.pg)
         .await?;

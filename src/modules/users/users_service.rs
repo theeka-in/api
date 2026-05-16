@@ -40,7 +40,7 @@ impl UsersService {
             }));
         }
 
-        let user = self.repo.create(account_id, body.name).await?;
+        let user = self.repo.create(account_id, body.name, body.avatar).await?;
 
         Ok(user.into())
     }

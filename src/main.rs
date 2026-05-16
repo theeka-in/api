@@ -6,6 +6,7 @@ use sqlx::postgres::PgPoolOptions;
 mod api;
 mod errors;
 mod modules;
+mod utils;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {

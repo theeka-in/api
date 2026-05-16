@@ -1,6 +1,8 @@
 use poem_openapi::Object;
 use uuid::Uuid;
 
+use crate::modules::auth::auth_entity::{AccountEntity, SessionEntity};
+
 #[derive(Debug, Object)]
 pub struct RegisterDto {
     pub phone: i64,
@@ -8,7 +10,7 @@ pub struct RegisterDto {
     pub password: String,
     #[oai(validator(min_length = 3, max_length = 60))]
     pub name: String,
-    pub avatar: String,
+    pub avatar: Option<String>,
 }
 
 #[derive(Debug, Object)]
@@ -31,4 +33,26 @@ pub struct SessionDto {
     pub ip_address: String,
     pub created_at: String,
     pub account_id: Uuid,
+}
+
+impl From<AccountEntity> for AccountDto {
+    fn from(e: AccountEntity) -> Self {
+        Self {
+            id: e.id,
+            phone: e.phone,
+            created_at: e.created_at.to_string(),
+        }
+    }
+}
+
+impl From<SessionEntity> for SessionDto {
+    fn from(e: SessionEntity) -> Self {
+        Self {
+            token: e.token,
+            user_agent: e.user_agent,
+            ip_address: e.ip_address,
+            created_at: e.created_at.to_string(),
+            account_id: e.account_id,
+        }
+    }
 }

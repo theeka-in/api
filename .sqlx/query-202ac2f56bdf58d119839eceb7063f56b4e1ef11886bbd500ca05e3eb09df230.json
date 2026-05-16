@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT token, account_id, user_agent, ip_address, created_at\n               FROM auth.sessions\n               WHERE token = $1",
+  "query": "SELECT \n                token, \n                account_id, \n                user_agent, \n                ip_address, \n                created_at\n               FROM auth.sessions\n               WHERE token = $1",
   "describe": {
     "columns": [
       {
@@ -42,5 +42,5 @@
       false
     ]
   },
-  "hash": "0c3c617bc461fa1cfa18e6bba49d3e4732fbff4fae720a74c72bbd70dc5e0795"
+  "hash": "202ac2f56bdf58d119839eceb7063f56b4e1ef11886bbd500ca05e3eb09df230"
 }

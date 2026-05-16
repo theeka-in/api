@@ -1,12 +1,8 @@
-use std::env;
+use std::{env, time::Duration};
 
 use poem::{Server, listener::TcpListener};
 use sqlx::postgres::PgPoolOptions;
-
-mod api;
-mod errors;
-mod modules;
-mod utils;
+use theeka_api::api;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
@@ -19,6 +15,9 @@ async fn main() -> Result<(), std::io::Error> {
 
     let pg_pool = PgPoolOptions::new()
         .max_connections(20)
+        .min_connections(5)
+        .acquire_timeout(Duration::from_secs(3))
+        .idle_timeout(Duration::from_secs(300))
         .connect(&database_url)
         .await
         .expect("Failed to connect to database");

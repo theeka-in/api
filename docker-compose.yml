@@ -13,6 +13,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+        networks:
+            - backend
     db:
         image: postgres:18-alpine
         environment:
@@ -28,6 +30,12 @@ services:
             interval: 5s
             timeout: 5s
             retries: 5
+        networks:
+            - backend
 
 volumes:
     postgres_data_prod:
+
+networks:
+    backend:
+        driver: bridge

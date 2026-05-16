@@ -109,7 +109,12 @@ impl AuthRepository {
     ) -> Result<Option<SessionEntity>, DbError> {
         let session = sqlx::query_as!(
             SessionEntity,
-            r#"SELECT token, account_id, user_agent, ip_address, created_at
+            r#"SELECT 
+                token, 
+                account_id, 
+                user_agent, 
+                ip_address, 
+                created_at
                FROM auth.sessions
                WHERE token = $1"#,
             token,
@@ -118,6 +123,48 @@ impl AuthRepository {
         .await?;
 
         Ok(session)
+    }
+
+    pub async fn find_account_and_session_by_token(
+        &self,
+        token: &str,
+    ) -> Result<Option<(AccountEntity, SessionEntity)>, DbError> {
+        let row = sqlx::query!(
+            r#"SELECT
+                   account.id           AS account_id, 
+                   account.phone        AS account_phone, 
+                   account.password     AS account_password, 
+                   account.created_at   AS account_created_at,
+                   session.token        AS session_token, 
+                   session.user_agent   AS session_user_agent, 
+                   session.ip_address   AS session_ip_address, 
+                   session.created_at   AS session_created_at,
+                   session.account_id   AS session_account_id
+               FROM auth.sessions session
+               JOIN auth.accounts account ON account.id = session.account_id
+               WHERE session.token = $1"#,
+            token,
+        )
+        .fetch_optional(&self.pg)
+        .await?;
+
+        Ok(row.map(|r| {
+            (
+                AccountEntity {
+                    id: r.account_id,
+                    phone: r.account_phone,
+                    password: r.account_password,
+                    created_at: r.account_created_at,
+                },
+                SessionEntity {
+                    token: r.session_token,
+                    user_agent: r.session_user_agent,
+                    ip_address: r.session_ip_address,
+                    created_at: r.session_created_at,
+                    account_id: r.session_account_id,
+                },
+            )
+        }))
     }
 
     pub async fn delete_session(&self, token: String) -> Result<(), DbError> {

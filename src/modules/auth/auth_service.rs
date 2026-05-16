@@ -94,7 +94,22 @@ impl AuthService {
     pub async fn get_sessions(&self, account_id: Uuid) -> Result<Vec<SessionDto>, ServiceError> {
         let sessions = self.repo.find_sessions_by_account(account_id).await?;
 
-        Ok(sessions.into_iter().map(Into::into).collect())
+        Ok(sessions.into_iter().map(SessionDto::from).collect())
+    }
+
+    pub async fn find_account_and_session_by_token(
+        &self,
+        token: String,
+    ) -> Result<(AccountDto, SessionDto), ServiceError> {
+        let (account, session) = self
+            .repo
+            .find_account_and_session_by_token(&token)
+            .await?
+            .ok_or(ServiceError::Unauthorized(ErrorDto {
+                message: "invalid token".to_owned(),
+            }))?;
+
+        Ok((account.into(), session.into()))
     }
 
     pub async fn delete_session(

@@ -1,5 +1,6 @@
 use super::ListingService;
 use crate::errors::{DbError, ErrorDto};
+use crate::guards::BearerAuth;
 use crate::modules::listing::listing_dto::{
     CreateListingMediaDto, CreateProductListingDto, CreateServiceListingDto, ListingDto,
     ListingMediaDto, UpdateListingDto,
@@ -119,6 +120,7 @@ impl ListingController {
         &self,
         business_id: Path<Uuid>,
         body: Json<CreateProductListingDto>,
+        auth: BearerAuth,
     ) -> CreateListingResponse {
         todo!()
     }
@@ -128,6 +130,7 @@ impl ListingController {
         &self,
         business_id: Path<Uuid>,
         body: Json<CreateServiceListingDto>,
+        auth: BearerAuth,
     ) -> CreateListingResponse {
         todo!()
     }
@@ -138,6 +141,7 @@ impl ListingController {
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
         body: Json<UpdateListingDto>,
+        auth: BearerAuth,
     ) -> UpdateListingResponse {
         todo!()
     }
@@ -147,6 +151,7 @@ impl ListingController {
         &self,
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
+        auth: BearerAuth,
     ) -> DeleteListingResponse {
         todo!()
     }
@@ -166,6 +171,7 @@ impl ListingController {
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
         body: Json<CreateListingMediaDto>,
+        auth: BearerAuth,
     ) -> CreateListingMediaResponse {
         todo!()
     }
@@ -179,6 +185,7 @@ impl ListingController {
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
         media_id: Path<Uuid>,
+        auth: BearerAuth,
     ) -> DeleteListingMediaResponse {
         todo!()
     }

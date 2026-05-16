@@ -1,7 +1,15 @@
 use super::BusinessService;
 use crate::errors::{DbError, ErrorDto};
-use crate::modules::business::business_dto::{BusinessDto, BusinessHourDto, BusinessMediaDto, CreateBusinessDto, CreateBusinessHourDto, CreateBusinessMediaDto, UpdateBusinessDto, UpdateBusinessHourDto};
-use poem_openapi::{ApiResponse, Object, OpenApi, param::{Path, Query}, payload::Json};
+use crate::guards::BearerAuth;
+use crate::modules::business::business_dto::{
+    BusinessDto, BusinessHourDto, BusinessMediaDto, CreateBusinessDto, CreateBusinessHourDto,
+    CreateBusinessMediaDto, UpdateBusinessDto, UpdateBusinessHourDto,
+};
+use poem_openapi::{
+    ApiResponse, Object, OpenApi,
+    param::{Path, Query},
+    payload::Json,
+};
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -140,17 +148,26 @@ impl BusinessController {
     }
 
     #[oai(path = "/", method = "post")]
-    pub async fn create(&self, body: Json<CreateBusinessDto>) -> CreateBusinessResponse {
+    pub async fn create(
+        &self,
+        body: Json<CreateBusinessDto>,
+        auth: BearerAuth,
+    ) -> CreateBusinessResponse {
         todo!()
     }
 
     #[oai(path = "/:id", method = "patch")]
-    pub async fn update(&self, id: Path<Uuid>, body: Json<UpdateBusinessDto>) -> UpdateBusinessResponse {
+    pub async fn update(
+        &self,
+        id: Path<Uuid>,
+        body: Json<UpdateBusinessDto>,
+        auth: BearerAuth,
+    ) -> UpdateBusinessResponse {
         todo!()
     }
 
     #[oai(path = "/:id", method = "delete")]
-    pub async fn delete(&self, id: Path<Uuid>) -> DeleteBusinessResponse {
+    pub async fn delete(&self, id: Path<Uuid>, auth: BearerAuth) -> DeleteBusinessResponse {
         todo!()
     }
 
@@ -160,17 +177,33 @@ impl BusinessController {
     }
 
     #[oai(path = "/:id/hours", method = "post")]
-    pub async fn create_hour(&self, id: Path<Uuid>, body: Json<CreateBusinessHourDto>) -> CreateHourResponse {
+    pub async fn create_hour(
+        &self,
+        id: Path<Uuid>,
+        body: Json<CreateBusinessHourDto>,
+        auth: BearerAuth,
+    ) -> CreateHourResponse {
         todo!()
     }
 
     #[oai(path = "/:id/hours/:day", method = "patch")]
-    pub async fn update_hour(&self, id: Path<Uuid>, day: Path<String>, body: Json<UpdateBusinessHourDto>) -> UpdateHourResponse {
+    pub async fn update_hour(
+        &self,
+        id: Path<Uuid>,
+        day: Path<String>,
+        body: Json<UpdateBusinessHourDto>,
+        auth: BearerAuth,
+    ) -> UpdateHourResponse {
         todo!()
     }
 
     #[oai(path = "/:id/hours/:day", method = "delete")]
-    pub async fn delete_hour(&self, id: Path<Uuid>, day: Path<String>) -> DeleteHourResponse {
+    pub async fn delete_hour(
+        &self,
+        id: Path<Uuid>,
+        day: Path<String>,
+        auth: BearerAuth,
+    ) -> DeleteHourResponse {
         todo!()
     }
 
@@ -180,12 +213,22 @@ impl BusinessController {
     }
 
     #[oai(path = "/:id/media", method = "post")]
-    pub async fn create_media(&self, id: Path<Uuid>, body: Json<CreateBusinessMediaDto>) -> CreateMediaResponse {
+    pub async fn create_media(
+        &self,
+        id: Path<Uuid>,
+        body: Json<CreateBusinessMediaDto>,
+        auth: BearerAuth,
+    ) -> CreateMediaResponse {
         todo!()
     }
 
     #[oai(path = "/:id/media/:media_id", method = "delete")]
-    pub async fn delete_media(&self, id: Path<Uuid>, media_id: Path<Uuid>) -> DeleteMediaResponse {
+    pub async fn delete_media(
+        &self,
+        id: Path<Uuid>,
+        media_id: Path<Uuid>,
+        auth: BearerAuth,
+    ) -> DeleteMediaResponse {
         todo!()
     }
 }

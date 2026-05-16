@@ -104,7 +104,7 @@ impl AuthController {
             Err(ServiceError::Conflict(dto)) => RegisterResponse::Conflict(Json(dto)),
             Err(ServiceError::Internal(dto)) => RegisterResponse::InternalError(Json(dto)),
             Err(_) => RegisterResponse::InternalError(Json(ErrorDto {
-                message: "unexpected error".to_owned(),
+                message: "internal server error".to_owned(),
             })),
         }
     }
@@ -144,7 +144,7 @@ impl AuthController {
             Err(ServiceError::Unauthorized(dto)) => LoginResponse::Unauthorized(Json(dto)),
             Err(ServiceError::Internal(dto)) => LoginResponse::InternalError(Json(dto)),
             Err(_) => LoginResponse::InternalError(Json(ErrorDto {
-                message: "unexpected error".to_owned(),
+                message: "internal server error".to_owned(),
             })),
         }
     }
@@ -168,7 +168,7 @@ impl AuthController {
             Ok(sessions) => GetSessionsResponse::Ok(Json(sessions)),
             Err(ServiceError::Internal(dto)) => GetSessionsResponse::InternalError(Json(dto)),
             Err(_) => GetSessionsResponse::InternalError(Json(ErrorDto {
-                message: "unexpected error".to_owned(),
+                message: "internal server error".to_owned(),
             })),
         }
     }
@@ -193,7 +193,7 @@ impl AuthController {
             Err(ServiceError::Forbidden(dto)) => DeleteSessionResponse::Forbidden(Json(dto)),
             Err(ServiceError::Internal(dto)) => DeleteSessionResponse::InternalError(Json(dto)),
             Err(_) => DeleteSessionResponse::InternalError(Json(ErrorDto {
-                message: "unexpected error".to_owned(),
+                message: "internal server error".to_owned(),
             })),
         }
     }

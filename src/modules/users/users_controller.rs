@@ -82,17 +82,17 @@ impl UsersController {
     }
 
     #[oai(path = "/me", method = "get")]
-    pub async fn get_me(&self) -> GetMeResponse {
+    pub async fn get(&self) -> GetMeResponse {
         todo!()
     }
 
     #[oai(path = "/me", method = "patch")]
-    pub async fn update_me(&self, body: Json<UpdateUserDto>) -> UpdateMeResponse {
+    pub async fn update(&self, body: Json<UpdateUserDto>) -> UpdateMeResponse {
         todo!()
     }
 
     #[oai(path = "/me", method = "delete")]
-    pub async fn delete_me(&self) -> DeleteMeResponse {
+    pub async fn delete(&self) -> DeleteMeResponse {
         todo!()
     }
 

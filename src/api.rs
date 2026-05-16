@@ -1,6 +1,6 @@
 use poem::Route;
 use poem_openapi::OpenApiService;
-use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
+use sqlx::{Pool, Postgres};
 
 use crate::modules::{
     analytics::{AnalyticsController, AnalyticsRepository, AnalyticsService},
@@ -13,8 +13,8 @@ use crate::modules::{
 };
 
 pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
-    let auth_service = AuthService::new(AuthRepository::new(pg_pool.clone()));
     let users_service = UsersService::new(UsersRepository::new(pg_pool.clone()));
+    let auth_service = AuthService::new(AuthRepository::new(pg_pool.clone()));
     let business_service = BusinessService::new(BusinessRepository::new(pg_pool.clone()));
     let listing_service = ListingService::new(ListingRepository::new(pg_pool.clone()));
     let review_service = ReviewService::new(ReviewRepository::new(pg_pool.clone()));

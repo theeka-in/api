@@ -12,6 +12,13 @@ pub struct UserDto {
 }
 
 #[derive(Debug, Object)]
+pub struct CreateUserDto {
+    #[oai(validator(min_length = 3, max_length = 60))]
+    pub name: String,
+    pub avatar: String,
+}
+
+#[derive(Debug, Object)]
 pub struct UpdateUserDto {
     #[oai(validator(min_length = 3, max_length = 60))]
     pub name: Option<String>,

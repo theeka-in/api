@@ -8,6 +8,7 @@ pub struct RegisterDto {
     pub password: String,
     #[oai(validator(min_length = 3, max_length = 60))]
     pub name: String,
+    pub avatar: String,
 }
 
 #[derive(Debug, Object)]

@@ -1,6 +1,6 @@
 use crate::errors::{DbError, ErrorDto, ServiceError};
 use crate::modules::users::users_dto::{
-    CreateUserAddressDto, UpdateUserAddressDto, UpdateUserDto, UserAddressDto, UserDto,
+    CreateUserAddressDto, CreateUserDto, UpdateUserAddressDto, UpdateUserDto, UserAddressDto, UserDto
 };
 use crate::modules::users::users_repository::UsersRepository;
 use std::sync::Arc;
@@ -16,11 +16,19 @@ impl UsersService {
         Arc::new(Self { repo })
     }
 
-    pub async fn get_me(&self, account_id: Uuid) -> Result<UserDto, ServiceError> {
+    pub async fn get(&self, account_id: Uuid) -> Result<UserDto, ServiceError> {
         todo!()
     }
 
-    pub async fn update_me(
+    pub async fn create(
+        &self,
+        account_id: Uuid,
+        body: CreateUserDto,
+    ) -> Result<UserDto, ServiceError> {
+        todo!()
+    }
+
+    pub async fn update(
         &self,
         account_id: Uuid,
         body: UpdateUserDto,
@@ -28,7 +36,7 @@ impl UsersService {
         todo!()
     }
 
-    pub async fn delete_me(&self, account_id: Uuid) -> Result<(), ServiceError> {
+    pub async fn delete(&self, account_id: Uuid) -> Result<(), ServiceError> {
         todo!()
     }
 

@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users.users (id, account_id, name)\n               VALUES (gen_random_uuid(), $1, $2)\n               RETURNING id, name, avatar, account_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "account_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "3eb1fbdae174868e35e77b8e54ffa311fb5f6aa01e72a39d5c5ad5fbcd9ece68"
+}

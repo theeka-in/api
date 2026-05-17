@@ -25,7 +25,7 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
 
     let users_service = UsersService::new(users_repository);
     let auth_service = AuthService::new(auth_repository, users_service.clone());
-    let business_service = BusinessService::new(business_repository);
+    let business_service = BusinessService::new(business_repository, users_service.clone());
     let listing_service = ListingService::new(listing_repository);
     let review_service = ReviewService::new(review_repository);
     let analytics_service = AnalyticsService::new(analytics_repository);

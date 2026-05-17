@@ -1,4 +1,6 @@
-use crate::modules::business::business_entity::{BusinessAddressEntity, BusinessEntity, BusinessHourEntity, BusinessMediaEntity};
+use crate::modules::business::business_entity::{
+    BusinessAddressEntity, BusinessEntity, BusinessHourEntity, BusinessMediaEntity,
+};
 use poem_openapi::Object;
 use uuid::Uuid;
 
@@ -16,7 +18,8 @@ pub struct BusinessDto {
 
 #[derive(Debug, Object)]
 pub struct CreateBusinessDto {
-    pub phone_number: i64,
+    #[oai(validator(minimum(value = "1111111111"), maximum(value = "9999999999")))]
+    pub phone_number: Option<i64>,
     #[oai(validator(min_length = 3, max_length = 120))]
     pub title: String,
     pub logo: Option<String>,
@@ -95,6 +98,45 @@ impl From<BusinessEntity> for BusinessDto {
             description: entity.description,
             created_at: entity.created_at.to_string(),
             owner_id: entity.owner_id,
+        }
+    }
+}
+
+impl From<BusinessHourEntity> for BusinessHourDto {
+    fn from(entity: BusinessHourEntity) -> Self {
+        Self {
+            id: entity.id,
+            day: format!("{:?}", entity.day).to_lowercase(),
+            hours_type: format!("{:?}", entity.hours_type).to_lowercase(),
+            open_time: entity.open_time.map(|t| t.to_string()),
+            close_time: entity.close_time.map(|t| t.to_string()),
+            business_id: entity.business_id,
+        }
+    }
+}
+
+impl From<BusinessMediaEntity> for BusinessMediaDto {
+    fn from(entity: BusinessMediaEntity) -> Self {
+        Self {
+            id: entity.id,
+            media_type: format!("{:?}", entity.media_type).to_lowercase(),
+            url: entity.url,
+            business_id: entity.business_id,
+        }
+    }
+}
+
+impl From<BusinessAddressEntity> for BusinessAddressDto {
+    fn from(entity: BusinessAddressEntity) -> Self {
+        Self {
+            complete_address: entity.complete_address,
+            city: entity.city,
+            state: entity.state,
+            pincode: entity.pincode,
+            latitude: entity.latitude,
+            longitude: entity.longitude,
+            radius: entity.radius,
+            business_id: entity.business_id,
         }
     }
 }

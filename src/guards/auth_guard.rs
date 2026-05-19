@@ -3,17 +3,17 @@ use std::sync::Arc;
 use poem::Request;
 use poem_openapi::{SecurityScheme, auth::Bearer};
 
-use crate::modules::auth::{AccountDto, AuthService, SessionDto};
+use crate::modules::{
+    auth::{AccountDto, AuthService, SessionDto},
+    users::UserDto,
+};
 
 #[derive(SecurityScheme)]
-#[oai(ty = "bearer", checker = "verify_token")]
-pub struct BearerAuth(pub (AccountDto, SessionDto));
+#[oai(ty = "bearer", checker = "verify_auth")]
+pub struct AuthGuard(pub (SessionDto));
 
-async fn verify_token(req: &Request, bearer: Bearer) -> Option<(AccountDto, SessionDto)> {
+pub async fn verify_auth(req: &Request, bearer: Bearer) -> Option<(SessionDto)> {
     let auth_service = req.data::<Arc<AuthService>>()?;
 
-    auth_service
-        .find_account_and_session_by_token(bearer.token)
-        .await
-        .ok()
+    auth_service.get_a_session(bearer.token).await.ok()
 }

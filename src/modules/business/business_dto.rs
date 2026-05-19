@@ -1,7 +1,9 @@
 use crate::modules::business::business_entity::{
-    BusinessAddressEntity, BusinessEntity, BusinessHourEntity, BusinessMediaEntity,
+    BusinessAddressEntity, BusinessEntity, BusinessHourEntity, BusinessHourType,
+    BusinessMediaEntity, DayOfWeekType,
 };
-use poem_openapi::Object;
+use poem_openapi::{Enum, Object};
+use sqlx::types::chrono::NaiveTime;
 use uuid::Uuid;
 
 #[derive(Debug, Object)]
@@ -14,6 +16,7 @@ pub struct BusinessDto {
     pub description: Option<String>,
     pub created_at: String,
     pub owner_id: Uuid,
+    pub address: Option<BusinessAddressDto>,
 }
 
 #[derive(Debug, Object)]
@@ -49,10 +52,34 @@ pub struct BusinessAddressDto {
 }
 
 #[derive(Debug, Object)]
+pub struct CreateBusinessAddressDto {
+    pub complete_address: String,
+    pub city: String,
+    pub state: String,
+    pub pincode: i32,
+    pub latitude: f64,
+    pub longitude: f64,
+    pub radius: f64,
+}
+
+#[derive(Debug, Object)]
+pub struct UpdateBusinessAddressDto {
+    pub complete_address: Option<String>,
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub pincode: Option<i32>,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
+    pub radius: Option<f64>,
+}
+
+const TIME_PATTERN: &str = r"^([01]\d|2[0-3]):[0-5]\d$";
+
+#[derive(Debug, Object)]
 pub struct BusinessHourDto {
     pub id: Uuid,
-    pub day: String,
-    pub hours_type: String,
+    pub day: DayOfWeekType,
+    pub hours_type: BusinessHourType,
     pub open_time: Option<String>,
     pub close_time: Option<String>,
     pub business_id: Uuid,
@@ -60,16 +87,20 @@ pub struct BusinessHourDto {
 
 #[derive(Debug, Object)]
 pub struct CreateBusinessHourDto {
-    pub day: String,
-    pub hours_type: String,
+    pub day: DayOfWeekType,
+    pub hours_type: BusinessHourType,
+    #[oai(validator(pattern = "^([01]\\d|2[0-3]):[0-5]\\d$"))]
     pub open_time: Option<String>,
+    #[oai(validator(pattern = "^([01]\\d|2[0-3]):[0-5]\\d$"))]
     pub close_time: Option<String>,
 }
 
 #[derive(Debug, Object)]
 pub struct UpdateBusinessHourDto {
-    pub hours_type: Option<String>,
+    pub hours_type: Option<BusinessHourType>,
+    #[oai(validator(pattern = "^([01]\\d|2[0-3]):[0-5]\\d$"))]
     pub open_time: Option<String>,
+    #[oai(validator(pattern = "^([01]\\d|2[0-3]):[0-5]\\d$"))]
     pub close_time: Option<String>,
 }
 
@@ -98,6 +129,7 @@ impl From<BusinessEntity> for BusinessDto {
             description: entity.description,
             created_at: entity.created_at.to_string(),
             owner_id: entity.owner_id,
+            address: None,
         }
     }
 }
@@ -106,8 +138,8 @@ impl From<BusinessHourEntity> for BusinessHourDto {
     fn from(entity: BusinessHourEntity) -> Self {
         Self {
             id: entity.id,
-            day: format!("{:?}", entity.day).to_lowercase(),
-            hours_type: format!("{:?}", entity.hours_type).to_lowercase(),
+            day: entity.day.into(),
+            hours_type: entity.hours_type.into(),
             open_time: entity.open_time.map(|t| t.to_string()),
             close_time: entity.close_time.map(|t| t.to_string()),
             business_id: entity.business_id,

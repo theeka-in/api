@@ -1,8 +1,11 @@
 use crate::errors::{ErrorDto, ServiceError};
+use crate::modules::auth::AuthService;
+use crate::modules::business::{CreateBusinessAddressDto, UpdateBusinessAddressDto};
 use crate::modules::business::business_dto::{
-    BusinessDto, BusinessHourDto, BusinessMediaDto, CreateBusinessDto, CreateBusinessHourDto,
-    CreateBusinessMediaDto, UpdateBusinessDto, UpdateBusinessHourDto,
+    BusinessAddressDto, BusinessDto, BusinessHourDto, BusinessMediaDto, CreateBusinessDto,
+    CreateBusinessHourDto, CreateBusinessMediaDto, UpdateBusinessDto, UpdateBusinessHourDto,
 };
+use crate::modules::business::business_entity::{BusinessHourType, DayOfWeekType};
 use crate::modules::business::business_repository::BusinessRepository;
 use crate::modules::users::UsersService;
 use std::sync::Arc;
@@ -12,33 +15,42 @@ use uuid::Uuid;
 pub struct BusinessService {
     repo: BusinessRepository,
     users: Arc<UsersService>,
+    auth: Arc<AuthService>,
 }
 
 impl BusinessService {
-    pub fn new(repo: BusinessRepository, users_service: Arc<UsersService>) -> Arc<Self> {
+    pub fn new(
+        repo: BusinessRepository,
+        users_service: Arc<UsersService>,
+        auth_service: Arc<AuthService>,
+    ) -> Arc<Self> {
         Arc::new(Self {
             repo,
             users: users_service,
+            auth: auth_service,
         })
     }
 
-    async fn get_owner_id(&self, account_id: Uuid) -> Result<Uuid, ServiceError> {
-        let user = self.users.get(account_id).await?;
-        Ok(user.id)
+    pub async fn get_business_by_id(&self, business_id: Uuid) -> Result<BusinessDto, ServiceError> {
+        let business =
+            self.repo
+                .find_business_by_id(business_id)
+                .await?
+                .ok_or(ServiceError::NotFound(ErrorDto {
+                    message: "business not found".to_owned(),
+                }))?;
+
+        Ok(BusinessDto::from(business))
     }
 
-    pub async fn get_nearby(
+    pub async fn get_business_by_id_and_owner(
         &self,
-        latitude: f64,
-        longitude: f64,
-    ) -> Result<Vec<BusinessDto>, ServiceError> {
-        todo!()
-    }
-
-    pub async fn get_by_id(&self, id: Uuid) -> Result<BusinessDto, ServiceError> {
+        business_id: Uuid,
+        owner_id: Uuid,
+    ) -> Result<BusinessDto, ServiceError> {
         let business = self
             .repo
-            .find_by_id(id)
+            .find_business_by_id_and_owner(business_id, owner_id)
             .await?
             .ok_or(ServiceError::NotFound(ErrorDto {
                 message: "business not found".to_owned(),
@@ -47,30 +59,27 @@ impl BusinessService {
         Ok(BusinessDto::from(business))
     }
 
-    pub async fn get_all_by_owner(
+    pub async fn get_all_businesses_by_owner(
         &self,
-        account_id: Uuid,
+        owner_id: Uuid,
     ) -> Result<Vec<BusinessDto>, ServiceError> {
-        let owner_id = self.get_owner_id(account_id).await?;
-        let businesses = self.repo.find_all_by_owner(owner_id).await?;
+        let businesses = self.repo.find_all_businesses_by_owner(owner_id).await?;
 
         Ok(businesses.into_iter().map(BusinessDto::from).collect())
     }
 
-    pub async fn create(
+    pub async fn create_business(
         &self,
-        account_id: Uuid,
-        account_phone: i64,
+        owner_id: Uuid,
         body: CreateBusinessDto,
     ) -> Result<BusinessDto, ServiceError> {
-        let user = self.users.get(account_id).await?;
-
-        let phone_number = body.phone_number.unwrap_or(account_phone);
+        let account = self.auth.get_account_by_user_id(owner_id).await?;
+        let phone_number = body.phone_number.unwrap_or(account.phone);
 
         let business = self
             .repo
-            .create(
-                user.id,
+            .create_business(
+                owner_id,
                 phone_number,
                 body.title,
                 body.logo,
@@ -81,32 +90,20 @@ impl BusinessService {
         Ok(BusinessDto::from(business))
     }
 
-    pub async fn update(
+    pub async fn update_business(
         &self,
-        id: Uuid,
-        account_id: Uuid,
+        business_id: Uuid,
+        owner_id: Uuid,
         body: UpdateBusinessDto,
     ) -> Result<BusinessDto, ServiceError> {
-        let owner_id = self.get_owner_id(account_id).await?;
-
-        let business = self
-            .repo
-            .find_by_id(id)
-            .await?
-            .ok_or(ServiceError::NotFound(ErrorDto {
-                message: "business not found".to_owned(),
-            }))?;
-
-        if business.owner_id != owner_id {
-            return Err(ServiceError::Forbidden(ErrorDto {
-                message: "you do not own this business".to_owned(),
-            }));
-        }
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
 
         let updated = self
             .repo
-            .update(
-                id,
+            .update_business(
+                business_id,
+                owner_id,
                 body.phone_number,
                 body.title,
                 body.logo,
@@ -118,25 +115,92 @@ impl BusinessService {
         Ok(BusinessDto::from(updated))
     }
 
-    pub async fn delete(&self, id: Uuid, account_id: Uuid) -> Result<(), ServiceError> {
-        let owner_id = self.get_owner_id(account_id).await?;
+    pub async fn delete_business(
+        &self,
+        business_id: Uuid,
+        owner_id: Uuid,
+    ) -> Result<(), ServiceError> {
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
 
-        let business = self
+        self.repo.delete_business(business_id, owner_id).await?;
+
+        Ok(())
+    }
+
+    pub async fn get_address(&self, business_id: Uuid) -> Result<BusinessAddressDto, ServiceError> {
+        let address = self
             .repo
-            .find_by_id(id)
+            .find_address(business_id)
             .await?
             .ok_or(ServiceError::NotFound(ErrorDto {
-                message: "business not found".to_owned(),
+                message: "address not found".to_owned(),
             }))?;
 
-        if business.owner_id != owner_id {
-            return Err(ServiceError::Forbidden(ErrorDto {
-                message: "you do not own this business".to_owned(),
-            }));
-        }
+        Ok(BusinessAddressDto::from(address))
+    }
 
-        self.repo.delete(id).await?;
+    pub async fn create_address(
+        &self,
+        business_id: Uuid,
+        owner_id: Uuid,
+        dto: CreateBusinessAddressDto,
+    ) -> Result<BusinessAddressDto, ServiceError> {
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
 
+        let address = self
+            .repo
+            .create_address(
+                business_id,
+                dto.complete_address,
+                dto.city,
+                dto.state,
+                dto.pincode,
+                dto.latitude,
+                dto.longitude,
+                dto.radius,
+            )
+            .await?;
+
+        Ok(BusinessAddressDto::from(address))
+    }
+
+    pub async fn update_address(
+        &self,
+        business_id: Uuid,
+        owner_id: Uuid,
+        dto: UpdateBusinessAddressDto,
+    ) -> Result<BusinessAddressDto, ServiceError> {
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
+
+        let address = self
+            .repo
+            .update_address(
+                business_id,
+                dto.complete_address,
+                dto.city,
+                dto.state,
+                dto.pincode,
+                dto.latitude,
+                dto.longitude,
+                dto.radius,
+            )
+            .await?;
+
+        Ok(BusinessAddressDto::from(address))
+    }
+
+    pub async fn delete_address(
+        &self,
+        business_id: Uuid,
+        owner_id: Uuid,
+    ) -> Result<(), ServiceError> {
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
+
+        self.repo.delete_address(business_id).await?;
         Ok(())
     }
 
@@ -149,23 +213,36 @@ impl BusinessService {
     pub async fn create_hour(
         &self,
         business_id: Uuid,
-        account_id: Uuid,
+        owner_id: Uuid,
         body: CreateBusinessHourDto,
     ) -> Result<BusinessHourDto, ServiceError> {
-        let owner_id = self.get_owner_id(account_id).await?;
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
 
-        let business = self
-            .repo
-            .find_by_id(business_id)
-            .await?
-            .ok_or(ServiceError::NotFound(ErrorDto {
-                message: "business not found".to_owned(),
-            }))?;
+        if matches!(body.hours_type, BusinessHourType::CustomRange) {
+            if (matches!(body.open_time, None)) {
+                return Err(ServiceError::Forbidden(ErrorDto {
+                    message: "open_time is not defined".to_owned(),
+                }));
+            }
 
-        if business.owner_id != owner_id {
-            return Err(ServiceError::Forbidden(ErrorDto {
-                message: "you do not own this business".to_owned(),
-            }));
+            if (matches!(body.close_time, None)) {
+                return Err(ServiceError::Forbidden(ErrorDto {
+                    message: "close_time is not defined".to_owned(),
+                }));
+            }
+        } else {
+            if (matches!(body.open_time, Some(_))) {
+                return Err(ServiceError::Forbidden(ErrorDto {
+                    message: "open_time is defined".to_owned(),
+                }));
+            }
+
+            if (matches!(body.close_time, Some(_))) {
+                return Err(ServiceError::Forbidden(ErrorDto {
+                    message: "close_time is defined".to_owned(),
+                }));
+            }
         }
 
         let hour = self
@@ -185,24 +262,41 @@ impl BusinessService {
     pub async fn update_hour(
         &self,
         business_id: Uuid,
-        account_id: Uuid,
-        day: String,
+        owner_id: Uuid,
+        day: DayOfWeekType,
         body: UpdateBusinessHourDto,
     ) -> Result<BusinessHourDto, ServiceError> {
-        let owner_id = self.get_owner_id(account_id).await?;
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
 
-        let business = self
-            .repo
-            .find_by_id(business_id)
-            .await?
-            .ok_or(ServiceError::NotFound(ErrorDto {
-                message: "business not found".to_owned(),
-            }))?;
+        dbg!("{}", &body);
 
-        if business.owner_id != owner_id {
-            return Err(ServiceError::Forbidden(ErrorDto {
-                message: "you do not own this business".to_owned(),
-            }));
+        if let Some(hours_type) = &body.hours_type {
+            if matches!(hours_type, BusinessHourType::CustomRange) {
+                if (matches!(body.open_time, None)) {
+                    return Err(ServiceError::Forbidden(ErrorDto {
+                        message: "open_time is not defined".to_owned(),
+                    }));
+                }
+
+                if (matches!(body.close_time, None)) {
+                    return Err(ServiceError::Forbidden(ErrorDto {
+                        message: "close_time is not defined".to_owned(),
+                    }));
+                }
+            } else {
+                if (matches!(body.open_time, Some(_))) {
+                    return Err(ServiceError::Forbidden(ErrorDto {
+                        message: "open_time is defined".to_owned(),
+                    }));
+                }
+
+                if (matches!(body.close_time, Some(_))) {
+                    return Err(ServiceError::Forbidden(ErrorDto {
+                        message: "close_time is defined".to_owned(),
+                    }));
+                }
+            }
         }
 
         let hour = self
@@ -222,24 +316,11 @@ impl BusinessService {
     pub async fn delete_hour(
         &self,
         business_id: Uuid,
-        account_id: Uuid,
-        day: String,
+        owner_id: Uuid,
+        day: DayOfWeekType,
     ) -> Result<(), ServiceError> {
-        let owner_id = self.get_owner_id(account_id).await?;
-
-        let business = self
-            .repo
-            .find_by_id(business_id)
-            .await?
-            .ok_or(ServiceError::NotFound(ErrorDto {
-                message: "business not found".to_owned(),
-            }))?;
-
-        if business.owner_id != owner_id {
-            return Err(ServiceError::Forbidden(ErrorDto {
-                message: "you do not own this business".to_owned(),
-            }));
-        }
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
 
         self.repo.delete_hour(business_id, day).await?;
 
@@ -258,24 +339,11 @@ impl BusinessService {
     pub async fn create_media(
         &self,
         business_id: Uuid,
-        account_id: Uuid,
+        owner_id: Uuid,
         body: CreateBusinessMediaDto,
     ) -> Result<BusinessMediaDto, ServiceError> {
-        let owner_id = self.get_owner_id(account_id).await?;
-
-        let business = self
-            .repo
-            .find_by_id(business_id)
-            .await?
-            .ok_or(ServiceError::NotFound(ErrorDto {
-                message: "business not found".to_owned(),
-            }))?;
-
-        if business.owner_id != owner_id {
-            return Err(ServiceError::Forbidden(ErrorDto {
-                message: "you do not own this business".to_owned(),
-            }));
-        }
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
 
         let media = self
             .repo
@@ -288,24 +356,11 @@ impl BusinessService {
     pub async fn delete_media(
         &self,
         business_id: Uuid,
-        account_id: Uuid,
+        owner_id: Uuid,
         media_id: Uuid,
     ) -> Result<(), ServiceError> {
-        let owner_id = self.get_owner_id(account_id).await?;
-
-        let business = self
-            .repo
-            .find_by_id(business_id)
-            .await?
-            .ok_or(ServiceError::NotFound(ErrorDto {
-                message: "business not found".to_owned(),
-            }))?;
-
-        if business.owner_id != owner_id {
-            return Err(ServiceError::Forbidden(ErrorDto {
-                message: "you do not own this business".to_owned(),
-            }));
-        }
+        self.get_business_by_id_and_owner(business_id, owner_id)
+            .await?;
 
         self.repo.delete_media(media_id, business_id).await?;
 

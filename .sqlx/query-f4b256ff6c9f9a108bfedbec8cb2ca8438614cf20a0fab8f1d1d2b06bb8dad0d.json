@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ll.id, ll.title, ll.description, ll.logo, ll.is_active, ll.created_at, ll.updated_at,\n                ll.business_id, ll.product_listing_id, ll.service_listing_id\n               FROM listing.business_listings ll\n               INNER JOIN business.businesses bb ON bb.id = ll.business_id\n               WHERE ll.id = $1 AND ll.business_id = $2 AND bb.owner_id = $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "logo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "business_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "product_listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 9,
+        "name": "service_listing_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "f4b256ff6c9f9a108bfedbec8cb2ca8438614cf20a0fab8f1d1d2b06bb8dad0d"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO listing.listing_tags (id, listing_id, value)\n                       VALUES (gen_random_uuid(), $1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6f42d6ee0c3f7c1c93e5082a1eb674c10f45c779468905eead95c8e01cf04061"
+}

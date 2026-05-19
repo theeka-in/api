@@ -82,3 +82,14 @@ impl From<BusinessListingEntity> for ListingDto {
         }
     }
 }
+
+impl From<ListingMediaEntity> for ListingMediaDto {
+    fn from(entity: ListingMediaEntity) -> Self {
+        Self {
+            id: entity.id,
+            media_type: format!("{:?}", entity.media_type).to_lowercase(),
+            url: entity.url,
+            listing_id: entity.listing_id,
+        }
+    }
+}

@@ -1,2 +1,3 @@
 mod auth_guard;
-pub use auth_guard::BearerAuth;
+
+pub use auth_guard::AuthGuard;

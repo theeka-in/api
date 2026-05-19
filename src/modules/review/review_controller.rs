@@ -1,6 +1,6 @@
 use super::ReviewService;
 use crate::errors::{DbError, ErrorDto};
-use crate::guards::BearerAuth;
+use crate::guards::AuthGuard;
 use crate::modules::review::review_dto::{CreateReviewDto, ReviewDto, UpdateReviewDto};
 use poem_openapi::{ApiResponse, Object, OpenApi, param::Path, payload::Json};
 use std::sync::Arc;
@@ -73,7 +73,7 @@ impl ReviewController {
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
         body: Json<CreateReviewDto>,
-        auth: BearerAuth,
+        auth: AuthGuard,
     ) -> CreateReviewResponse {
         todo!()
     }
@@ -88,7 +88,7 @@ impl ReviewController {
         listing_id: Path<Uuid>,
         review_id: Path<Uuid>,
         body: Json<UpdateReviewDto>,
-        auth: BearerAuth,
+        auth: AuthGuard,
     ) -> UpdateReviewResponse {
         todo!()
     }
@@ -102,7 +102,7 @@ impl ReviewController {
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
         review_id: Path<Uuid>,
-        auth: BearerAuth,
+        auth: AuthGuard,
     ) -> DeleteReviewResponse {
         todo!()
     }

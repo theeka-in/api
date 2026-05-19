@@ -1,6 +1,6 @@
 use super::AuthService;
 use crate::errors::{ErrorDto, ServiceError};
-use crate::guards::BearerAuth;
+use crate::guards::AuthGuard;
 use crate::modules::auth::auth_dto::{LoginDto, RegisterDto, SessionDto};
 use poem::{Request, web::RemoteAddr};
 use poem_openapi::param::Header;
@@ -150,8 +150,8 @@ impl AuthController {
     }
 
     #[oai(path = "/logout", method = "post")]
-    pub async fn logout(&self, auth: BearerAuth) -> LogoutResponse {
-        let (_, session) = auth.0;
+    pub async fn logout(&self, auth: AuthGuard) -> LogoutResponse {
+        let session = auth.0;
 
         match self.service.logout(session.token).await {
             Ok(_) => LogoutResponse::NoContent,
@@ -161,10 +161,10 @@ impl AuthController {
     }
 
     #[oai(path = "/sessions", method = "get")]
-    pub async fn get_sessions(&self, auth: BearerAuth) -> GetSessionsResponse {
-        let (account, _) = auth.0;
+    pub async fn get_sessions(&self, auth: AuthGuard) -> GetSessionsResponse {
+        let account_id = auth.0.account_id;
 
-        match self.service.get_sessions(account.id).await {
+        match self.service.get_sessions(account_id).await {
             Ok(sessions) => GetSessionsResponse::Ok(Json(sessions)),
             Err(ServiceError::Internal(dto)) => GetSessionsResponse::InternalError(Json(dto)),
             Err(_) => GetSessionsResponse::InternalError(Json(ErrorDto {
@@ -176,10 +176,10 @@ impl AuthController {
     #[oai(path = "/sessions/:token", method = "delete")]
     pub async fn delete_session(
         &self,
-        auth: BearerAuth,
+        auth: AuthGuard,
         token: Path<String>,
     ) -> DeleteSessionResponse {
-        let (account, session) = auth.0;
+        let session = auth.0;
 
         if session.token == token.0 {
             return DeleteSessionResponse::Forbidden(Json(ErrorDto {
@@ -187,7 +187,11 @@ impl AuthController {
             }));
         }
 
-        match self.service.delete_session(account.id, token.0).await {
+        match self
+            .service
+            .delete_session(session.account_id, token.0)
+            .await
+        {
             Ok(_) => DeleteSessionResponse::NoContent,
             Err(ServiceError::NotFound(dto)) => DeleteSessionResponse::NotFound(Json(dto)),
             Err(ServiceError::Forbidden(dto)) => DeleteSessionResponse::Forbidden(Json(dto)),

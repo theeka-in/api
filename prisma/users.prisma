@@ -14,6 +14,7 @@ model User {
     reviews    Review[]
     views      View[]
     businesses Business[]
+    sessions   Session[]
 
     @@map("users")
     @@schema("users")

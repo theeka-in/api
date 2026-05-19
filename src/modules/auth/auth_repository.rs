@@ -63,20 +63,40 @@ impl AuthRepository {
         Ok(account)
     }
 
+    pub async fn find_account_by_user_id(
+        &self,
+        user_id: Uuid,
+    ) -> Result<Option<AccountEntity>, DbError> {
+        let account = sqlx::query_as!(
+            AccountEntity,
+            r#"SELECT account.id, account.phone, account.password, account.created_at
+               FROM auth.accounts account
+               INNER JOIN users.users u ON u.account_id = account.id
+               WHERE u.id = $1"#,
+            user_id,
+        )
+        .fetch_optional(&self.pg)
+        .await?;
+
+        Ok(account)
+    }
+
     pub async fn create_session(
         &self,
         account_id: Uuid,
+        user_id: Uuid,
         token: String,
         user_agent: String,
         ip_address: String,
     ) -> Result<SessionEntity, DbError> {
         let session = sqlx::query_as!(
             SessionEntity,
-            r#"INSERT INTO auth.sessions (token, account_id, user_agent, ip_address)
-               VALUES ($1, $2, $3, $4)
-               RETURNING token, account_id, user_agent, ip_address, created_at"#,
+            r#"INSERT INTO auth.sessions (token, account_id, user_id, user_agent, ip_address)
+               VALUES ($1, $2, $3, $4, $5)
+               RETURNING token, account_id, user_id, user_agent, ip_address, created_at"#,
             token,
             account_id,
+            user_id,
             user_agent,
             ip_address,
         )
@@ -92,7 +112,7 @@ impl AuthRepository {
     ) -> Result<Vec<SessionEntity>, DbError> {
         let sessions = sqlx::query_as!(
             SessionEntity,
-            r#"SELECT token, account_id, user_agent, ip_address, created_at
+            r#"SELECT token, account_id, user_id, user_agent, ip_address, created_at
                FROM auth.sessions
                WHERE account_id = $1"#,
             account_id,
@@ -111,7 +131,8 @@ impl AuthRepository {
             SessionEntity,
             r#"SELECT 
                 token, 
-                account_id, 
+                account_id,
+                user_id, 
                 user_agent, 
                 ip_address, 
                 created_at
@@ -139,7 +160,8 @@ impl AuthRepository {
                    session.user_agent   AS session_user_agent, 
                    session.ip_address   AS session_ip_address, 
                    session.created_at   AS session_created_at,
-                   session.account_id   AS session_account_id
+                   session.account_id   AS session_account_id,
+                   session.user_id      AS session_user_id
                FROM auth.sessions session
                JOIN auth.accounts account ON account.id = session.account_id
                WHERE session.token = $1"#,
@@ -162,6 +184,7 @@ impl AuthRepository {
                     ip_address: r.session_ip_address,
                     created_at: r.session_created_at,
                     account_id: r.session_account_id,
+                    user_id: r.session_user_id
                 },
             )
         }))

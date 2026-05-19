@@ -24,6 +24,9 @@ model Session {
     accountId String  @map("account_id") @db.Uuid
     account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
+    userId String @map("user_id") @db.Uuid
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
     @@map("sessions")
     @@schema("auth")
 }

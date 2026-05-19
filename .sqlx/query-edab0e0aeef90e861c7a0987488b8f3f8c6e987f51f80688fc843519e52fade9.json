@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE business.business_addresses SET\n                   complete_address = COALESCE($2, complete_address),\n                   city             = COALESCE($3, city),\n                   state            = COALESCE($4, state),\n                   pincode          = COALESCE($5, pincode),\n                   latitude         = COALESCE($6, latitude),\n                   longitude        = COALESCE($7, longitude),\n                   radius           = COALESCE($8, radius)\n               WHERE business_id = $1\n               RETURNING complete_address, city, state, pincode, latitude, longitude, radius, business_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "complete_address",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "city",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "state",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "pincode",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "radius",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "business_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Float8",
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "edab0e0aeef90e861c7a0987488b8f3f8c6e987f51f80688fc843519e52fade9"
+}

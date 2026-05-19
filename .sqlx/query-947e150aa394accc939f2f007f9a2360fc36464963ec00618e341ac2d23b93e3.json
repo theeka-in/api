@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO auth.sessions (token, account_id, user_agent, ip_address)\n               VALUES ($1, $2, $3, $4)\n               RETURNING token, account_id, user_agent, ip_address, created_at",
+  "query": "INSERT INTO auth.sessions (token, account_id, user_id, user_agent, ip_address)\n               VALUES ($1, $2, $3, $4, $5)\n               RETURNING token, account_id, user_id, user_agent, ip_address, created_at",
   "describe": {
     "columns": [
       {
@@ -15,16 +15,21 @@
       },
       {
         "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
         "name": "user_agent",
         "type_info": "Text"
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "ip_address",
         "type_info": "Text"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "created_at",
         "type_info": "Timestamp"
       }
@@ -32,6 +37,7 @@
     "parameters": {
       "Left": [
         "Text",
+        "Uuid",
         "Uuid",
         "Text",
         "Text"
@@ -42,8 +48,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "65ea7ca790c55e3b234a0946c5e0c9c54696a05260a6b66b8edc8e87fce5785c"
+  "hash": "947e150aa394accc939f2f007f9a2360fc36464963ec00618e341ac2d23b93e3"
 }

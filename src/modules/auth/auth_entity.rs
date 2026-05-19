@@ -15,5 +15,6 @@ pub struct SessionEntity {
     pub user_agent: String,
     pub ip_address: String,
     pub account_id: Uuid,
+    pub user_id: Uuid,
     pub created_at: chrono::NaiveDateTime,
 }

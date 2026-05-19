@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO listing.product_listings (id, price, stock)\n               VALUES (gen_random_uuid(), $1, $2)\n               RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "36b0fa9fe7593c38af5ef46d7a2391eb86cdea8e6b15b47ce4e39e6581b8344a"
+}

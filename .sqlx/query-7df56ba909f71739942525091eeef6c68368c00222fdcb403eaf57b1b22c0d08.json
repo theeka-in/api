@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO listing.business_listings\n                   (id, business_id, title, description, logo, service_listing_id, updated_at)\n               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now())\n               RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                         business_id, product_listing_id, service_listing_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "logo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "business_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "product_listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 9,
+        "name": "service_listing_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "7df56ba909f71739942525091eeef6c68368c00222fdcb403eaf57b1b22c0d08"
+}

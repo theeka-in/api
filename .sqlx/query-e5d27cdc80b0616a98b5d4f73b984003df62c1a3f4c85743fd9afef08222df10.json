@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                   account.id           AS account_id, \n                   account.phone        AS account_phone, \n                   account.password     AS account_password, \n                   account.created_at   AS account_created_at,\n                   session.token        AS session_token, \n                   session.user_agent   AS session_user_agent, \n                   session.ip_address   AS session_ip_address, \n                   session.created_at   AS session_created_at,\n                   session.account_id   AS session_account_id\n               FROM auth.sessions session\n               JOIN auth.accounts account ON account.id = session.account_id\n               WHERE session.token = $1",
+  "query": "SELECT\n                   account.id           AS account_id, \n                   account.phone        AS account_phone, \n                   account.password     AS account_password, \n                   account.created_at   AS account_created_at,\n                   session.token        AS session_token, \n                   session.user_agent   AS session_user_agent, \n                   session.ip_address   AS session_ip_address, \n                   session.created_at   AS session_created_at,\n                   session.account_id   AS session_account_id,\n                   session.user_id      AS session_user_id\n               FROM auth.sessions session\n               JOIN auth.accounts account ON account.id = session.account_id\n               WHERE session.token = $1",
   "describe": {
     "columns": [
       {
@@ -47,6 +47,11 @@
         "ordinal": 8,
         "name": "session_account_id",
         "type_info": "Uuid"
+      },
+      {
+        "ordinal": 9,
+        "name": "session_user_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -63,8 +68,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "bd7bffb96a5ae574943b0a08a171273b5dbf119cdda65b9113d0105028314635"
+  "hash": "e5d27cdc80b0616a98b5d4f73b984003df62c1a3f4c85743fd9afef08222df10"
 }

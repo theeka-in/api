@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO business.business_addresses\n                   (business_id, complete_address, city, state, pincode, latitude, longitude, radius)\n               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n               ON CONFLICT (business_id) DO UPDATE SET\n                   complete_address = EXCLUDED.complete_address,\n                   city             = EXCLUDED.city,\n                   state            = EXCLUDED.state,\n                   pincode          = EXCLUDED.pincode,\n                   latitude         = EXCLUDED.latitude,\n                   longitude        = EXCLUDED.longitude,\n                   radius           = EXCLUDED.radius\n               RETURNING complete_address, city, state, pincode, latitude, longitude, radius, business_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "complete_address",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "city",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "state",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "pincode",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "radius",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "business_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Float8",
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0d91c0c10acb8fea3cb9c043d4433555434c0d798673a5c85011b814f5f6b415"
+}

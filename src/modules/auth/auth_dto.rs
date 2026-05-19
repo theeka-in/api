@@ -37,6 +37,7 @@ pub struct SessionDto {
     pub ip_address: String,
     pub created_at: String,
     pub account_id: Uuid,
+    pub user_id: Uuid,
 }
 
 impl From<AccountEntity> for AccountDto {
@@ -57,6 +58,7 @@ impl From<SessionEntity> for SessionDto {
             ip_address: e.ip_address,
             created_at: e.created_at.to_string(),
             account_id: e.account_id,
+            user_id: e.user_id
         }
     }
 }

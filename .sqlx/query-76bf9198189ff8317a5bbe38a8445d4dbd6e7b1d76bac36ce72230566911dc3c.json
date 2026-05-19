@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "DELETE FROM business.businesses WHERE id = $1",
+  "query": "DELETE FROM business.business_addresses WHERE business_id = $1",
   "describe": {
     "columns": [],
     "parameters": {
@@ -10,5 +10,5 @@
     },
     "nullable": []
   },
-  "hash": "7cea46538d0da317a39707cd2d2365410c97b13eebd1db204ceef9199d10bb17"
+  "hash": "76bf9198189ff8317a5bbe38a8445d4dbd6e7b1d76bac36ce72230566911dc3c"
 }

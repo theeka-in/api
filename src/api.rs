@@ -25,15 +25,19 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
 
     let users_service = UsersService::new(users_repository);
     let auth_service = AuthService::new(auth_repository, users_service.clone());
-    let business_service = BusinessService::new(business_repository, users_service.clone());
-    let listing_service = ListingService::new(listing_repository);
+    let business_service = BusinessService::new(
+        business_repository,
+        users_service.clone(),
+        auth_service.clone(),
+    );
+    let listing_service = ListingService::new(listing_repository, business_service.clone());
     let review_service = ReviewService::new(review_repository);
     let analytics_service = AnalyticsService::new(analytics_repository);
 
     let auth_controller = AuthController::new(auth_service.clone());
-    let users_controller = UsersController::new(users_service);
-    let business_controller = BusinessController::new(business_service);
-    let listing_controller = ListingController::new(listing_service);
+    let users_controller = UsersController::new(users_service.clone());
+    let business_controller = BusinessController::new(business_service.clone());
+    let listing_controller = ListingController::new(listing_service.clone());
     let review_controller = ReviewController::new(review_service);
     let analytics_controller = AnalyticsController::new(analytics_service);
 
@@ -65,8 +69,11 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
             .nest(
                 "/api",
                 the_api
-                    // exception: this is for the bearer auth to work
+                    // exception: this is for the guards to work
                     .data(auth_service)
+                    .data(users_service)
+                    .data(business_service)
+                    .data(listing_service)
                     .with(ErrorHandlerMiddleware),
             )
             .nest("/", the_ui)

@@ -37,21 +37,21 @@ impl AuthService {
 
         let account = self.repo.create_account(body.phone, hashed).await?;
 
-        let (session, _) = tokio::try_join!(
-            async {
-                self.repo
-                    .create_session(account.id, token, user_agent, ip_address)
-                    .await
-                    .map_err(ServiceError::from)
-            },
-            self.users.create(
+        let user = self
+            .users
+            .create(
                 account.id,
                 CreateUserDto {
                     name: body.name,
                     avatar: body.avatar,
                 },
             )
-        )?;
+            .await?;
+
+        let session = self
+            .repo
+            .create_session(account.id, user.id, token, user_agent, ip_address)
+            .await?;
 
         Ok(session.into())
     }
@@ -64,7 +64,7 @@ impl AuthService {
     ) -> Result<SessionDto, ServiceError> {
         let account = self.repo.find_account_by_phone(body.phone).await?.ok_or(
             ServiceError::Unauthorized(ErrorDto {
-                message: "invalid session".to_owned(),
+                message: "user already exists".to_owned(),
             }),
         )?;
 
@@ -76,10 +76,12 @@ impl AuthService {
             }));
         }
 
+        let user = self.users.get(account.id).await?;
+
         let token = generate_token();
         let session = self
             .repo
-            .create_session(account.id, token, user_agent, ip_address)
+            .create_session(account.id, user.id, token, user_agent, ip_address)
             .await?;
 
         Ok(session.into())
@@ -103,25 +105,20 @@ impl AuthService {
         Ok(SessionDto::from(session))
     }
 
+    pub async fn get_account_by_user_id(&self, user_id: Uuid) -> Result<AccountDto, ServiceError> {
+        let account = self.repo.find_account_by_user_id(user_id).await?.ok_or(
+            ServiceError::Unauthorized(ErrorDto {
+                message: "invalid session".to_owned(),
+            }),
+        )?;
+
+        Ok(AccountDto::from(account))
+    }
+
     pub async fn get_sessions(&self, account_id: Uuid) -> Result<Vec<SessionDto>, ServiceError> {
         let sessions = self.repo.find_sessions_by_account(account_id).await?;
 
         Ok(sessions.into_iter().map(SessionDto::from).collect())
-    }
-
-    pub async fn find_account_and_session_by_token(
-        &self,
-        token: String,
-    ) -> Result<(AccountDto, SessionDto), ServiceError> {
-        let (account, session) = self
-            .repo
-            .find_account_and_session_by_token(&token)
-            .await?
-            .ok_or(ServiceError::Unauthorized(ErrorDto {
-                message: "invalid token".to_owned(),
-            }))?;
-
-        Ok((account.into(), session.into()))
     }
 
     pub async fn delete_session(

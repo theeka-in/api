@@ -1,3 +1,4 @@
+use poem_openapi::Enum;
 use sqlx::{FromRow, types::chrono};
 use uuid::Uuid;
 
@@ -26,8 +27,9 @@ pub struct BusinessAddressEntity {
 }
 
 #[derive(Debug, sqlx::Type, PartialEq)]
-#[sqlx(type_name = "day_of_week", rename_all = "snake_case")]
-pub enum DayOfWeek {
+#[sqlx(type_name = "business.day_of_week", rename_all = "snake_case")]
+#[derive(Enum)]
+pub enum DayOfWeekType {
     Monday,
     Tuesday,
     Wednesday,
@@ -38,9 +40,11 @@ pub enum DayOfWeek {
 }
 
 #[derive(Debug, sqlx::Type, PartialEq)]
-#[sqlx(type_name = "business_hour_type", rename_all = "snake_case")]
+#[sqlx(type_name = "business.business_hour_type", rename_all = "snake_case")]
+#[derive(Enum)]
 pub enum BusinessHourType {
     Closed,
+    #[sqlx(rename = "open_24_hours")]
     Open24Hours,
     CustomRange,
 }
@@ -48,7 +52,7 @@ pub enum BusinessHourType {
 #[derive(Debug, FromRow)]
 pub struct BusinessHourEntity {
     pub id: Uuid,
-    pub day: DayOfWeek,
+    pub day: DayOfWeekType,
     pub hours_type: BusinessHourType,
     pub open_time: Option<chrono::NaiveTime>,
     pub close_time: Option<chrono::NaiveTime>,
@@ -56,7 +60,7 @@ pub struct BusinessHourEntity {
 }
 
 #[derive(Debug, sqlx::Type, PartialEq)]
-#[sqlx(type_name = "media_type", rename_all = "snake_case")]
+#[sqlx(type_name = "business.media_type", rename_all = "snake_case")]
 pub enum MediaType {
     Image,
     Video,

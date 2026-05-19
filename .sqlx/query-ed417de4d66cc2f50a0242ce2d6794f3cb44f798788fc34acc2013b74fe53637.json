@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT token, account_id, user_agent, ip_address, created_at\n               FROM auth.sessions\n               WHERE account_id = $1",
+  "query": "SELECT token, account_id, user_id, user_agent, ip_address, created_at\n               FROM auth.sessions\n               WHERE account_id = $1",
   "describe": {
     "columns": [
       {
@@ -15,16 +15,21 @@
       },
       {
         "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
         "name": "user_agent",
         "type_info": "Text"
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "ip_address",
         "type_info": "Text"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "created_at",
         "type_info": "Timestamp"
       }
@@ -39,8 +44,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "b2be2b7c741ee0c5a836d2ca6988ee20bcb16727759705f5d33428ad9b88833e"
+  "hash": "ed417de4d66cc2f50a0242ce2d6794f3cb44f798788fc34acc2013b74fe53637"
 }

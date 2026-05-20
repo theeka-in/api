@@ -15,6 +15,14 @@ impl ListingRepository {
         Self { pg }
     }
 
+    pub async fn explore_products_listings_nearby(&self, latitude: f64, longitude: f64) -> Result<Vec<(BusinessListingEntity, ProductListingEntity)>, DbError> {
+        todo!()
+    }
+
+    pub async fn explore_services_listings_nearby(&self, latitude: f64, longitude: f64) -> Result<Vec<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+        todo!()
+    }
+
     pub async fn find_all_products_listings_by_business(
         &self,
         business_id: Uuid,

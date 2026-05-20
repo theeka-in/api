@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT ll.id, ll.title, ll.description, ll.logo, ll.is_active, ll.created_at, ll.updated_at,\n                ll.business_id, ll.product_listing_id, ll.service_listing_id\n               FROM listing.business_listings ll\n               INNER JOIN business.businesses bb ON bb.id = ll.business_id\n               WHERE ll.id = $1 AND ll.business_id = $2 AND bb.owner_id = $3",
+  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                pl.id as pl_id, pl.price, pl.stock\n               FROM listing.business_listings bl\n               INNER JOIN listing.product_listings pl ON pl.id = bl.product_listing_id\n               WHERE bl.business_id = $1",
   "describe": {
     "columns": [
       {
@@ -52,12 +52,25 @@
         "ordinal": 9,
         "name": "service_listing_id",
         "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "pl_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "price",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 12,
+        "name": "stock",
+        "type_info": "Int4"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Uuid",
         "Uuid"
       ]
     },
@@ -71,8 +84,11 @@
       false,
       false,
       true,
-      true
+      true,
+      false,
+      false,
+      false
     ]
   },
-  "hash": "f4b256ff6c9f9a108bfedbec8cb2ca8438614cf20a0fab8f1d1d2b06bb8dad0d"
+  "hash": "ad80058716960eab7ef379322a09a4523a2d565c3d75e73eb29918de0cff41ef"
 }

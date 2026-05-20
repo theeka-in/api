@@ -1,7 +1,9 @@
 use poem_openapi::Object;
+use sqlx::prelude::Type;
 use uuid::Uuid;
 
 use crate::modules::auth::auth_entity::{AccountEntity, SessionEntity};
+
 
 #[derive(Debug, Object)]
 pub struct RegisterDto {

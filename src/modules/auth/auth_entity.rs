@@ -1,5 +1,9 @@
+use poem_openapi::NewType;
 use sqlx::{FromRow, types::chrono};
 use uuid::Uuid;
+
+#[derive(Debug, NewType)]
+pub struct AccountUuid(Uuid);
 
 #[derive(Debug, FromRow)]
 pub struct AccountEntity {

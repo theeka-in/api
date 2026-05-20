@@ -106,6 +106,7 @@ impl UsersController {
                 message: "internal server error".to_owned(),
             })),
         }
+
     }
 
     #[oai(path = "/me", method = "delete")]

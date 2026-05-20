@@ -1,9 +1,11 @@
-use crate::modules::listing::listing_entity::{BusinessListingEntity, ListingMediaEntity};
+use crate::modules::listing::listing_entity::{
+    BusinessListingEntity, ListingMediaEntity, ProductListingEntity, ServiceListingEntity,
+};
 use poem_openapi::Object;
 use uuid::Uuid;
 
 #[derive(Debug, Object)]
-pub struct ListingDto {
+pub struct ProductListingDto {
     pub id: Uuid,
     pub title: String,
     pub description: Option<String>,
@@ -12,8 +14,24 @@ pub struct ListingDto {
     pub created_at: String,
     pub updated_at: String,
     pub business_id: Uuid,
-    pub product_listing_id: Option<Uuid>,
-    pub service_listing_id: Option<Uuid>,
+    pub product_listing_id: Uuid,
+    pub price: f64,
+    pub stock: i32,
+}
+
+#[derive(Debug, Object)]
+pub struct ServiceListingDto {
+    pub id: Uuid,
+    pub title: String,
+    pub description: Option<String>,
+    pub logo: Option<String>,
+    pub is_active: bool,
+    pub created_at: String,
+    pub updated_at: String,
+    pub business_id: Uuid,
+    pub service_listing_id: Uuid,
+    pub price: String,
+    pub available: bool,
 }
 
 #[derive(Debug, Object)]
@@ -41,14 +59,24 @@ pub struct CreateServiceListingDto {
 }
 
 #[derive(Debug, Object)]
-pub struct UpdateListingDto {
+pub struct UpdateProductListingDto {
+    #[oai(validator(min_length = 3, max_length = 120))]
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub logo: Option<String>,
+    pub is_active: Option<bool>,
+    pub price: Option<f64>,
+    pub stock: Option<i32>,
+}
+
+#[derive(Debug, Object)]
+pub struct UpdateServiceListingDto {
     #[oai(validator(min_length = 3, max_length = 120))]
     pub title: Option<String>,
     pub description: Option<String>,
     pub logo: Option<String>,
     pub is_active: Option<bool>,
     pub price: Option<String>,
-    pub stock: Option<i32>,
     pub available: Option<bool>,
 }
 
@@ -66,19 +94,38 @@ pub struct CreateListingMediaDto {
     pub url: String,
 }
 
-impl From<BusinessListingEntity> for ListingDto {
-    fn from(entity: BusinessListingEntity) -> Self {
+impl From<(BusinessListingEntity, ProductListingEntity)> for ProductListingDto {
+    fn from((bl, pl): (BusinessListingEntity, ProductListingEntity)) -> Self {
         Self {
-            id: entity.id,
-            title: entity.title,
-            description: entity.description,
-            logo: entity.logo,
-            is_active: entity.is_active,
-            created_at: entity.created_at.to_string(),
-            updated_at: entity.updated_at.to_string(),
-            business_id: entity.business_id,
-            product_listing_id: entity.product_listing_id,
-            service_listing_id: entity.service_listing_id,
+            id: bl.id,
+            title: bl.title,
+            description: bl.description,
+            logo: bl.logo,
+            is_active: bl.is_active,
+            created_at: bl.created_at.to_string(),
+            updated_at: bl.updated_at.to_string(),
+            business_id: bl.business_id,
+            product_listing_id: pl.id,
+            price: pl.price,
+            stock: pl.stock,
+        }
+    }
+}
+
+impl From<(BusinessListingEntity, ServiceListingEntity)> for ServiceListingDto {
+    fn from((bl, sl): (BusinessListingEntity, ServiceListingEntity)) -> Self {
+        Self {
+            id: bl.id,
+            title: bl.title,
+            description: bl.description,
+            logo: bl.logo,
+            is_active: bl.is_active,
+            created_at: bl.created_at.to_string(),
+            updated_at: bl.updated_at.to_string(),
+            business_id: bl.business_id,
+            service_listing_id: sl.id,
+            price: sl.price,
+            available: sl.available,
         }
     }
 }

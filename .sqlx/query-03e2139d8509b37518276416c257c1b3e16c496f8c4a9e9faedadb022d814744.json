@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, title, description, logo, is_active, created_at, updated_at,\n                      business_id, product_listing_id, service_listing_id\n               FROM listing.business_listings WHERE id = $1 AND business_id = $2",
+  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                sl.id as sl_id, sl.price, sl.available\n               FROM listing.business_listings bl\n               INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id\n               WHERE bl.business_id = $1",
   "describe": {
     "columns": [
       {
@@ -52,11 +52,25 @@
         "ordinal": 9,
         "name": "service_listing_id",
         "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "sl_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "price",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 12,
+        "name": "available",
+        "type_info": "Bool"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Uuid"
       ]
     },
@@ -70,8 +84,11 @@
       false,
       false,
       true,
-      true
+      true,
+      false,
+      false,
+      false
     ]
   },
-  "hash": "e019b8e89dab86aba5bcdea38589f12dba210a28f7f7259c7c0af519f2757ed2"
+  "hash": "03e2139d8509b37518276416c257c1b3e16c496f8c4a9e9faedadb022d814744"
 }

@@ -1,5 +1,7 @@
 use crate::errors::DbError;
-use crate::modules::listing::listing_entity::{BusinessListingEntity, ListingMediaEntity};
+use crate::modules::listing::listing_entity::{
+    BusinessListingEntity, ListingMediaEntity, ProductListingEntity, ServiceListingEntity,
+};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -13,72 +15,107 @@ impl ListingRepository {
         Self { pg }
     }
 
-    pub async fn find_all_listings_by_business(
+    pub async fn find_all_products_listings_by_business(
         &self,
         business_id: Uuid,
-    ) -> Result<Vec<BusinessListingEntity>, DbError> {
-        let listings = sqlx::query_as!(
-            BusinessListingEntity,
-            r#"SELECT id, title, description, logo, is_active, created_at, updated_at,
-                      business_id, product_listing_id, service_listing_id
-               FROM listing.business_listings WHERE business_id = $1"#,
+    ) -> Result<Vec<(BusinessListingEntity, ProductListingEntity)>, DbError> {
+        let rows = sqlx::query!(
+            r#"SELECT
+                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
+                bl.created_at, bl.updated_at, bl.business_id,
+                bl.product_listing_id, bl.service_listing_id,
+                pl.id as pl_id, pl.price, pl.stock
+               FROM listing.business_listings bl
+               INNER JOIN listing.product_listings pl ON pl.id = bl.product_listing_id
+               WHERE bl.business_id = $1"#,
             business_id
         )
         .fetch_all(&self.pg)
         .await?;
 
-        Ok(listings)
+        Ok(rows
+            .into_iter()
+            .map(|row| {
+                let listing = BusinessListingEntity {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    logo: row.logo,
+                    is_active: row.is_active,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    business_id: row.business_id,
+                    product_listing_id: row.product_listing_id,
+                    service_listing_id: row.service_listing_id,
+                };
+                let product = ProductListingEntity {
+                    id: row.pl_id,
+                    price: row.price,
+                    stock: row.stock,
+                };
+                (listing, product)
+            })
+            .collect())
     }
 
-    pub async fn find_listing_by_id(
-        &self,
-        id: Uuid,
-    ) -> Result<Option<BusinessListingEntity>, DbError> {
-        let listing = sqlx::query_as!(
-            BusinessListingEntity,
-            r#"SELECT id, title, description, logo, is_active, created_at, updated_at,
-                      business_id, product_listing_id, service_listing_id
-               FROM listing.business_listings WHERE id = $1"#,
-            id,
-        )
-        .fetch_optional(&self.pg)
-        .await?;
-
-        Ok(listing)
-    }
-
-    pub async fn find_listing_by_id_and_business(
+    pub async fn find_product_listing_by_id_and_business(
         &self,
         id: Uuid,
         business_id: Uuid,
-    ) -> Result<Option<BusinessListingEntity>, DbError> {
-        let listing = sqlx::query_as!(
-            BusinessListingEntity,
-            r#"SELECT id, title, description, logo, is_active, created_at, updated_at,
-                      business_id, product_listing_id, service_listing_id
-               FROM listing.business_listings WHERE id = $1 AND business_id = $2"#,
+    ) -> Result<Option<(BusinessListingEntity, ProductListingEntity)>, DbError> {
+        let row = sqlx::query!(
+            r#"SELECT
+                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
+                bl.created_at, bl.updated_at, bl.business_id,
+                bl.product_listing_id, bl.service_listing_id,
+                pl.id as pl_id, pl.price, pl.stock
+               FROM listing.business_listings bl
+               INNER JOIN listing.product_listings pl ON pl.id = bl.product_listing_id
+               WHERE bl.id = $1 AND bl.business_id = $2"#,
             id,
             business_id
         )
         .fetch_optional(&self.pg)
         .await?;
 
-        Ok(listing)
+        Ok(row.map(|row| {
+            let listing = BusinessListingEntity {
+                id: row.id,
+                title: row.title,
+                description: row.description,
+                logo: row.logo,
+                is_active: row.is_active,
+                created_at: row.created_at,
+                updated_at: row.updated_at,
+                business_id: row.business_id,
+                product_listing_id: row.product_listing_id,
+                service_listing_id: row.service_listing_id,
+            };
+            let product = ProductListingEntity {
+                id: row.pl_id,
+                price: row.price,
+                stock: row.stock,
+            };
+            (listing, product)
+        }))
     }
 
-    pub async fn find_listing_by_id_and_business_and_owner(
+    pub async fn find_product_listing_by_id_and_business_and_owner(
         &self,
         id: Uuid,
         business_id: Uuid,
         owner_id: Uuid,
-    ) -> Result<Option<BusinessListingEntity>, DbError> {
-        let listing = sqlx::query_as!(
-            BusinessListingEntity,
-            r#"SELECT ll.id, ll.title, ll.description, ll.logo, ll.is_active, ll.created_at, ll.updated_at,
-                ll.business_id, ll.product_listing_id, ll.service_listing_id
-               FROM listing.business_listings ll
-               INNER JOIN business.businesses bb ON bb.id = ll.business_id
-               WHERE ll.id = $1 AND ll.business_id = $2 AND bb.owner_id = $3"#,
+    ) -> Result<Option<(BusinessListingEntity, ProductListingEntity)>, DbError> {
+        let row = sqlx::query!(
+            r#"SELECT
+                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
+                bl.created_at, bl.updated_at, bl.business_id,
+                bl.product_listing_id, bl.service_listing_id,
+                pl.id as pl_id, pl.price, pl.stock
+               FROM listing.business_listings bl
+               INNER JOIN listing.product_listings pl ON pl.id = bl.product_listing_id
+               INNER JOIN business.businesses bb ON bb.id = bl.business_id
+               WHERE bl.id = $1 AND bl.business_id = $2 AND bb.owner_id = $3"#,
             id,
             business_id,
             owner_id
@@ -86,7 +123,26 @@ impl ListingRepository {
         .fetch_optional(&self.pg)
         .await?;
 
-        Ok(listing)
+        Ok(row.map(|row| {
+            let listing = BusinessListingEntity {
+                id: row.id,
+                title: row.title,
+                description: row.description,
+                logo: row.logo,
+                is_active: row.is_active,
+                created_at: row.created_at,
+                updated_at: row.updated_at,
+                business_id: row.business_id,
+                product_listing_id: row.product_listing_id,
+                service_listing_id: row.service_listing_id,
+            };
+            let product = ProductListingEntity {
+                id: row.pl_id,
+                price: row.price,
+                stock: row.stock,
+            };
+            (listing, product)
+        }))
     }
 
     pub async fn create_product_listing(
@@ -99,13 +155,14 @@ impl ListingRepository {
         stock: i32,
         categories: Option<Vec<String>>,
         tags: Option<Vec<String>>,
-    ) -> Result<BusinessListingEntity, DbError> {
+    ) -> Result<(BusinessListingEntity, ProductListingEntity), DbError> {
         let mut tx = self.pg.begin().await?;
 
-        let product = sqlx::query!(
+        let product = sqlx::query_as!(
+            ProductListingEntity,
             r#"INSERT INTO listing.product_listings (id, price, stock)
                VALUES (gen_random_uuid(), $1, $2)
-               RETURNING id"#,
+               RETURNING id, price, stock"#,
             price,
             stock
         )
@@ -156,7 +213,202 @@ impl ListingRepository {
 
         tx.commit().await?;
 
-        Ok(listing)
+        Ok((listing, product))
+    }
+
+    pub async fn update_product_listing(
+        &self,
+        listing_id: Uuid,
+        business_id: Uuid,
+        title: Option<String>,
+        description: Option<String>,
+        logo: Option<String>,
+        is_active: Option<bool>,
+        price: Option<f64>,
+        stock: Option<i32>,
+    ) -> Result<(BusinessListingEntity, ProductListingEntity), DbError> {
+        let mut tx = self.pg.begin().await?;
+
+        let listing = sqlx::query_as!(
+            BusinessListingEntity,
+            r#"UPDATE listing.business_listings SET
+               title = COALESCE($3, title),
+               description = COALESCE($4, description),
+               logo = COALESCE($5, logo),
+               is_active = COALESCE($6, is_active),
+               updated_at = now()
+               WHERE id = $1 AND business_id = $2
+               RETURNING id, title, description, logo, is_active, created_at, updated_at,
+                         business_id, product_listing_id, service_listing_id"#,
+            listing_id,
+            business_id,
+            title,
+            description,
+            logo,
+            is_active
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
+        let product = sqlx::query_as!(
+            ProductListingEntity,
+            r#"UPDATE listing.product_listings SET
+               price = COALESCE($2, price),
+               stock = COALESCE($3, stock)
+               WHERE id = $1
+               RETURNING id, price, stock"#,
+            listing.product_listing_id,
+            price,
+            stock
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
+        tx.commit().await?;
+
+        Ok((listing, product))
+    }
+
+    pub async fn delete_product_listing(&self, id: Uuid, business_id: Uuid) -> Result<(), DbError> {
+        sqlx::query!(
+            "DELETE FROM listing.business_listings WHERE id = $1 AND business_id = $2 AND product_listing_id IS NOT NULL",
+            id,
+            business_id
+        )
+        .execute(&self.pg)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn find_all_services_listings_by_business(
+        &self,
+        business_id: Uuid,
+    ) -> Result<Vec<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+        let rows = sqlx::query!(
+            r#"SELECT
+                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
+                bl.created_at, bl.updated_at, bl.business_id,
+                bl.product_listing_id, bl.service_listing_id,
+                sl.id as sl_id, sl.price, sl.available
+               FROM listing.business_listings bl
+               INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id
+               WHERE bl.business_id = $1"#,
+            business_id
+        )
+        .fetch_all(&self.pg)
+        .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|row| {
+                let listing = BusinessListingEntity {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    logo: row.logo,
+                    is_active: row.is_active,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    business_id: row.business_id,
+                    product_listing_id: row.product_listing_id,
+                    service_listing_id: row.service_listing_id,
+                };
+                let service = ServiceListingEntity {
+                    id: row.sl_id,
+                    price: row.price,
+                    available: row.available,
+                };
+                (listing, service)
+            })
+            .collect())
+    }
+
+    pub async fn find_service_listing_by_id_and_business(
+        &self,
+        id: Uuid,
+        business_id: Uuid,
+    ) -> Result<Option<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+        let row = sqlx::query!(
+            r#"SELECT
+                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
+                bl.created_at, bl.updated_at, bl.business_id,
+                bl.product_listing_id, bl.service_listing_id,
+                sl.id as sl_id, sl.price, sl.available
+               FROM listing.business_listings bl
+               INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id
+               WHERE bl.id = $1 AND bl.business_id = $2"#,
+            id,
+            business_id
+        )
+        .fetch_optional(&self.pg)
+        .await?;
+
+        Ok(row.map(|row| {
+            let listing = BusinessListingEntity {
+                id: row.id,
+                title: row.title,
+                description: row.description,
+                logo: row.logo,
+                is_active: row.is_active,
+                created_at: row.created_at,
+                updated_at: row.updated_at,
+                business_id: row.business_id,
+                product_listing_id: row.product_listing_id,
+                service_listing_id: row.service_listing_id,
+            };
+            let service = ServiceListingEntity {
+                id: row.sl_id,
+                price: row.price,
+                available: row.available,
+            };
+            (listing, service)
+        }))
+    }
+
+    pub async fn find_service_listing_by_id_and_business_and_owner(
+        &self,
+        id: Uuid,
+        business_id: Uuid,
+        owner_id: Uuid,
+    ) -> Result<Option<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+        let row = sqlx::query!(
+            r#"SELECT
+                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
+                bl.created_at, bl.updated_at, bl.business_id,
+                bl.product_listing_id, bl.service_listing_id,
+                sl.id as sl_id, sl.price, sl.available
+               FROM listing.business_listings bl
+               INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id
+               INNER JOIN business.businesses bb ON bb.id = bl.business_id
+               WHERE bl.id = $1 AND bl.business_id = $2 AND bb.owner_id = $3"#,
+            id,
+            business_id,
+            owner_id
+        )
+        .fetch_optional(&self.pg)
+        .await?;
+
+        Ok(row.map(|row| {
+            let listing = BusinessListingEntity {
+                id: row.id,
+                title: row.title,
+                description: row.description,
+                logo: row.logo,
+                is_active: row.is_active,
+                created_at: row.created_at,
+                updated_at: row.updated_at,
+                business_id: row.business_id,
+                product_listing_id: row.product_listing_id,
+                service_listing_id: row.service_listing_id,
+            };
+            let service = ServiceListingEntity {
+                id: row.sl_id,
+                price: row.price,
+                available: row.available,
+            };
+            (listing, service)
+        }))
     }
 
     pub async fn create_service_listing(
@@ -169,13 +421,14 @@ impl ListingRepository {
         available: bool,
         categories: Option<Vec<String>>,
         tags: Option<Vec<String>>,
-    ) -> Result<BusinessListingEntity, DbError> {
+    ) -> Result<(BusinessListingEntity, ServiceListingEntity), DbError> {
         let mut tx = self.pg.begin().await?;
 
-        let service = sqlx::query!(
+        let service = sqlx::query_as!(
+            ServiceListingEntity,
             r#"INSERT INTO listing.service_listings (id, price, available)
                VALUES (gen_random_uuid(), $1, $2)
-               RETURNING id"#,
+               RETURNING id, price, available"#,
             price,
             available
         )
@@ -198,13 +451,13 @@ impl ListingRepository {
         .fetch_one(&mut *tx)
         .await?;
 
-        if let Some(cats) = categories {
-            for cat in cats {
+        if let Some(categories) = categories {
+            for category in categories {
                 sqlx::query!(
                     r#"INSERT INTO listing.listing_categories (id, listing_id, value)
                        VALUES (gen_random_uuid(), $1, $2)"#,
                     listing.id,
-                    cat
+                    category
                 )
                 .execute(&mut *tx)
                 .await?;
@@ -226,10 +479,10 @@ impl ListingRepository {
 
         tx.commit().await?;
 
-        Ok(listing)
+        Ok((listing, service))
     }
 
-    pub async fn update_listing(
+    pub async fn update_service_listing(
         &self,
         listing_id: Uuid,
         business_id: Uuid,
@@ -237,7 +490,11 @@ impl ListingRepository {
         description: Option<String>,
         logo: Option<String>,
         is_active: Option<bool>,
-    ) -> Result<BusinessListingEntity, DbError> {
+        price: Option<String>,
+        available: Option<bool>,
+    ) -> Result<(BusinessListingEntity, ServiceListingEntity), DbError> {
+        let mut tx = self.pg.begin().await?;
+
         let listing = sqlx::query_as!(
             BusinessListingEntity,
             r#"UPDATE listing.business_listings SET
@@ -256,15 +513,31 @@ impl ListingRepository {
             logo,
             is_active
         )
-        .fetch_one(&self.pg)
+        .fetch_one(&mut *tx)
         .await?;
 
-        Ok(listing)
+        let service = sqlx::query_as!(
+            ServiceListingEntity,
+            r#"UPDATE listing.service_listings SET
+               price = COALESCE($2, price),
+               available = COALESCE($3, available)
+               WHERE id = $1
+               RETURNING id, price, available"#,
+            listing.service_listing_id,
+            price,
+            available
+        )
+        .fetch_one(&mut *tx)
+        .await?;
+
+        tx.commit().await?;
+
+        Ok((listing, service))
     }
 
-    pub async fn delete_listing(&self, id: Uuid, business_id: Uuid) -> Result<(), DbError> {
+    pub async fn delete_service_listing(&self, id: Uuid, business_id: Uuid) -> Result<(), DbError> {
         sqlx::query!(
-            "DELETE FROM listing.business_listings WHERE id = $1 AND business_id = $2",
+            "DELETE FROM listing.business_listings WHERE id = $1 AND business_id = $2 AND service_listing_id IS NOT NULL",
             id,
             business_id
         )

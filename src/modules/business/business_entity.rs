@@ -16,10 +16,12 @@ pub struct BusinessEntity {
 
 #[derive(Debug, FromRow)]
 pub struct BusinessAddressEntity {
-    pub complete_address: String,
+    pub address_line1: String,
+    pub address_line2: String,
+    pub landmark: Option<String>,
+    pub pincode: String,
     pub city: String,
     pub state: String,
-    pub pincode: i32,
     pub latitude: f64,
     pub longitude: f64,
     pub radius: f64,

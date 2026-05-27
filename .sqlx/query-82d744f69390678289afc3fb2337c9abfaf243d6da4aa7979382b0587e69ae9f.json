@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT address_line1, address_line2, landmark, pincode, city, state, radius,\n                      ST_Y(location::geometry) AS \"latitude!\",\n                      ST_X(location::geometry) AS \"longitude!\",\n                      business_id\n               FROM business.business_addresses WHERE business_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "address_line1",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "address_line2",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "landmark",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "pincode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "city",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "state",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "radius",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "latitude!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 8,
+        "name": "longitude!",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 9,
+        "name": "business_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      false
+    ]
+  },
+  "hash": "82d744f69390678289afc3fb2337c9abfaf243d6da4aa7979382b0587e69ae9f"
+}

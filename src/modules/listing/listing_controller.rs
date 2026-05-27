@@ -5,7 +5,7 @@ use crate::modules::listing::listing_dto::{
     CreateListingMediaDto, CreateProductListingDto, CreateServiceListingDto, ListingMediaDto,
     ProductListingDto, ServiceListingDto, UpdateProductListingDto, UpdateServiceListingDto,
 };
-use poem::web::Query;
+use poem_openapi::param::Query;
 use poem_openapi::{ApiResponse, OpenApi, param::Path, payload::Json};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -172,7 +172,19 @@ impl ListingController {
         latitude: Query<f64>,
         longitude: Query<f64>,
     ) -> ExploreProductListingsNearbyResponse {
-        todo!()
+        match self
+            .service
+            .explore_products_listings_nearby(latitude.0, longitude.0)
+            .await
+        {
+            Ok(listings) => ExploreProductListingsNearbyResponse::Ok(Json(listings)),
+            Err(ServiceError::Internal(dto)) => {
+                ExploreProductListingsNearbyResponse::InternalError(Json(dto))
+            }
+            Err(_) => ExploreProductListingsNearbyResponse::InternalError(Json(ErrorDto {
+                message: "internal server error".to_owned(),
+            })),
+        }
     }
 
     #[oai(path = "/listings/service/explore", method = "get")]
@@ -181,7 +193,19 @@ impl ListingController {
         latitude: Query<f64>,
         longitude: Query<f64>,
     ) -> ExploreServiceListingsNearbyResponse {
-        todo!()
+        match self
+            .service
+            .explore_services_listings_nearby(latitude.0, longitude.0)
+            .await
+        {
+            Ok(listings) => ExploreServiceListingsNearbyResponse::Ok(Json(listings)),
+            Err(ServiceError::Internal(dto)) => {
+                ExploreServiceListingsNearbyResponse::InternalError(Json(dto))
+            }
+            Err(_) => ExploreServiceListingsNearbyResponse::InternalError(Json(ErrorDto {
+                message: "internal server error".to_owned(),
+            })),
+        }
     }
 
     #[oai(path = "/:business_id/listings/product", method = "get")]

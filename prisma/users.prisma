@@ -3,36 +3,36 @@
 // ========================
 
 model User {
-    id     String  @id @db.Uuid
-    name   String
-    avatar String?
+  id     String  @id @db.Uuid
+  name   String
+  avatar String?
 
-    accountId String  @unique @map("account_id") @db.Uuid
-    account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String  @unique @map("account_id") @db.Uuid
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-    addresses  UserAddress[]
-    reviews    Review[]
-    views      View[]
-    businesses Business[]
-    sessions   Session[]
+  addresses  UserAddress[]
+  reviews    Review[]
+  views      View[]
+  businesses Business[]
+  sessions   Session[]
 
-    @@map("users")
-    @@schema("users")
+  @@map("users")
+  @@schema("users")
 }
 
 model UserAddress {
-    id              String @id @db.Uuid
-    name            String
-    completeAddress String @map("complete_address")
-    city            String
-    state           String
-    pincode         Int
-    latitude        Float  @db.DoublePrecision
-    longitude       Float  @db.DoublePrecision
+  id              String @id @db.Uuid
+  name            String
+  completeAddress String @map("complete_address")
+  city            String
+  state           String
+  pincode         Int
+  latitude        Float  @db.DoublePrecision
+  longitude       Float  @db.DoublePrecision
 
-    userId String @map("user_id") @db.Uuid
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@map("user_addresses")
-    @@schema("users")
+  @@map("user_addresses")
+  @@schema("users")
 }

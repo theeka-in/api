@@ -140,7 +140,10 @@ impl BusinessRepository {
     ) -> Result<Option<BusinessAddressEntity>, DbError> {
         let address = sqlx::query_as!(
             BusinessAddressEntity,
-            r#"SELECT complete_address, city, state, pincode, latitude, longitude, radius, business_id
+            r#"SELECT address_line1, address_line2, landmark, pincode, city, state, radius,
+                      ST_Y(location::geometry) AS "latitude!",
+                      ST_X(location::geometry) AS "longitude!",
+                      business_id
                FROM business.business_addresses WHERE business_id = $1"#,
             business_id
         )
@@ -153,10 +156,12 @@ impl BusinessRepository {
     pub async fn create_address(
         &self,
         business_id: Uuid,
-        complete_address: String,
+        address_line1: String,
+        address_line2: String,
+        landmark: Option<String>,
+        pincode: String,
         city: String,
         state: String,
-        pincode: i32,
         latitude: f64,
         longitude: f64,
         radius: f64,
@@ -164,25 +169,31 @@ impl BusinessRepository {
         let address = sqlx::query_as!(
             BusinessAddressEntity,
             r#"INSERT INTO business.business_addresses
-                   (business_id, complete_address, city, state, pincode, latitude, longitude, radius)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                   (business_id, address_line1, address_line2, landmark, pincode, city, state, location, radius)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, ST_SetSRID(ST_MakePoint($8, $9), 4326), $10)
                ON CONFLICT (business_id) DO UPDATE SET
-                   complete_address = EXCLUDED.complete_address,
-                   city             = EXCLUDED.city,
-                   state            = EXCLUDED.state,
-                   pincode          = EXCLUDED.pincode,
-                   latitude         = EXCLUDED.latitude,
-                   longitude        = EXCLUDED.longitude,
-                   radius           = EXCLUDED.radius
-               RETURNING complete_address, city, state, pincode, latitude, longitude, radius, business_id"#,
+                   address_line1 = EXCLUDED.address_line1,
+                   address_line2 = EXCLUDED.address_line2,
+                   landmark      = EXCLUDED.landmark,
+                   pincode       = EXCLUDED.pincode,
+                   city          = EXCLUDED.city,
+                   state         = EXCLUDED.state,
+                   location      = EXCLUDED.location,
+                   radius        = EXCLUDED.radius
+               RETURNING address_line1, address_line2, landmark, pincode, city, state, radius,
+                         ST_Y(location::geometry) AS "latitude!",
+                         ST_X(location::geometry) AS "longitude!",
+                         business_id"#,
             business_id,
-            complete_address,
+            address_line1,
+            address_line2,
+            landmark,
+            pincode,
             city,
             state,
-            pincode,
-            latitude,
             longitude,
-            radius
+            latitude,
+            radius,
         )
         .fetch_one(&self.pg)
         .await?;
@@ -193,10 +204,12 @@ impl BusinessRepository {
     pub async fn update_address(
         &self,
         business_id: Uuid,
-        complete_address: Option<String>,
+        address_line1: Option<String>,
+        address_line2: Option<String>,
+        landmark: Option<String>,
+        pincode: Option<String>,
         city: Option<String>,
         state: Option<String>,
-        pincode: Option<i32>,
         latitude: Option<f64>,
         longitude: Option<f64>,
         radius: Option<f64>,
@@ -204,27 +217,37 @@ impl BusinessRepository {
         let address = sqlx::query_as!(
             BusinessAddressEntity,
             r#"UPDATE business.business_addresses SET
-                   complete_address = COALESCE($2, complete_address),
-                   city             = COALESCE($3, city),
-                   state            = COALESCE($4, state),
-                   pincode          = COALESCE($5, pincode),
-                   latitude         = COALESCE($6, latitude),
-                   longitude        = COALESCE($7, longitude),
-                   radius           = COALESCE($8, radius)
+                   address_line1 = COALESCE($2, address_line1),
+                   address_line2 = COALESCE($3, address_line2),
+                   landmark      = COALESCE($4, landmark),
+                   pincode       = COALESCE($5, pincode),
+                   city          = COALESCE($6, city),
+                   state         = COALESCE($7, state),
+                   location      = CASE
+                                       WHEN $8::float8 IS NOT NULL AND $9::float8 IS NOT NULL
+                                       THEN ST_SetSRID(ST_MakePoint($9, $8), 4326)
+                                       ELSE location
+                                   END,
+                   radius        = COALESCE($10, radius)
                WHERE business_id = $1
-               RETURNING complete_address, city, state, pincode, latitude, longitude, radius, business_id"#,
+               RETURNING address_line1, address_line2, landmark, pincode, city, state, radius,
+                         ST_Y(location::geometry) AS "latitude!",
+                         ST_X(location::geometry) AS "longitude!",
+                         business_id"#,
             business_id,
-            complete_address,
+            address_line1,
+            address_line2,
+            landmark,
+            pincode,
             city,
             state,
-            pincode,
             latitude,
             longitude,
-            radius
+            radius,
         )
         .fetch_one(&self.pg)
         .await?;
-    
+
         Ok(address)
     }
 

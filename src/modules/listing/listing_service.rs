@@ -22,12 +22,30 @@ impl ListingService {
         })
     }
 
-    pub async fn explore_products_listings_nearby(&self, latitude: f64, longitude: f64) -> Result<Vec<ProductListingDto>, ServiceError> {
-        todo!()
+    pub async fn explore_products_listings_nearby(
+        &self,
+        latitude: f64,
+        longitude: f64,
+    ) -> Result<Vec<ProductListingDto>, ServiceError> {
+        let listings = self
+            .repo
+            .explore_products_listings_nearby(latitude, longitude)
+            .await?;
+        
+        Ok(listings.into_iter().map(ProductListingDto::from).collect())
     }
+    
+    pub async fn explore_services_listings_nearby(
+        &self,
+        latitude: f64,
+        longitude: f64,
+    ) -> Result<Vec<ServiceListingDto>, ServiceError> {
+        let listings = self
+            .repo
+            .explore_services_listings_nearby(latitude, longitude)
+            .await?;
 
-    pub async fn explore_services_listings_nearby(&self, latitude: f64, longitude: f64) -> Result<Vec<ServiceListingDto>, ServiceError> {
-        todo!()
+        Ok(listings.into_iter().map(ServiceListingDto::from).collect())
     }
 
     pub async fn get_all_product_listings_by_business(

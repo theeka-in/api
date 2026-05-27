@@ -1,4 +1,4 @@
 datasource db {
-    provider = "postgresql"
-    schemas  = ["analytics", "auth", "business", "listing", "review", "schema", "shared", "users"]
+  provider = "postgresql"
+  schemas  = ["analytics", "auth", "business", "listing", "review", "schema", "shared", "users"]
 }

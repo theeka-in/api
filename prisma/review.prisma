@@ -3,36 +3,36 @@
 // ========================
 
 model Review {
-    id        String   @id @db.Uuid
-    rating    Int
-    title     String
-    comment   String
-    createdAt DateTime @default(now()) @map("created_at")
+  id        String   @id @db.Uuid
+  rating    Int
+  title     String
+  comment   String
+  createdAt DateTime @default(now()) @map("created_at")
 
-    userId String @map("user_id") @db.Uuid
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    businessId String   @map("business_id") @db.Uuid
-    business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String   @map("business_id") @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-    listingId String          @map("listing_id") @db.Uuid
-    listing   BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String          @map("listing_id") @db.Uuid
+  listing   BusinessListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-    media ReviewMedia[]
+  media ReviewMedia[]
 
-    @@unique([userId, listingId])
-    @@map("reviews")
-    @@schema("review")
+  @@unique([userId, listingId])
+  @@map("reviews")
+  @@schema("review")
 }
 
 model ReviewMedia {
-    id   String    @id @db.Uuid
-    type MediaType
-    url  String
+  id   String    @id @db.Uuid
+  type MediaType
+  url  String
 
-    reviewId String @map("review_id") @db.Uuid
-    review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewId String @map("review_id") @db.Uuid
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
-    @@map("review_media")
-    @@schema("review")
+  @@map("review_media")
+  @@schema("review")
 }

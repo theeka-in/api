@@ -1,12 +1,12 @@
 use crate::errors::{ErrorDto, ServiceError};
 use crate::modules::auth::AuthService;
-use crate::modules::business::{CreateBusinessAddressDto, UpdateBusinessAddressDto};
 use crate::modules::business::business_dto::{
     BusinessAddressDto, BusinessDto, BusinessHourDto, BusinessMediaDto, CreateBusinessDto,
     CreateBusinessHourDto, CreateBusinessMediaDto, UpdateBusinessDto, UpdateBusinessHourDto,
 };
 use crate::modules::business::business_entity::{BusinessHourType, DayOfWeekType};
 use crate::modules::business::business_repository::BusinessRepository;
+use crate::modules::business::{CreateBusinessAddressDto, UpdateBusinessAddressDto};
 use crate::modules::users::UsersService;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -153,10 +153,12 @@ impl BusinessService {
             .repo
             .create_address(
                 business_id,
-                dto.complete_address,
+                dto.address_line1,
+                dto.address_line2,
+                dto.landmark,
+                dto.pincode,
                 dto.city,
                 dto.state,
-                dto.pincode,
                 dto.latitude,
                 dto.longitude,
                 dto.radius,
@@ -179,10 +181,12 @@ impl BusinessService {
             .repo
             .update_address(
                 business_id,
-                dto.complete_address,
+                dto.address_line1,
+                dto.address_line2,
+                dto.landmark,
+                dto.pincode,
                 dto.city,
                 dto.state,
-                dto.pincode,
                 dto.latitude,
                 dto.longitude,
                 dto.radius,

@@ -15,12 +15,121 @@ impl ListingRepository {
         Self { pg }
     }
 
-    pub async fn explore_products_listings_nearby(&self, latitude: f64, longitude: f64) -> Result<Vec<(BusinessListingEntity, ProductListingEntity)>, DbError> {
-        todo!()
+    pub async fn explore_products_listings_nearby(
+        &self,
+        latitude: f64,
+        longitude: f64,
+    ) -> Result<Vec<(BusinessListingEntity, ProductListingEntity)>, DbError> {
+        let rows = sqlx::query!(
+            r#"SELECT
+                business_listings.id, 
+                business_listings.title, 
+                business_listings.description, 
+                business_listings.logo, 
+                business_listings.is_active,
+                business_listings.created_at, 
+                business_listings.updated_at, 
+                business_listings.business_id,
+                business_listings.product_listing_id, 
+                business_listings.service_listing_id,
+                product_listings.id AS pl_id, 
+                product_listings.price, 
+                product_listings.stock
+               FROM listing.business_listings
+               INNER JOIN listing.product_listings ON product_listings.id = business_listings.product_listing_id
+               INNER JOIN business.businesses ON businesses.id = business_listings.business_id
+               INNER JOIN business.business_addresses ON business_addresses.business_id = businesses.id
+               WHERE business_listings.is_active = true
+                 AND businesses.is_closed = false
+                 AND ST_DWithin(
+                     business_addresses.location,
+                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+                     business_addresses.radius
+                 )"#,
+                 longitude,
+            latitude,
+        )
+        .fetch_all(&self.pg)
+        .await?;
+
+        dbg!("{}", &rows);
+
+        Ok(rows
+            .into_iter()
+            .map(|row| {
+                let listing = BusinessListingEntity {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    logo: row.logo,
+                    is_active: row.is_active,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    business_id: row.business_id,
+                    product_listing_id: row.product_listing_id,
+                    service_listing_id: row.service_listing_id,
+                };
+                let product = ProductListingEntity {
+                    id: row.pl_id,
+                    price: row.price,
+                    stock: row.stock,
+                };
+                (listing, product)
+            })
+            .collect())
     }
 
-    pub async fn explore_services_listings_nearby(&self, latitude: f64, longitude: f64) -> Result<Vec<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
-        todo!()
+    pub async fn explore_services_listings_nearby(
+        &self,
+        latitude: f64,
+        longitude: f64,
+    ) -> Result<Vec<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+        let rows = sqlx::query!(
+            r#"SELECT
+                business_listings.id, business_listings.title, business_listings.description, business_listings.logo, business_listings.is_active,
+                business_listings.created_at, business_listings.updated_at, business_listings.business_id,
+                business_listings.product_listing_id, business_listings.service_listing_id,
+                service_listings.id AS sl_id, service_listings.price, service_listings.available
+               FROM listing.business_listings
+               INNER JOIN listing.service_listings ON service_listings.id = business_listings.service_listing_id
+               INNER JOIN business.businesses ON businesses.id = business_listings.business_id
+               INNER JOIN business.business_addresses ON business_addresses.business_id = businesses.id
+               WHERE business_listings.is_active = true
+                 AND businesses.is_closed = false
+                 AND ST_DWithin(
+                     business_addresses.location,
+                     ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography,
+                     business_addresses.radius
+                 )"#,
+            latitude,
+            longitude,
+        )
+        .fetch_all(&self.pg)
+        .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|row| {
+                let listing = BusinessListingEntity {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    logo: row.logo,
+                    is_active: row.is_active,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    business_id: row.business_id,
+                    product_listing_id: row.product_listing_id,
+                    service_listing_id: row.service_listing_id,
+                };
+                let service = ServiceListingEntity {
+                    id: row.sl_id,
+                    price: row.price,
+                    available: row.available,
+                };
+                (listing, service)
+            })
+            .collect())
     }
 
     pub async fn find_all_products_listings_by_business(

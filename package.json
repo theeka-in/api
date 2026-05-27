@@ -13,7 +13,7 @@
         "prod:build": "cargo sqlx prepare && cross-env COMPOSE_BAKE=true docker compose -f docker-compose.yml build",
         "prod:stop": "docker compose -f docker-compose.yml stop",
         "db:migrate": "npx prisma migrate dev",
-        "db:deploy": "npx prisma migrate deploy",
+        "db:apply": "npx prisma migrate deploy",
         "db:reset": "npx prisma migrate reset",
         "db:status": "npx prisma migrate status"
     },

@@ -41,10 +41,12 @@ pub struct UpdateBusinessDto {
 
 #[derive(Debug, Object)]
 pub struct BusinessAddressDto {
-    pub complete_address: String,
+    pub address_line1: String,
+    pub address_line2: String,
+    pub landmark: Option<String>,
+    pub pincode: String,
     pub city: String,
     pub state: String,
-    pub pincode: i32,
     pub latitude: f64,
     pub longitude: f64,
     pub radius: f64,
@@ -53,10 +55,12 @@ pub struct BusinessAddressDto {
 
 #[derive(Debug, Object)]
 pub struct CreateBusinessAddressDto {
-    pub complete_address: String,
+    pub address_line1: String,
+    pub address_line2: String,
+    pub landmark: Option<String>,
+    pub pincode: String,
     pub city: String,
     pub state: String,
-    pub pincode: i32,
     pub latitude: f64,
     pub longitude: f64,
     pub radius: f64,
@@ -64,10 +68,12 @@ pub struct CreateBusinessAddressDto {
 
 #[derive(Debug, Object)]
 pub struct UpdateBusinessAddressDto {
-    pub complete_address: Option<String>,
+    pub address_line1: Option<String>,
+    pub address_line2: Option<String>,
+    pub landmark: Option<String>,
+    pub pincode: Option<String>,
     pub city: Option<String>,
     pub state: Option<String>,
-    pub pincode: Option<i32>,
     pub latitude: Option<f64>,
     pub longitude: Option<f64>,
     pub radius: Option<f64>,
@@ -161,10 +167,12 @@ impl From<BusinessMediaEntity> for BusinessMediaDto {
 impl From<BusinessAddressEntity> for BusinessAddressDto {
     fn from(entity: BusinessAddressEntity) -> Self {
         Self {
-            complete_address: entity.complete_address,
+            address_line1: entity.address_line1,
+            address_line2: entity.address_line2,
+            landmark: entity.landmark,
+            pincode: entity.pincode,
             city: entity.city,
             state: entity.state,
-            pincode: entity.pincode,
             latitude: entity.latitude,
             longitude: entity.longitude,
             radius: entity.radius,

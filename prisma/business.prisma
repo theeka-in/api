@@ -48,13 +48,14 @@ model Business {
 }
 
 model BusinessAddress {
-    completeAddress String @map("complete_address")
-    city            String
-    state           String
-    pincode         Int
-    latitude        Float  @db.DoublePrecision
-    longitude       Float  @db.DoublePrecision
-    radius          Float
+    addressLine1 String                               @map("address_line1")
+    addressLine2 String                               @map("address_line2")
+    landmark     String?                              @map("landmark")
+    pincode      String                               @map("pincode")
+    city         String
+    state        String
+    location     Unsupported("geometry(Point, 4326)")
+    radius       Float
 
     businessId String   @id @map("business_id") @db.Uuid
     business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)

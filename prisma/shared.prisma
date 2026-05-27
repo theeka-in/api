@@ -1,7 +1,7 @@
 enum MediaType {
-    image
-    video
+  image
+  video
 
-    @@schema("shared")
-    @@map("media_type")
+  @@map("media_type")
+  @@schema("shared")
 }

@@ -64,7 +64,7 @@ impl AuthService {
     ) -> Result<SessionDto, ServiceError> {
         let account = self.repo.find_account_by_phone(body.phone).await?.ok_or(
             ServiceError::Unauthorized(ErrorDto {
-                message: "user already exists".to_owned(),
+                message: "user doesn't exist".to_owned(),
             }),
         )?;
 
@@ -106,11 +106,13 @@ impl AuthService {
     }
 
     pub async fn get_account_by_user_id(&self, user_id: Uuid) -> Result<AccountDto, ServiceError> {
-        let account = self.repo.find_account_by_user_id(user_id).await?.ok_or(
-            ServiceError::Unauthorized(ErrorDto {
-                message: "invalid session".to_owned(),
-            }),
-        )?;
+        let account =
+            self.repo
+                .find_account_by_user_id(user_id)
+                .await?
+                .ok_or(ServiceError::Unauthorized(ErrorDto {
+                    message: "invalid session".to_owned(),
+                }))?;
 
         Ok(AccountDto::from(account))
     }

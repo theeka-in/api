@@ -14,11 +14,11 @@ async fn main() -> Result<(), std::io::Error> {
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     let pg_pool = PgPoolOptions::new()
-    .max_connections(10)
-    .min_connections(2)
-    .acquire_timeout(Duration::from_secs(3))
-    .idle_timeout(Duration::from_secs(300))
-    .max_lifetime(Duration::from_secs(3600))
+        .max_connections(10)
+        .min_connections(2)
+        .acquire_timeout(Duration::from_secs(3))
+        .idle_timeout(Duration::from_secs(300))
+        .max_lifetime(Duration::from_secs(3600))
         .connect(&database_url)
         .await
         .expect("Failed to connect to database");

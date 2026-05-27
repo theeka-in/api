@@ -16,7 +16,8 @@ services:
         networks:
             - backend
     db:
-        image: postgres:18-alpine
+        build:
+            dockerfile: Dockerfile.pg
         environment:
             - POSTGRES_USER=${DB_USER}
             - POSTGRES_PASSWORD=${DB_PASSWORD}

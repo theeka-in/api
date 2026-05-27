@@ -71,9 +71,6 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
                 the_api
                     // exception: this is for the guards to work
                     .data(auth_service)
-                    .data(users_service)
-                    .data(business_service)
-                    .data(listing_service)
                     .with(ErrorHandlerMiddleware),
             )
             .nest("/", the_ui)

@@ -1,4 +1,4 @@
-name: publish docker image
+name: publish docker pg image
 
 on:
     workflow_run:
@@ -23,5 +23,6 @@ jobs:
               uses: docker/build-push-action@v5
               with:
                   context: .
+                  file: ./Dockerfile.pg
                   push: true
-                  tags: 4o4wasd/theeka-api:latest
+                  tags: 4o4wasd/theeka-pg:latest

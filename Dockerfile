@@ -12,13 +12,14 @@ COPY scripts ./scripts
 
 COPY migrations ./migrations
 
-RUN node scripts/sqlx-migrations.js
-
-RUN rm -rf migrations/_prisma
+RUN node scripts/sqlx-migrations.js && rm -rf migrations/_prisma
 
 FROM rust:1.95.0 AS builder
 
 WORKDIR /app
+
+RUN apt-get update
+RUN apt-get install -y musl-tools
 
 RUN rustup target add x86_64-unknown-linux-musl
 

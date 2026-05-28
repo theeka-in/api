@@ -33,8 +33,31 @@ services:
         networks:
             - backend
 
+    ollama:
+        image: ollama/ollama:latest
+        ports:
+            - "11434:11434"
+        volumes:
+            - ollama_data_prod:/root/.ollama
+        entrypoint:
+            [
+                "/bin/sh",
+                "-c",
+                "ollama serve & sleep 5 && ollama pull leoipulsar/harrier-0.6b && wait",
+            ]
+        networks:
+            - backend
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: all
+                          capabilities: [gpu]
+
 volumes:
     postgres_data_prod:
+    ollama_data_prod:
 
 networks:
     backend:

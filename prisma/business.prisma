@@ -3,90 +3,90 @@
 // ========================
 
 enum DayOfWeek {
-    monday
-    tuesday
-    wednesday
-    thursday
-    friday
-    saturday
-    sunday
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
 
-    @@map("day_of_week")
-    @@schema("business")
+  @@map("day_of_week")
+  @@schema("business")
 }
 
 enum BusinessHoursType {
-    closed
-    open_24_hours
-    custom_range
+  closed
+  open_24_hours
+  custom_range
 
-    @@map("business_hour_type")
-    @@schema("business")
+  @@map("business_hour_type")
+  @@schema("business")
 }
 
 model Business {
-    id          String   @id @db.Uuid
-    phoneNumber BigInt   @map("phone_number")
-    isClosed    Boolean  @default(false) @map("is_closed")
-    title       String
-    logo        String?
-    description String?
-    createdAt   DateTime @default(now()) @map("created_at")
+  id          String   @id @db.Uuid
+  phoneNumber BigInt   @map("phone_number")
+  isClosed    Boolean  @default(false) @map("is_closed")
+  title       String
+  logo        String?
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
 
-    ownerId String @map("owner_id") @db.Uuid
-    owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String @map("owner_id") @db.Uuid
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-    address       BusinessAddress?
-    businessHours BusinessHours[]
-    media         BusinessMedia[]
-    listings      BusinessListing[]
-    reviews       Review[]
-    views         View[]
+  address       BusinessAddress?
+  businessHours BusinessHours[]
+  media         BusinessMedia[]
+  listings      BusinessListing[]
+  reviews       Review[]
+  views         View[]
 
-    @@map("businesses")
-    @@schema("business")
+  @@map("businesses")
+  @@schema("business")
 }
 
 model BusinessAddress {
-    addressLine1 String                               @map("address_line1")
-    addressLine2 String                               @map("address_line2")
-    landmark     String?                              @map("landmark")
-    pincode      String                               @map("pincode")
-    city         String
-    state        String
-    location     Unsupported("geometry(Point, 4326)")
-    radius       Float
+  addressLine1 String                               @map("address_line1")
+  addressLine2 String                               @map("address_line2")
+  landmark     String?                              @map("landmark")
+  pincode      String                               @map("pincode")
+  city         String
+  state        String
+  location     Unsupported("geometry(Point, 4326)")
+  radius       Float
 
-    businessId String   @id @map("business_id") @db.Uuid
-    business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String   @id @map("business_id") @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-    @@map("business_addresses")
-    @@schema("business")
+  @@map("business_addresses")
+  @@schema("business")
 }
 
 model BusinessHours {
-    id        String            @id @db.Uuid
-    day       DayOfWeek
-    hoursType BusinessHoursType @map("hours_type")
-    openTime  DateTime?         @map("open_time") @db.Time(6)
-    closeTime DateTime?         @map("close_time") @db.Time(6)
+  id        String            @id @db.Uuid
+  day       DayOfWeek
+  hoursType BusinessHoursType @map("hours_type")
+  openTime  DateTime?         @map("open_time") @db.Time(6)
+  closeTime DateTime?         @map("close_time") @db.Time(6)
 
-    businessId String   @map("business_id") @db.Uuid
-    business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String   @map("business_id") @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-    @@unique([businessId, day])
-    @@map("business_hours")
-    @@schema("business")
+  @@unique([businessId, day])
+  @@map("business_hours")
+  @@schema("business")
 }
 
 model BusinessMedia {
-    id   String    @id @db.Uuid
-    type MediaType
-    url  String
+  id   String    @id @db.Uuid
+  type MediaType
+  url  String
 
-    businessId String   @map("business_id") @db.Uuid
-    business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String   @map("business_id") @db.Uuid
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-    @@map("business_media")
-    @@schema("business")
+  @@map("business_media")
+  @@schema("business")
 }

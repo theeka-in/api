@@ -5,3 +5,4 @@ pub mod health;
 pub mod listing;
 pub mod review;
 pub mod users;
+pub mod embedding;

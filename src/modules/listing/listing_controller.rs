@@ -171,10 +171,11 @@ impl ListingController {
         &self,
         latitude: Query<f64>,
         longitude: Query<f64>,
+        query: Query<String>,
     ) -> ExploreProductListingsNearbyResponse {
         match self
             .service
-            .explore_products_listings_nearby(latitude.0, longitude.0)
+            .explore_products_listings_nearby(latitude.0, longitude.0, query.0)
             .await
         {
             Ok(listings) => ExploreProductListingsNearbyResponse::Ok(Json(listings)),
@@ -192,10 +193,11 @@ impl ListingController {
         &self,
         latitude: Query<f64>,
         longitude: Query<f64>,
+        query: Query<String>,
     ) -> ExploreServiceListingsNearbyResponse {
         match self
             .service
-            .explore_services_listings_nearby(latitude.0, longitude.0)
+            .explore_services_listings_nearby(latitude.0, longitude.0, query.0)
             .await
         {
             Ok(listings) => ExploreServiceListingsNearbyResponse::Ok(Json(listings)),

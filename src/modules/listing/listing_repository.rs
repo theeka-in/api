@@ -19,21 +19,23 @@ impl ListingRepository {
         &self,
         latitude: f64,
         longitude: f64,
+        query_embedding: pgvector::Vector,
     ) -> Result<Vec<(BusinessListingEntity, ProductListingEntity)>, DbError> {
         let rows = sqlx::query!(
             r#"SELECT
-                business_listings.id, 
-                business_listings.title, 
-                business_listings.description, 
-                business_listings.logo, 
+                business_listings.id,
+                business_listings.title,
+                business_listings.description,
+                business_listings.logo,
                 business_listings.is_active,
-                business_listings.created_at, 
-                business_listings.updated_at, 
+                business_listings.created_at,
+                business_listings.updated_at,
                 business_listings.business_id,
-                business_listings.product_listing_id, 
+                business_listings.product_listing_id,
                 business_listings.service_listing_id,
-                product_listings.id AS pl_id, 
-                product_listings.price, 
+                business_listings.embedding AS "embedding: pgvector::Vector",
+                product_listings.id AS pl_id,
+                product_listings.price,
                 product_listings.stock
                FROM listing.business_listings
                INNER JOIN listing.product_listings ON product_listings.id = business_listings.product_listing_id
@@ -45,14 +47,16 @@ impl ListingRepository {
                      business_addresses.location,
                      ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
                      business_addresses.radius
-                 )"#,
-                 longitude,
+                 )
+                AND 1 - (business_listings.embedding <=> $3) >= 0.4
+                ORDER BY business_listings.embedding <=> $3
+                LIMIT 100"#,
+            longitude,
             latitude,
+            query_embedding as _
         )
         .fetch_all(&self.pg)
         .await?;
-
-        dbg!("{}", &rows);
 
         Ok(rows
             .into_iter()
@@ -68,6 +72,7 @@ impl ListingRepository {
                     business_id: row.business_id,
                     product_listing_id: row.product_listing_id,
                     service_listing_id: row.service_listing_id,
+                    embedding: row.embedding,
                 };
                 let product = ProductListingEntity {
                     id: row.pl_id,
@@ -83,13 +88,24 @@ impl ListingRepository {
         &self,
         latitude: f64,
         longitude: f64,
+        query_embedding: pgvector::Vector,
     ) -> Result<Vec<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
         let rows = sqlx::query!(
             r#"SELECT
-                business_listings.id, business_listings.title, business_listings.description, business_listings.logo, business_listings.is_active,
-                business_listings.created_at, business_listings.updated_at, business_listings.business_id,
-                business_listings.product_listing_id, business_listings.service_listing_id,
-                service_listings.id AS sl_id, service_listings.price, service_listings.available
+                business_listings.id,
+                business_listings.title,
+                business_listings.description,
+                business_listings.logo,
+                business_listings.is_active,
+                business_listings.created_at,
+                business_listings.updated_at,
+                business_listings.business_id,
+                business_listings.product_listing_id,
+                business_listings.service_listing_id,
+                business_listings.embedding AS "embedding: pgvector::Vector",
+                service_listings.id AS sl_id,
+                service_listings.price,
+                service_listings.available
                FROM listing.business_listings
                INNER JOIN listing.service_listings ON service_listings.id = business_listings.service_listing_id
                INNER JOIN business.businesses ON businesses.id = business_listings.business_id
@@ -98,11 +114,15 @@ impl ListingRepository {
                  AND businesses.is_closed = false
                  AND ST_DWithin(
                      business_addresses.location,
-                     ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography,
+                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
                      business_addresses.radius
-                 )"#,
-            latitude,
+                 )
+                AND 1 - (business_listings.embedding <=> $3) >= 0.4
+                ORDER BY business_listings.embedding <=> $3
+                LIMIT 100"#,
             longitude,
+            latitude,
+            query_embedding as _
         )
         .fetch_all(&self.pg)
         .await?;
@@ -121,6 +141,7 @@ impl ListingRepository {
                     business_id: row.business_id,
                     product_listing_id: row.product_listing_id,
                     service_listing_id: row.service_listing_id,
+                    embedding: row.embedding,
                 };
                 let service = ServiceListingEntity {
                     id: row.sl_id,
@@ -141,6 +162,7 @@ impl ListingRepository {
                 bl.id, bl.title, bl.description, bl.logo, bl.is_active,
                 bl.created_at, bl.updated_at, bl.business_id,
                 bl.product_listing_id, bl.service_listing_id,
+                bl.embedding AS "embedding: pgvector::Vector",
                 pl.id as pl_id, pl.price, pl.stock
                FROM listing.business_listings bl
                INNER JOIN listing.product_listings pl ON pl.id = bl.product_listing_id
@@ -164,6 +186,7 @@ impl ListingRepository {
                     business_id: row.business_id,
                     product_listing_id: row.product_listing_id,
                     service_listing_id: row.service_listing_id,
+                    embedding: row.embedding,
                 };
                 let product = ProductListingEntity {
                     id: row.pl_id,
@@ -185,6 +208,7 @@ impl ListingRepository {
                 bl.id, bl.title, bl.description, bl.logo, bl.is_active,
                 bl.created_at, bl.updated_at, bl.business_id,
                 bl.product_listing_id, bl.service_listing_id,
+                bl.embedding AS "embedding: pgvector::Vector",
                 pl.id as pl_id, pl.price, pl.stock
                FROM listing.business_listings bl
                INNER JOIN listing.product_listings pl ON pl.id = bl.product_listing_id
@@ -207,6 +231,7 @@ impl ListingRepository {
                 business_id: row.business_id,
                 product_listing_id: row.product_listing_id,
                 service_listing_id: row.service_listing_id,
+                embedding: row.embedding,
             };
             let product = ProductListingEntity {
                 id: row.pl_id,
@@ -228,6 +253,7 @@ impl ListingRepository {
                 bl.id, bl.title, bl.description, bl.logo, bl.is_active,
                 bl.created_at, bl.updated_at, bl.business_id,
                 bl.product_listing_id, bl.service_listing_id,
+                bl.embedding AS "embedding: pgvector::Vector",
                 pl.id as pl_id, pl.price, pl.stock
                FROM listing.business_listings bl
                INNER JOIN listing.product_listings pl ON pl.id = bl.product_listing_id
@@ -252,6 +278,7 @@ impl ListingRepository {
                 business_id: row.business_id,
                 product_listing_id: row.product_listing_id,
                 service_listing_id: row.service_listing_id,
+                embedding: row.embedding,
             };
             let product = ProductListingEntity {
                 id: row.pl_id,
@@ -272,6 +299,7 @@ impl ListingRepository {
         stock: i32,
         categories: Option<Vec<String>>,
         tags: Option<Vec<String>>,
+        embedding: pgvector::Vector,
     ) -> Result<(BusinessListingEntity, ProductListingEntity), DbError> {
         let mut tx = self.pg.begin().await?;
 
@@ -289,15 +317,17 @@ impl ListingRepository {
         let listing = sqlx::query_as!(
             BusinessListingEntity,
             r#"INSERT INTO listing.business_listings
-                   (id, business_id, title, description, logo, product_listing_id, updated_at)
-               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now())
+                   (id, business_id, title, description, logo, product_listing_id, updated_at, embedding)
+               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now(), $6)
                RETURNING id, title, description, logo, is_active, created_at, updated_at,
-                         business_id, product_listing_id, service_listing_id"#,
+                         business_id, product_listing_id, service_listing_id,
+                         embedding AS "embedding: pgvector::Vector""#,
             business_id,
             title,
             description,
             logo,
-            product.id
+            product.id,
+            embedding as _,
         )
         .fetch_one(&mut *tx)
         .await?;
@@ -343,6 +373,7 @@ impl ListingRepository {
         is_active: Option<bool>,
         price: Option<f64>,
         stock: Option<i32>,
+        embedding: Option<pgvector::Vector>,
     ) -> Result<(BusinessListingEntity, ProductListingEntity), DbError> {
         let mut tx = self.pg.begin().await?;
 
@@ -353,16 +384,19 @@ impl ListingRepository {
                description = COALESCE($4, description),
                logo = COALESCE($5, logo),
                is_active = COALESCE($6, is_active),
+               embedding = COALESCE($7, embedding),
                updated_at = now()
                WHERE id = $1 AND business_id = $2
                RETURNING id, title, description, logo, is_active, created_at, updated_at,
-                         business_id, product_listing_id, service_listing_id"#,
+                         business_id, product_listing_id, service_listing_id,
+                         embedding AS "embedding: pgvector::Vector""#,
             listing_id,
             business_id,
             title,
             description,
             logo,
-            is_active
+            is_active,
+            embedding as _,
         )
         .fetch_one(&mut *tx)
         .await?;
@@ -407,6 +441,7 @@ impl ListingRepository {
                 bl.id, bl.title, bl.description, bl.logo, bl.is_active,
                 bl.created_at, bl.updated_at, bl.business_id,
                 bl.product_listing_id, bl.service_listing_id,
+                bl.embedding AS "embedding: pgvector::Vector",
                 sl.id as sl_id, sl.price, sl.available
                FROM listing.business_listings bl
                INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id
@@ -430,6 +465,7 @@ impl ListingRepository {
                     business_id: row.business_id,
                     product_listing_id: row.product_listing_id,
                     service_listing_id: row.service_listing_id,
+                    embedding: row.embedding,
                 };
                 let service = ServiceListingEntity {
                     id: row.sl_id,
@@ -451,6 +487,7 @@ impl ListingRepository {
                 bl.id, bl.title, bl.description, bl.logo, bl.is_active,
                 bl.created_at, bl.updated_at, bl.business_id,
                 bl.product_listing_id, bl.service_listing_id,
+                bl.embedding AS "embedding: pgvector::Vector",
                 sl.id as sl_id, sl.price, sl.available
                FROM listing.business_listings bl
                INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id
@@ -473,6 +510,7 @@ impl ListingRepository {
                 business_id: row.business_id,
                 product_listing_id: row.product_listing_id,
                 service_listing_id: row.service_listing_id,
+                embedding: row.embedding,
             };
             let service = ServiceListingEntity {
                 id: row.sl_id,
@@ -494,6 +532,7 @@ impl ListingRepository {
                 bl.id, bl.title, bl.description, bl.logo, bl.is_active,
                 bl.created_at, bl.updated_at, bl.business_id,
                 bl.product_listing_id, bl.service_listing_id,
+                bl.embedding AS "embedding: pgvector::Vector",
                 sl.id as sl_id, sl.price, sl.available
                FROM listing.business_listings bl
                INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id
@@ -518,6 +557,7 @@ impl ListingRepository {
                 business_id: row.business_id,
                 product_listing_id: row.product_listing_id,
                 service_listing_id: row.service_listing_id,
+                embedding: row.embedding,
             };
             let service = ServiceListingEntity {
                 id: row.sl_id,
@@ -538,6 +578,7 @@ impl ListingRepository {
         available: bool,
         categories: Option<Vec<String>>,
         tags: Option<Vec<String>>,
+        embedding: pgvector::Vector,
     ) -> Result<(BusinessListingEntity, ServiceListingEntity), DbError> {
         let mut tx = self.pg.begin().await?;
 
@@ -555,15 +596,17 @@ impl ListingRepository {
         let listing = sqlx::query_as!(
             BusinessListingEntity,
             r#"INSERT INTO listing.business_listings
-                   (id, business_id, title, description, logo, service_listing_id, updated_at)
-               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now())
+                   (id, business_id, title, description, logo, service_listing_id, updated_at, embedding)
+               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now(), $6)
                RETURNING id, title, description, logo, is_active, created_at, updated_at,
-                         business_id, product_listing_id, service_listing_id"#,
+                         business_id, product_listing_id, service_listing_id,
+                         embedding AS "embedding: pgvector::Vector""#,
             business_id,
             title,
             description,
             logo,
-            service.id
+            service.id,
+            embedding as _,
         )
         .fetch_one(&mut *tx)
         .await?;
@@ -609,6 +652,7 @@ impl ListingRepository {
         is_active: Option<bool>,
         price: Option<String>,
         available: Option<bool>,
+        embedding: Option<pgvector::Vector>,
     ) -> Result<(BusinessListingEntity, ServiceListingEntity), DbError> {
         let mut tx = self.pg.begin().await?;
 
@@ -619,16 +663,19 @@ impl ListingRepository {
                description = COALESCE($4, description),
                logo = COALESCE($5, logo),
                is_active = COALESCE($6, is_active),
+               embedding = COALESCE($7, embedding),
                updated_at = now()
                WHERE id = $1 AND business_id = $2
                RETURNING id, title, description, logo, is_active, created_at, updated_at,
-                         business_id, product_listing_id, service_listing_id"#,
+                         business_id, product_listing_id, service_listing_id,
+                         embedding AS "embedding: pgvector::Vector""#,
             listing_id,
             business_id,
             title,
             description,
             logo,
-            is_active
+            is_active,
+            embedding as _,
         )
         .fetch_one(&mut *tx)
         .await?;

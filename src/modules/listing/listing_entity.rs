@@ -20,6 +20,7 @@ pub struct BusinessListingEntity {
     pub business_id: Uuid,
     pub product_listing_id: Option<Uuid>,
     pub service_listing_id: Option<Uuid>,
+    pub embedding: pgvector::Vector,
 }
 
 #[derive(Debug, FromRow)]

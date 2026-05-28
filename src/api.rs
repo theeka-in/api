@@ -8,6 +8,7 @@ use crate::{
         analytics::{AnalyticsController, AnalyticsRepository, AnalyticsService},
         auth::{AuthController, AuthRepository, AuthService},
         business::{BusinessController, BusinessRepository, BusinessService},
+        embedding::{self, EmbeddingService},
         health::HealthController,
         listing::{ListingController, ListingRepository, ListingService},
         review::{ReviewController, ReviewRepository, ReviewService},
@@ -30,7 +31,12 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
         users_service.clone(),
         auth_service.clone(),
     );
-    let listing_service = ListingService::new(listing_repository, business_service.clone());
+    let embedding_service = EmbeddingService::new("http://localhost:11434".to_owned());
+    let listing_service = ListingService::new(
+        listing_repository,
+        business_service.clone(),
+        embedding_service,
+    );
     let review_service = ReviewService::new(review_repository);
     let analytics_service = AnalyticsService::new(analytics_repository);
 

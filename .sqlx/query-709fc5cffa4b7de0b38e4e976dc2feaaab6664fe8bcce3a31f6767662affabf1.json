@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO listing.business_listings\n                   (id, business_id, title, description, logo, service_listing_id, updated_at)\n               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now())\n               RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                         business_id, product_listing_id, service_listing_id",
+  "query": "INSERT INTO listing.business_listings\n                   (id, business_id, title, description, logo, service_listing_id, updated_at, embedding)\n               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now(), $6)\n               RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                         business_id, product_listing_id, service_listing_id,\n                         embedding AS \"embedding: pgvector::Vector\"",
   "describe": {
     "columns": [
       {
@@ -52,6 +52,16 @@
         "ordinal": 9,
         "name": "service_listing_id",
         "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "embedding: pgvector::Vector",
+        "type_info": {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        }
       }
     ],
     "parameters": {
@@ -60,7 +70,13 @@
         "Text",
         "Text",
         "Text",
-        "Uuid"
+        "Uuid",
+        {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        }
       ]
     },
     "nullable": [
@@ -73,8 +89,9 @@
       false,
       false,
       true,
-      true
+      true,
+      false
     ]
   },
-  "hash": "7df56ba909f71739942525091eeef6c68368c00222fdcb403eaf57b1b22c0d08"
+  "hash": "709fc5cffa4b7de0b38e4e976dc2feaaab6664fe8bcce3a31f6767662affabf1"
 }

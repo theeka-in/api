@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                sl.id as sl_id, sl.price, sl.available\n               FROM listing.business_listings bl\n               INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id\n               WHERE bl.id = $1 AND bl.business_id = $2",
+  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                bl.embedding AS \"embedding: pgvector::Vector\",\n                pl.id as pl_id, pl.price, pl.stock\n               FROM listing.business_listings bl\n               INNER JOIN listing.product_listings pl ON pl.id = bl.product_listing_id\n               WHERE bl.business_id = $1",
   "describe": {
     "columns": [
       {
@@ -55,23 +55,32 @@
       },
       {
         "ordinal": 10,
-        "name": "sl_id",
-        "type_info": "Uuid"
+        "name": "embedding: pgvector::Vector",
+        "type_info": {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        }
       },
       {
         "ordinal": 11,
-        "name": "price",
-        "type_info": "Text"
+        "name": "pl_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 12,
-        "name": "available",
-        "type_info": "Bool"
+        "name": "price",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 13,
+        "name": "stock",
+        "type_info": "Int4"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Uuid"
       ]
     },
@@ -88,8 +97,9 @@
       true,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "2f0259d60d72961d0e1d9bb6b931292cf6a9dcdf344803cad01108c5607dd730"
+  "hash": "2a789317eb7dce48c8bbd75ae1ce6a6b915d05266417977890536f52533f3042"
 }

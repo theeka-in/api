@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                sl.id as sl_id, sl.price, sl.available\n               FROM listing.business_listings bl\n               INNER JOIN listing.service_listings sl ON sl.id = bl.service_listing_id\n               WHERE bl.business_id = $1",
+  "query": "UPDATE listing.business_listings SET\n               title = COALESCE($3, title),\n               description = COALESCE($4, description),\n               logo = COALESCE($5, logo),\n               is_active = COALESCE($6, is_active),\n               embedding = COALESCE($7, embedding),\n               updated_at = now()\n               WHERE id = $1 AND business_id = $2\n               RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                         business_id, product_listing_id, service_listing_id,\n                         embedding AS \"embedding: pgvector::Vector\"",
   "describe": {
     "columns": [
       {
@@ -55,23 +55,29 @@
       },
       {
         "ordinal": 10,
-        "name": "sl_id",
-        "type_info": "Uuid"
-      },
-      {
-        "ordinal": 11,
-        "name": "price",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 12,
-        "name": "available",
-        "type_info": "Bool"
+        "name": "embedding: pgvector::Vector",
+        "type_info": {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        }
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid"
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        }
       ]
     },
     "nullable": [
@@ -85,10 +91,8 @@
       false,
       true,
       true,
-      false,
-      false,
       false
     ]
   },
-  "hash": "03e2139d8509b37518276416c257c1b3e16c496f8c4a9e9faedadb022d814744"
+  "hash": "7ad378f4d97e5e937350a1737b6e789245950d2f3688f19afd675450a943d243"
 }

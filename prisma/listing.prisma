@@ -25,6 +25,8 @@ model BusinessListing {
   reviews    Review[]
   views      View[]
 
+  embedding Unsupported("vector(768)")
+
   @@map("business_listings")
   @@schema("listing")
 }

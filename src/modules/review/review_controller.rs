@@ -58,8 +58,8 @@ impl ReviewController {
         Self { service }
     }
 
-    #[oai(path = "/:business_id/listings/:listing_id/reviews", method = "get")]
-    pub async fn get_by_listing(
+    #[oai(path = "/:business_id/listings/:listing_id/reviews", method = "get", operation_id = "get_review_by_listing")]
+    pub async fn get_review_by_listing(
         &self,
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
@@ -67,8 +67,8 @@ impl ReviewController {
         todo!()
     }
 
-    #[oai(path = "/:business_id/listings/:listing_id/reviews", method = "post")]
-    pub async fn create(
+    #[oai(path = "/:business_id/listings/:listing_id/reviews", method = "post", operation_id = "create_review")]
+    pub async fn create_review(
         &self,
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
@@ -80,9 +80,10 @@ impl ReviewController {
 
     #[oai(
         path = "/:business_id/listings/:listing_id/reviews/:review_id",
-        method = "patch"
+        method = "patch",
+        operation_id = "update_review"
     )]
-    pub async fn update(
+    pub async fn update_review(
         &self,
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,
@@ -95,9 +96,10 @@ impl ReviewController {
 
     #[oai(
         path = "/:business_id/listings/:listing_id/reviews/:review_id",
-        method = "delete"
+        method = "delete",
+        operation_id = "delete_review"
     )]
-    pub async fn delete(
+    pub async fn delete_review(
         &self,
         business_id: Path<Uuid>,
         listing_id: Path<Uuid>,

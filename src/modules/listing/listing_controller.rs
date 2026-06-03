@@ -166,7 +166,7 @@ impl ListingController {
         Self { service }
     }
 
-    #[oai(path = "/listings/product/explore", method = "get")]
+    #[oai(path = "/listings/product/explore", method = "get", operation_id = "explore_product_listings_nearby")]
     pub async fn explore_products_listings_nearby(
         &self,
         latitude: Query<f64>,
@@ -188,7 +188,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/listings/service/explore", method = "get")]
+    #[oai(path = "/listings/service/explore", method = "get", operation_id = "explore_service_listings_nearby")]
     pub async fn explore_services_listings_nearby(
         &self,
         latitude: Query<f64>,
@@ -210,7 +210,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product", method = "get")]
+    #[oai(path = "/:business_id/listings/product", method = "get", operation_id = "get_product_listings")]
     pub async fn get_product_listings(
         &self,
         business_id: Path<Uuid>,
@@ -230,7 +230,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product/:listing_id", method = "get")]
+    #[oai(path = "/:business_id/listings/product/:listing_id", method = "get", operation_id = "get_product_listing_by_id")]
     pub async fn get_product_listing_by_id(
         &self,
         business_id: Path<Uuid>,
@@ -250,7 +250,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product", method = "post")]
+    #[oai(path = "/:business_id/listings/product", method = "post", operation_id = "create_product_listing")]
     pub async fn create_product(
         &self,
         business_id: Path<Uuid>,
@@ -274,7 +274,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product/:listing_id", method = "patch")]
+    #[oai(path = "/:business_id/listings/product/:listing_id", method = "patch", operation_id = "update_product_listing")]
     pub async fn update_product(
         &self,
         business_id: Path<Uuid>,
@@ -299,7 +299,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product/:listing_id", method = "delete")]
+    #[oai(path = "/:business_id/listings/product/:listing_id", method = "delete", operation_id = "delete_product_listing")]
     pub async fn delete_product(
         &self,
         business_id: Path<Uuid>,
@@ -321,7 +321,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service", method = "get")]
+    #[oai(path = "/:business_id/listings/service", method = "get", operation_id = "get_service_listings")]
     pub async fn get_service_listings(
         &self,
         business_id: Path<Uuid>,
@@ -341,7 +341,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service/:listing_id", method = "get")]
+    #[oai(path = "/:business_id/listings/service/:listing_id", method = "get", operation_id = "get_service_listing_by_id")]
     pub async fn get_service_listing_by_id(
         &self,
         business_id: Path<Uuid>,
@@ -361,7 +361,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service", method = "post")]
+    #[oai(path = "/:business_id/listings/service", method = "post", operation_id = "create_service_listing")]
     pub async fn create_service(
         &self,
         business_id: Path<Uuid>,
@@ -385,7 +385,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service/:listing_id", method = "patch")]
+    #[oai(path = "/:business_id/listings/service/:listing_id", method = "patch", operation_id = "update_service_listing")]
     pub async fn update_service(
         &self,
         business_id: Path<Uuid>,
@@ -410,7 +410,7 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service/:listing_id", method = "delete")]
+    #[oai(path = "/:business_id/listings/service/:listing_id", method = "delete", operation_id = "delete_service_listing")]
     pub async fn delete_service(
         &self,
         business_id: Path<Uuid>,
@@ -434,7 +434,8 @@ impl ListingController {
 
     #[oai(
         path = "/:business_id/listings/product/:listing_id/media",
-        method = "get"
+        method = "get",
+        operation_id = "get_product_listing_media"
     )]
     pub async fn get_product_media(
         &self,
@@ -453,7 +454,8 @@ impl ListingController {
 
     #[oai(
         path = "/:business_id/listings/product/:listing_id/media",
-        method = "post"
+        method = "post",
+        operation_id = "create_product_listing_media"
     )]
     pub async fn create_product_media(
         &self,
@@ -481,7 +483,8 @@ impl ListingController {
 
     #[oai(
         path = "/:business_id/listings/product/:listing_id/media/:media_id",
-        method = "delete"
+        method = "delete",
+        operation_id = "delete_product_listing_media"
     )]
     pub async fn delete_product_media(
         &self,
@@ -509,7 +512,8 @@ impl ListingController {
 
     #[oai(
         path = "/:business_id/listings/service/:listing_id/media",
-        method = "get"
+        method = "get",
+        operation_id = "get_service_listing_media"
     )]
     pub async fn get_service_media(
         &self,
@@ -528,7 +532,8 @@ impl ListingController {
 
     #[oai(
         path = "/:business_id/listings/service/:listing_id/media",
-        method = "post"
+        method = "post",
+        operation_id = "create_service_listing_media"
     )]
     pub async fn create_service_media(
         &self,
@@ -556,7 +561,8 @@ impl ListingController {
 
     #[oai(
         path = "/:business_id/listings/service/:listing_id/media/:media_id",
-        method = "delete"
+        method = "delete",
+        operation_id = "delete_service_listing_media"
     )]
     pub async fn delete_service_media(
         &self,

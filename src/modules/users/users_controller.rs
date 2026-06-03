@@ -83,7 +83,7 @@ impl UsersController {
     }
 
     #[oai(path = "/me", method = "get")]
-    pub async fn get(&self, auth: AuthGuard) -> GetMeResponse {
+    pub async fn get_user(&self, auth: AuthGuard) -> GetMeResponse {
         let account_id = auth.0.account_id;
 
         match self.service.get(account_id).await {
@@ -96,7 +96,7 @@ impl UsersController {
     }
 
     #[oai(path = "/me", method = "patch")]
-    pub async fn update(&self, auth: AuthGuard, body: Json<UpdateUserDto>) -> UpdateMeResponse {
+    pub async fn update_user(&self, auth: AuthGuard, body: Json<UpdateUserDto>) -> UpdateMeResponse {
         let account_id = auth.0.account_id;
 
         match self.service.update(account_id, body.0).await {
@@ -110,7 +110,7 @@ impl UsersController {
     }
 
     #[oai(path = "/me", method = "delete")]
-    pub async fn delete(&self, auth: AuthGuard) -> DeleteMeResponse {
+    pub async fn delete_user(&self, auth: AuthGuard) -> DeleteMeResponse {
         let account_id = auth.0.account_id;
 
         match self.service.delete(account_id).await {
@@ -122,7 +122,7 @@ impl UsersController {
     }
 
     #[oai(path = "/me/addresses", method = "get")]
-    pub async fn get_addresses(&self, auth: AuthGuard) -> GetAddressesResponse {
+    pub async fn get_user_addresses(&self, auth: AuthGuard) -> GetAddressesResponse {
         let account_id = auth.0.account_id;
 
         match self.service.get_addresses(account_id).await {
@@ -134,7 +134,7 @@ impl UsersController {
     }
 
     #[oai(path = "/me/addresses", method = "post")]
-    pub async fn create_address(
+    pub async fn create_user_address(
         &self,
         auth: AuthGuard,
         body: Json<CreateUserAddressDto>,
@@ -150,7 +150,7 @@ impl UsersController {
     }
 
     #[oai(path = "/me/addresses/:address_id", method = "patch")]
-    pub async fn update_address(
+    pub async fn update_user_address(
         &self,
         auth: AuthGuard,
         address_id: Path<Uuid>,
@@ -172,7 +172,7 @@ impl UsersController {
     }
 
     #[oai(path = "/me/addresses/:address_id", method = "delete")]
-    pub async fn delete_address(
+    pub async fn delete_user_address(
         &self,
         auth: AuthGuard,
         address_id: Path<Uuid>,

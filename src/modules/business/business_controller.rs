@@ -193,7 +193,7 @@ impl BusinessController {
         Self { service }
     }
 
-    #[oai(path = "/", method = "get")]
+    #[oai(path = "/", method = "get", operation_id = "get_my_businesses")]
     pub async fn get_all_businesses(&self, auth: AuthGuard) -> GetMyBusinessesResponse {
         let user_id = auth.0.user_id;
 
@@ -206,7 +206,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id", method = "get")]
+    #[oai(
+        path = "/:business_id",
+        method = "get",
+        operation_id = "get_business_by_id"
+    )]
     pub async fn get_by_id(&self, business_id: Path<Uuid>) -> GetBusinessResponse {
         match self.service.get_business_by_id(business_id.0).await {
             Ok(business) => GetBusinessResponse::Ok(Json(business)),
@@ -218,7 +222,7 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/", method = "post")]
+    #[oai(path = "/", method = "post", operation_id = "create_business")]
     pub async fn create_business(
         &self,
         body: Json<CreateBusinessDto>,
@@ -235,7 +239,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id", method = "patch")]
+    #[oai(
+        path = "/:business_id",
+        method = "patch",
+        operation_id = "update_business"
+    )]
     pub async fn update_business(
         &self,
         business_id: Path<Uuid>,
@@ -259,7 +267,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id", method = "delete")]
+    #[oai(
+        path = "/:business_id",
+        method = "delete",
+        operation_id = "delete_business"
+    )]
     pub async fn delete_business(
         &self,
         business_id: Path<Uuid>,
@@ -278,7 +290,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/address", method = "get")]
+    #[oai(
+        path = "/:business_id/address",
+        method = "get",
+        operation_id = "get_business_address"
+    )]
     pub async fn get_address(&self, business_id: Path<Uuid>) -> GetAddressResponse {
         match self.service.get_address(business_id.0).await {
             Ok(address) => GetAddressResponse::Ok(Json(address)),
@@ -290,7 +306,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/address", method = "post")]
+    #[oai(
+        path = "/:business_id/address",
+        method = "post",
+        operation_id = "create_business_address"
+    )]
     pub async fn insert_address(
         &self,
         business_id: Path<Uuid>,
@@ -314,7 +334,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/address", method = "patch")]
+    #[oai(
+        path = "/:business_id/address",
+        method = "patch",
+        operation_id = "update_business_address"
+    )]
     pub async fn update_address(
         &self,
         business_id: Path<Uuid>,
@@ -338,7 +362,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/address", method = "delete")]
+    #[oai(
+        path = "/:business_id/address",
+        method = "delete",
+        operation_id = "delete_business_address"
+    )]
     pub async fn delete_address(
         &self,
         business_id: Path<Uuid>,
@@ -357,7 +385,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/hours", method = "get")]
+    #[oai(
+        path = "/:business_id/hours",
+        method = "get",
+        operation_id = "get_business_hours"
+    )]
     pub async fn get_hours(&self, business_id: Path<Uuid>) -> GetHoursResponse {
         match self.service.get_hours(business_id.0).await {
             Ok(hours) => GetHoursResponse::Ok(Json(hours)),
@@ -368,7 +400,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/hours", method = "post")]
+    #[oai(
+        path = "/:business_id/hours",
+        method = "post",
+        operation_id = "create_business_hour"
+    )]
     pub async fn create_hour(
         &self,
         business_id: Path<Uuid>,
@@ -391,7 +427,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/hours/:day", method = "patch")]
+    #[oai(
+        path = "/:business_id/hours/:day",
+        method = "patch",
+        operation_id = "update_business_hour"
+    )]
     pub async fn update_hour(
         &self,
         business_id: Path<Uuid>,
@@ -415,7 +455,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/hours/:day", method = "delete")]
+    #[oai(
+        path = "/:business_id/hours/:day",
+        method = "delete",
+        operation_id = "delete_business_hour"
+    )]
     pub async fn delete_hour(
         &self,
         business_id: Path<Uuid>,
@@ -438,7 +482,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/media", method = "get")]
+    #[oai(
+        path = "/:business_id/media",
+        method = "get",
+        operation_id = "get_business_media"
+    )]
     pub async fn get_media(&self, business_id: Path<Uuid>) -> GetMediaResponse {
         match self.service.get_media(business_id.0).await {
             Ok(media) => GetMediaResponse::Ok(Json(media)),
@@ -449,7 +497,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/media", method = "post")]
+    #[oai(
+        path = "/:business_id/media",
+        method = "post",
+        operation_id = "create_business_media"
+    )]
     pub async fn create_media(
         &self,
         business_id: Path<Uuid>,
@@ -471,7 +523,11 @@ impl BusinessController {
         }
     }
 
-    #[oai(path = "/:business_id/media/:media_id", method = "delete")]
+    #[oai(
+        path = "/:business_id/media/:media_id",
+        method = "delete",
+        operation_id = "delete_business_media"
+    )]
     pub async fn delete_media(
         &self,
         business_id: Path<Uuid>,

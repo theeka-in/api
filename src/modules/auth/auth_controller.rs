@@ -69,7 +69,7 @@ impl AuthController {
         Self { service }
     }
 
-    #[oai(path = "/register", method = "post")]
+    #[oai(path = "/register", method = "post", operation_id = "register")]
     pub async fn register(
         &self,
         req: &Request,
@@ -109,7 +109,7 @@ impl AuthController {
         }
     }
 
-    #[oai(path = "/login", method = "post")]
+    #[oai(path = "/login", method = "post", operation_id = "login")]
     pub async fn login(
         &self,
         req: &Request,
@@ -149,7 +149,7 @@ impl AuthController {
         }
     }
 
-    #[oai(path = "/logout", method = "post")]
+    #[oai(path = "/logout", method = "post", operation_id = "logout")]
     pub async fn logout(&self, auth: AuthGuard) -> LogoutResponse {
         let session = auth.0;
 
@@ -160,7 +160,7 @@ impl AuthController {
         }
     }
 
-    #[oai(path = "/sessions", method = "get")]
+    #[oai(path = "/sessions", method = "get", operation_id = "get_sessions")]
     pub async fn get_sessions(&self, auth: AuthGuard) -> GetSessionsResponse {
         let account_id = auth.0.account_id;
 
@@ -173,7 +173,7 @@ impl AuthController {
         }
     }
 
-    #[oai(path = "/sessions/:token", method = "delete")]
+    #[oai(path = "/sessions/:token", method = "delete", operation_id = "delete_session")]
     pub async fn delete_session(
         &self,
         auth: AuthGuard,

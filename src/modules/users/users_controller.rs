@@ -82,8 +82,8 @@ impl UsersController {
         Self { service }
     }
 
-    #[oai(path = "/me", method = "get")]
-    pub async fn get_user(&self, auth: AuthGuard) -> GetMeResponse {
+    #[oai(path = "/me", method = "get", operation_id = "get_myself")]
+    pub async fn get_myself(&self, auth: AuthGuard) -> GetMeResponse {
         let account_id = auth.0.account_id;
 
         match self.service.get(account_id).await {
@@ -95,8 +95,12 @@ impl UsersController {
         }
     }
 
-    #[oai(path = "/me", method = "patch")]
-    pub async fn update_user(&self, auth: AuthGuard, body: Json<UpdateUserDto>) -> UpdateMeResponse {
+    #[oai(path = "/me", method = "patch", operation_id = "update_myself")]
+    pub async fn update_myself(
+        &self,
+        auth: AuthGuard,
+        body: Json<UpdateUserDto>,
+    ) -> UpdateMeResponse {
         let account_id = auth.0.account_id;
 
         match self.service.update(account_id, body.0).await {
@@ -106,11 +110,10 @@ impl UsersController {
                 message: "internal server error".to_owned(),
             })),
         }
-
     }
 
-    #[oai(path = "/me", method = "delete")]
-    pub async fn delete_user(&self, auth: AuthGuard) -> DeleteMeResponse {
+    #[oai(path = "/me", method = "delete", operation_id = "delete_myself")]
+    pub async fn delete_myself(&self, auth: AuthGuard) -> DeleteMeResponse {
         let account_id = auth.0.account_id;
 
         match self.service.delete(account_id).await {
@@ -121,8 +124,12 @@ impl UsersController {
         }
     }
 
-    #[oai(path = "/me/addresses", method = "get")]
-    pub async fn get_user_addresses(&self, auth: AuthGuard) -> GetAddressesResponse {
+    #[oai(
+        path = "/me/addresses",
+        method = "get",
+        operation_id = "get_my_addresses"
+    )]
+    pub async fn get_my_addresses(&self, auth: AuthGuard) -> GetAddressesResponse {
         let account_id = auth.0.account_id;
 
         match self.service.get_addresses(account_id).await {
@@ -133,8 +140,12 @@ impl UsersController {
         }
     }
 
-    #[oai(path = "/me/addresses", method = "post")]
-    pub async fn create_user_address(
+    #[oai(
+        path = "/me/addresses",
+        method = "post",
+        operation_id = "create_my_address"
+    )]
+    pub async fn create_my_address(
         &self,
         auth: AuthGuard,
         body: Json<CreateUserAddressDto>,
@@ -149,8 +160,12 @@ impl UsersController {
         }
     }
 
-    #[oai(path = "/me/addresses/:address_id", method = "patch")]
-    pub async fn update_user_address(
+    #[oai(
+        path = "/me/addresses/:address_id",
+        method = "patch",
+        operation_id = "update_my_address"
+    )]
+    pub async fn update_my_address(
         &self,
         auth: AuthGuard,
         address_id: Path<Uuid>,
@@ -171,8 +186,12 @@ impl UsersController {
         }
     }
 
-    #[oai(path = "/me/addresses/:address_id", method = "delete")]
-    pub async fn delete_user_address(
+    #[oai(
+        path = "/me/addresses/:address_id",
+        method = "delete",
+        operation_id = "delete_my_address"
+    )]
+    pub async fn delete_my_address(
         &self,
         auth: AuthGuard,
         address_id: Path<Uuid>,

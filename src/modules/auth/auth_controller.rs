@@ -173,7 +173,11 @@ impl AuthController {
         }
     }
 
-    #[oai(path = "/sessions/:token", method = "delete", operation_id = "delete_session")]
+    #[oai(
+        path = "/sessions/:token",
+        method = "delete",
+        operation_id = "delete_session"
+    )]
     pub async fn delete_session(
         &self,
         auth: AuthGuard,

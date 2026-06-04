@@ -64,8 +64,9 @@ tasks:
 
     check:offline:
         desc: Check compilation without connecting to DB (offline mode)
+        env:
+            SQLX_OFFLINE: true
         cmds:
-            - SQLX_OFFLINE=true
             - cargo check
 
     prepare:
@@ -75,6 +76,7 @@ tasks:
 
     generate:spec:
         desc: Export OpenAPI spec to openapi.json
+        env:
+            SQLX_OFFLINE: true
         cmds:
-            - SQLX_OFFLINE=true
             - cargo run --bin export-schema > openapi.json

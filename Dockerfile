@@ -1,19 +1,3 @@
-FROM node:24-alpine as migrator
-
-WORKDIR /app
-
-COPY package.json ./
-
-RUN npm install
-
-COPY prisma ./prisma
-
-COPY scripts ./scripts
-
-COPY migrations ./migrations
-
-RUN node scripts/sqlx-migrations.js && rm -rf migrations/_prisma
-
 FROM rust:1.95.0 AS builder
 
 WORKDIR /app
@@ -31,7 +15,7 @@ RUN rm -rf src
 
 COPY src ./src
 COPY .sqlx ./.sqlx
-COPY --from=migrator /app/migrations /app/migrations
+COPY migrations ./migrations
 RUN ls -la /app/migrations/
 
 ENV SQLX_OFFLINE=true
@@ -39,14 +23,15 @@ ENV RUSTFLAGS="-A warnings"
 
 RUN touch src/main.rs && cargo build --release --target x86_64-unknown-linux-musl
 
-FROM scratch
+FROM alpine:latest
 
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/theeka_api /usr/local/bin/app
 
-ENV PORT=8080
+RUN apk add --no-cache ca-certificates
 
 ENV ENV="prod"
+ENV RUST_BACKTRACE=full
 
-EXPOSE 8080
+EXPOSE 404
 
 CMD ["app"]

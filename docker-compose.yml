@@ -5,9 +5,10 @@ services:
         build:
             dockerfile: Dockerfile
         ports:
-            - "8080:8080"
+            - "404:404"
         environment:
-            - DATABASE_URL=${DATABASE_URL_LOCAL}
+            - DATABASE_URL=${DATABASE_URL_PROD}
+            - OLLAMA_URL=${OLLAMA_URL_PROD}
             - ENV=prod
         depends_on:
             db:
@@ -39,12 +40,6 @@ services:
             - "11434:11434"
         volumes:
             - ollama_data_prod:/root/.ollama
-        entrypoint:
-            [
-                "/bin/sh",
-                "-c",
-                "ollama serve & sleep 5 && ollama pull leoipulsar/harrier-0.6b && wait",
-            ]
         networks:
             - backend
         deploy:

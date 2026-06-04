@@ -24,6 +24,9 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
     let review_repository = ReviewRepository::new(pg_pool.clone());
     let analytics_repository = AnalyticsRepository::new(pg_pool);
 
+    let ollama_url = std::env::var("OLLAMA_URL").expect("OLLAMA_URL not found");
+    let embedding_service = EmbeddingService::new(ollama_url);
+
     let users_service = UsersService::new(users_repository);
     let auth_service = AuthService::new(auth_repository, users_service.clone());
     let business_service = BusinessService::new(
@@ -31,7 +34,6 @@ pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {
         users_service.clone(),
         auth_service.clone(),
     );
-    let embedding_service = EmbeddingService::new("http://localhost:11434".to_owned());
     let listing_service = ListingService::new(
         listing_repository,
         business_service.clone(),

@@ -1,0 +1,80 @@
+version: "3"
+
+tasks:
+    dev:
+        desc: Start dev docker + cargo watch
+        cmds:
+            - docker compose -f docker-compose.dev.yml up -d
+            - cargo watch -x run
+
+    dev:build:
+        desc: Build dev docker image
+        env:
+            COMPOSE_BAKE: "true"
+        cmds:
+            - docker compose -f docker-compose.dev.yml build
+
+    dev:stop:
+        desc: Stop dev docker containers
+        cmds:
+            - docker compose -f docker-compose.dev.yml stop
+
+    prod:
+        desc: Start prod docker (foreground)
+        cmds:
+            - docker compose -f docker-compose.yml up
+
+    prod:build:
+        desc: Build prod docker image
+        env:
+            COMPOSE_BAKE: "true"
+        cmds:
+            - docker compose -f docker-compose.yml build
+
+    prod:stop:
+        desc: Stop prod docker containers
+        cmds:
+            - docker compose -f docker-compose.yml stop
+
+    db:migrate:
+        desc: Run pending migrations
+        cmds:
+            - sqlx migrate run
+
+    db:add:
+        desc: "Create new migration (usage: task db:add -- migration_name)"
+        cmds:
+            - sqlx migrate add {{.CLI_ARGS}}
+
+    db:reset:
+        desc: Revert all migrations and re-run from scratch
+        cmds:
+            - sqlx migrate revert --target-version 0
+            - sqlx migrate run
+
+    db:status:
+        desc: Show applied and pending migration status
+        cmds:
+            - sqlx migrate info
+
+    check:
+        desc: Check compilation
+        cmds:
+            - cargo check
+
+    check:offline:
+        desc: Check compilation without connecting to DB (offline mode)
+        cmds:
+            - SQLX_OFFLINE=true
+            - cargo check
+
+    prepare:
+        desc: Generate sqlx-data.json for offline query checking
+        cmds:
+            - cargo sqlx prepare
+
+    generate:spec:
+        desc: Export OpenAPI spec to openapi.json
+        cmds:
+            - SQLX_OFFLINE=true
+            - cargo run --bin export-schema > openapi.json

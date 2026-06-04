@@ -1,6 +1,8 @@
 use super::AnalyticsService;
 use crate::errors::{DbError, ErrorDto};
-use crate::modules::analytics::analytics_dto::{BusinessAnalyticsDto, ListingAnalyticsDto, RecordBusinessViewDto, ViewDto};
+use crate::modules::analytics::analytics_dto::{
+    BusinessAnalyticsDto, ListingAnalyticsDto, RecordBusinessViewDto, ViewDto,
+};
 use poem_openapi::{ApiResponse, Object, OpenApi, param::Path, payload::Json};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -43,23 +45,53 @@ impl AnalyticsController {
         Self { service }
     }
 
-    #[oai(path = "/:business_id/views", method = "post")]
-    pub async fn record_business_view(&self, business_id: Path<Uuid>, body: Json<RecordBusinessViewDto>) -> RecordViewResponse {
+    #[oai(
+        path = "/:business_id/views",
+        method = "post",
+        operation_id = "record_business_view"
+    )]
+    pub async fn record_business_view(
+        &self,
+        business_id: Path<Uuid>,
+        body: Json<RecordBusinessViewDto>,
+    ) -> RecordViewResponse {
         todo!()
     }
 
-    #[oai(path = "/:business_id/listings/:listing_id/views", method = "post")]
-    pub async fn record_listing_view(&self, business_id: Path<Uuid>, listing_id: Path<Uuid>) -> RecordViewResponse {
+    #[oai(
+        path = "/:business_id/listings/:listing_id/views",
+        method = "post",
+        operation_id = "record_listing_view"
+    )]
+    pub async fn record_listing_view(
+        &self,
+        business_id: Path<Uuid>,
+        listing_id: Path<Uuid>,
+    ) -> RecordViewResponse {
         todo!()
     }
 
-    #[oai(path = "/:business_id/analytics", method = "get")]
-    pub async fn get_business_analytics(&self, business_id: Path<Uuid>) -> GetBusinessAnalyticsResponse {
+    #[oai(
+        path = "/:business_id/analytics",
+        method = "get",
+        operation_id = "get_business_analytics"
+    )]
+    pub async fn get_business_analytics(
+        &self,
+        business_id: Path<Uuid>,
+    ) -> GetBusinessAnalyticsResponse {
         todo!()
     }
 
-    #[oai(path = "/:business_id/listings/analytics", method = "get")]
-    pub async fn get_listing_analytics(&self, business_id: Path<Uuid>) -> GetListingAnalyticsResponse {
+    #[oai(
+        path = "/:business_id/listings/analytics",
+        method = "get",
+        operation_id = "get_listing_analytics"
+    )]
+    pub async fn get_listing_analytics(
+        &self,
+        business_id: Path<Uuid>,
+    ) -> GetListingAnalyticsResponse {
         todo!()
     }
 }

@@ -8,7 +8,7 @@ use theeka_api::api;
 async fn main() -> Result<(), std::io::Error> {
     dotenvy::dotenv().ok();
 
-    let the_port = env::var("PORT").unwrap_or("3000".to_owned());
+    let the_port = env::var("PORT").unwrap_or("404".to_owned());
     let the_address = format!("0.0.0.0:{the_port}");
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");

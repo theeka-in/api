@@ -32,9 +32,7 @@ impl<E: Endpoint> Endpoint for ErrorHandlerEndpoint<E> {
                         .replace("parse request payload error: ", "")
                         .replace("\"", "`");
                     json!({
-                        "error": {
-                            "message": normalized_error,
-                        }
+                        "message": normalized_error,
                     })
                     .to_string()
                 })();

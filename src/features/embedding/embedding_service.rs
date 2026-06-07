@@ -5,9 +5,9 @@ use std::vec;
 use reqwest::Client;
 use tokio::sync::Mutex;
 
-use crate::shared::errors::{ErrorDto, ServiceError};
 use crate::features::embedding::EmbedRequest;
 use crate::features::embedding::EmbedResponse;
+use crate::shared::errors::{ErrorDto, ServiceError};
 
 #[derive(Debug)]
 pub struct EmbeddingService {

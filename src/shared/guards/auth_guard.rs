@@ -3,10 +3,7 @@ use std::sync::Arc;
 use poem::Request;
 use poem_openapi::{SecurityScheme, auth::Bearer};
 
-use crate::features::{
-    auth::{AccountDto, AuthService, SessionDto},
-    users::UserDto,
-};
+use crate::features::auth::{AuthService, SessionDto};
 
 #[derive(SecurityScheme)]
 #[oai(ty = "bearer", checker = "verify_auth")]

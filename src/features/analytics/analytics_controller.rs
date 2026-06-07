@@ -1,8 +1,8 @@
 use super::AnalyticsService;
-use crate::shared::errors::{DbError, ErrorDto};
 use crate::features::analytics::analytics_dto::{
     BusinessAnalyticsDto, ListingAnalyticsDto, RecordBusinessViewDto, ViewDto,
 };
+use crate::shared::errors::{DbError, ErrorDto};
 use poem_openapi::{ApiResponse, Object, OpenApi, param::Path, payload::Json};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -38,6 +38,7 @@ pub enum GetListingAnalyticsResponse {
     #[oai(status = 500)]
     InternalError(Json<ErrorDto>),
 }
+
 
 #[OpenApi(prefix_path = "/businesses")]
 impl AnalyticsController {

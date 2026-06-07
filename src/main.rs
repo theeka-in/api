@@ -30,7 +30,9 @@ async fn main() -> Result<(), std::io::Error> {
             .expect("Migrations directory was not found");
     }
 
-    let (the_api, _) = api::init(pg_pool, &the_port).await;
+    let ollama_url = std::env::var("OLLAMA_URL").expect("OLLAMA_URL not found");
+
+    let (the_api, _) = api::init(pg_pool, &the_port, ollama_url).await;
 
     Server::new(TcpListener::bind(the_address))
         .run(the_api)

@@ -14,7 +14,7 @@ async fn main() {
         .connect_lazy("postgres://postgres:password@localhost/fake")
         .unwrap();
 
-    let (_, spec) = api::init(pg_pool, &the_port).await;
+    let (_, spec) = api::init(pg_pool, &the_port, "".to_owned()).await;
 
     print!("{spec}")
 }

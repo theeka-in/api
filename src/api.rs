@@ -3,8 +3,7 @@ use poem_openapi::OpenApiService;
 use sqlx::{Pool, Postgres};
 
 use crate::{
-    middleware::ErrorHandlerMiddleware,
-    modules::{
+    features::{
         analytics::{AnalyticsController, AnalyticsRepository, AnalyticsService},
         auth::{AuthController, AuthRepository, AuthService},
         business::{BusinessController, BusinessRepository, BusinessService},
@@ -14,6 +13,7 @@ use crate::{
         review::{ReviewController, ReviewRepository, ReviewService},
         users::{UsersController, UsersRepository, UsersService},
     },
+    shared::middleware::ErrorHandlerMiddleware,
 };
 
 pub async fn init(pg_pool: Pool<Postgres>, port: &str) -> (Route, String) {

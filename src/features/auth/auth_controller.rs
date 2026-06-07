@@ -1,0 +1,208 @@
+use super::AuthService;
+use crate::features::auth::auth_dto::{LoginDto, RegisterDto, SessionDto};
+use crate::shared::errors::{ErrorDto, ServiceError};
+use crate::shared::guards::AuthGuard;
+use poem::{Request, web::RemoteAddr};
+use poem_openapi::param::Header;
+use poem_openapi::{ApiResponse, OpenApi, param::Path, payload::Json};
+use std::sync::Arc;
+
+pub struct AuthController {
+    service: Arc<AuthService>,
+}
+
+#[derive(ApiResponse)]
+pub enum RegisterResponse {
+    #[oai(status = 201)]
+    Created(Json<SessionDto>),
+    #[oai(status = 403)]
+    Forbidden(Json<ErrorDto>),
+    #[oai(status = 409)]
+    Conflict(Json<ErrorDto>),
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
+}
+
+#[derive(ApiResponse)]
+pub enum LoginResponse {
+    #[oai(status = 200)]
+    Ok(Json<SessionDto>),
+    #[oai(status = 401)]
+    Unauthorized(Json<ErrorDto>),
+    #[oai(status = 403)]
+    Forbidden(Json<ErrorDto>),
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
+}
+
+#[derive(ApiResponse)]
+pub enum LogoutResponse {
+    #[oai(status = 204)]
+    NoContent,
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
+}
+
+#[derive(ApiResponse)]
+pub enum GetSessionsResponse {
+    #[oai(status = 200)]
+    Ok(Json<Vec<SessionDto>>),
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
+}
+
+#[derive(ApiResponse)]
+pub enum DeleteSessionResponse {
+    #[oai(status = 204)]
+    NoContent,
+    #[oai(status = 404)]
+    NotFound(Json<ErrorDto>),
+    #[oai(status = 403)]
+    Forbidden(Json<ErrorDto>),
+    #[oai(status = 500)]
+    InternalError(Json<ErrorDto>),
+}
+
+#[OpenApi(prefix_path = "/auth")]
+impl AuthController {
+    pub fn new(service: Arc<AuthService>) -> Self {
+        Self { service }
+    }
+
+    #[oai(path = "/register", method = "post", operation_id = "register")]
+    pub async fn register(
+        &self,
+        req: &Request,
+        remote_addr: &RemoteAddr,
+        body: Json<RegisterDto>,
+        #[oai(name = "Authorization")] bearer_token: Header<Option<String>>,
+    ) -> RegisterResponse {
+        let token = bearer_token.0;
+
+        if token.is_some()
+            && let token = token.unwrap().trim_start_matches("Bearer ").to_owned()
+            && self.service.get_a_session(token).await.is_ok()
+        {
+            return RegisterResponse::Forbidden(Json(ErrorDto {
+                message: "you are already logged in".to_owned(),
+            }));
+        }
+
+        let user_agent = req
+            .headers()
+            .get("user-agent")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("unknown")
+            .to_owned();
+
+        match self
+            .service
+            .register(body.0, user_agent, remote_addr.to_string())
+            .await
+        {
+            Ok(session) => RegisterResponse::Created(Json(session)),
+            Err(ServiceError::Conflict(dto)) => RegisterResponse::Conflict(Json(dto)),
+            Err(ServiceError::Internal(dto)) => RegisterResponse::InternalError(Json(dto)),
+            Err(_) => RegisterResponse::InternalError(Json(ErrorDto {
+                message: "internal server error".to_owned(),
+            })),
+        }
+    }
+
+    #[oai(path = "/login", method = "post", operation_id = "login")]
+    pub async fn login(
+        &self,
+        req: &Request,
+        remote_addr: &RemoteAddr,
+        body: Json<LoginDto>,
+        #[oai(name = "Authorization")] bearer_token: Header<Option<String>>,
+    ) -> LoginResponse {
+        let token = bearer_token.0;
+
+        if token.is_some()
+            && let token = token.unwrap().trim_start_matches("Bearer ").to_owned()
+            && self.service.get_a_session(token).await.is_ok()
+        {
+            return LoginResponse::Forbidden(Json(ErrorDto {
+                message: "you are already logged in".to_owned(),
+            }));
+        }
+
+        let user_agent = req
+            .headers()
+            .get("user-agent")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("unknown")
+            .to_owned();
+
+        match self
+            .service
+            .login(body.0, user_agent, remote_addr.to_string())
+            .await
+        {
+            Ok(session) => LoginResponse::Ok(Json(session)),
+            Err(ServiceError::Unauthorized(dto)) => LoginResponse::Unauthorized(Json(dto)),
+            Err(ServiceError::Internal(dto)) => LoginResponse::InternalError(Json(dto)),
+            Err(_) => LoginResponse::InternalError(Json(ErrorDto {
+                message: "internal server error".to_owned(),
+            })),
+        }
+    }
+
+    #[oai(path = "/logout", method = "post", operation_id = "logout")]
+    pub async fn logout(&self, auth: AuthGuard) -> LogoutResponse {
+        let session = auth.0;
+
+        match self.service.logout(session.token).await {
+            Ok(_) => LogoutResponse::NoContent,
+            Err(ServiceError::Internal(dto)) => LogoutResponse::InternalError(Json(dto)),
+            Err(_) => LogoutResponse::NoContent,
+        }
+    }
+
+    #[oai(path = "/sessions", method = "get", operation_id = "get_sessions")]
+    pub async fn get_sessions(&self, auth: AuthGuard) -> GetSessionsResponse {
+        let account_id = auth.0.account_id;
+
+        match self.service.get_sessions(account_id).await {
+            Ok(sessions) => GetSessionsResponse::Ok(Json(sessions)),
+            Err(ServiceError::Internal(dto)) => GetSessionsResponse::InternalError(Json(dto)),
+            Err(_) => GetSessionsResponse::InternalError(Json(ErrorDto {
+                message: "internal server error".to_owned(),
+            })),
+        }
+    }
+
+    #[oai(
+        path = "/sessions/:token",
+        method = "delete",
+        operation_id = "delete_session"
+    )]
+    pub async fn delete_session(
+        &self,
+        auth: AuthGuard,
+        token: Path<String>,
+    ) -> DeleteSessionResponse {
+        let session = auth.0;
+
+        if session.token == token.0 {
+            return DeleteSessionResponse::Forbidden(Json(ErrorDto {
+                message: "you can't delete your current token".to_owned(),
+            }));
+        }
+
+        match self
+            .service
+            .delete_session(session.account_id, token.0)
+            .await
+        {
+            Ok(_) => DeleteSessionResponse::NoContent,
+            Err(ServiceError::NotFound(dto)) => DeleteSessionResponse::NotFound(Json(dto)),
+            Err(ServiceError::Forbidden(dto)) => DeleteSessionResponse::Forbidden(Json(dto)),
+            Err(ServiceError::Internal(dto)) => DeleteSessionResponse::InternalError(Json(dto)),
+            Err(_) => DeleteSessionResponse::InternalError(Json(ErrorDto {
+                message: "internal server error".to_owned(),
+            })),
+        }
+    }
+}

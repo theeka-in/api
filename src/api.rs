@@ -2,10 +2,10 @@ use poem::{EndpointExt, Route};
 use poem_openapi::OpenApiService;
 use sqlx::{Pool, Postgres};
 
-use crate::{features, shared::middleware::ErrorHandlerMiddleware};
+use crate::{modules, shared::middleware::ErrorHandlerMiddleware};
 
 pub async fn init(pg_pool: Pool<Postgres>, port: &str, ollama_url: String) -> (Route, String) {
-    let (services, controllers) = features::init(pg_pool, ollama_url);
+    let (services, controllers) = modules::init(pg_pool, ollama_url);
 
     let the_api = OpenApiService::new(controllers.0, "Theeka", "1.0")
         .server(format!("http://localhost:{port}/api"));

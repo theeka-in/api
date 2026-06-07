@@ -5,6 +5,7 @@ use crate::modules::listing::listing_dto::{
     CreateListingMediaDto, CreateProductListingDto, CreateServiceListingDto, ListingMediaDto,
     ProductListingDto, ServiceListingDto, UpdateProductListingDto, UpdateServiceListingDto,
 };
+use crate::modules::listing::{ExploreProductListingDto, ExploreServiceListingDto};
 use poem_openapi::param::Query;
 use poem_openapi::{ApiResponse, OpenApi, param::Path, payload::Json};
 use std::sync::Arc;
@@ -17,7 +18,7 @@ pub struct ListingController {
 #[derive(ApiResponse)]
 pub enum ExploreProductListingsNearbyResponse {
     #[oai(status = 200)]
-    Ok(Json<Vec<ProductListingDto>>),
+    Ok(Json<Vec<ExploreProductListingDto>>),
     #[oai(status = 500)]
     InternalError(Json<ErrorDto>),
 }
@@ -25,7 +26,7 @@ pub enum ExploreProductListingsNearbyResponse {
 #[derive(ApiResponse)]
 pub enum ExploreServiceListingsNearbyResponse {
     #[oai(status = 200)]
-    Ok(Json<Vec<ServiceListingDto>>),
+    Ok(Json<Vec<ExploreServiceListingDto>>),
     #[oai(status = 500)]
     InternalError(Json<ErrorDto>),
 }
@@ -166,7 +167,11 @@ impl ListingController {
         Self { service }
     }
 
-    #[oai(path = "/listings/product/explore", method = "get", operation_id = "explore_product_listings_nearby")]
+    #[oai(
+        path = "/listings/product/explore",
+        method = "get",
+        operation_id = "explore_product_listings_nearby"
+    )]
     pub async fn explore_products_listings_nearby(
         &self,
         latitude: Query<f64>,
@@ -188,7 +193,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/listings/service/explore", method = "get", operation_id = "explore_service_listings_nearby")]
+    #[oai(
+        path = "/listings/service/explore",
+        method = "get",
+        operation_id = "explore_service_listings_nearby"
+    )]
     pub async fn explore_services_listings_nearby(
         &self,
         latitude: Query<f64>,
@@ -210,7 +219,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product", method = "get", operation_id = "get_product_listings")]
+    #[oai(
+        path = "/:business_id/listings/product",
+        method = "get",
+        operation_id = "get_product_listings"
+    )]
     pub async fn get_product_listings(
         &self,
         business_id: Path<Uuid>,
@@ -230,7 +243,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product/:listing_id", method = "get", operation_id = "get_product_listing_by_id")]
+    #[oai(
+        path = "/:business_id/listings/product/:listing_id",
+        method = "get",
+        operation_id = "get_product_listing_by_id"
+    )]
     pub async fn get_product_listing_by_id(
         &self,
         business_id: Path<Uuid>,
@@ -250,7 +267,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product", method = "post", operation_id = "create_product_listing")]
+    #[oai(
+        path = "/:business_id/listings/product",
+        method = "post",
+        operation_id = "create_product_listing"
+    )]
     pub async fn create_product(
         &self,
         business_id: Path<Uuid>,
@@ -274,7 +295,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product/:listing_id", method = "patch", operation_id = "update_product_listing")]
+    #[oai(
+        path = "/:business_id/listings/product/:listing_id",
+        method = "patch",
+        operation_id = "update_product_listing"
+    )]
     pub async fn update_product(
         &self,
         business_id: Path<Uuid>,
@@ -299,7 +324,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/product/:listing_id", method = "delete", operation_id = "delete_product_listing")]
+    #[oai(
+        path = "/:business_id/listings/product/:listing_id",
+        method = "delete",
+        operation_id = "delete_product_listing"
+    )]
     pub async fn delete_product(
         &self,
         business_id: Path<Uuid>,
@@ -321,7 +350,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service", method = "get", operation_id = "get_service_listings")]
+    #[oai(
+        path = "/:business_id/listings/service",
+        method = "get",
+        operation_id = "get_service_listings"
+    )]
     pub async fn get_service_listings(
         &self,
         business_id: Path<Uuid>,
@@ -341,7 +374,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service/:listing_id", method = "get", operation_id = "get_service_listing_by_id")]
+    #[oai(
+        path = "/:business_id/listings/service/:listing_id",
+        method = "get",
+        operation_id = "get_service_listing_by_id"
+    )]
     pub async fn get_service_listing_by_id(
         &self,
         business_id: Path<Uuid>,
@@ -361,7 +398,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service", method = "post", operation_id = "create_service_listing")]
+    #[oai(
+        path = "/:business_id/listings/service",
+        method = "post",
+        operation_id = "create_service_listing"
+    )]
     pub async fn create_service(
         &self,
         business_id: Path<Uuid>,
@@ -385,7 +426,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service/:listing_id", method = "patch", operation_id = "update_service_listing")]
+    #[oai(
+        path = "/:business_id/listings/service/:listing_id",
+        method = "patch",
+        operation_id = "update_service_listing"
+    )]
     pub async fn update_service(
         &self,
         business_id: Path<Uuid>,
@@ -410,7 +455,11 @@ impl ListingController {
         }
     }
 
-    #[oai(path = "/:business_id/listings/service/:listing_id", method = "delete", operation_id = "delete_service_listing")]
+    #[oai(
+        path = "/:business_id/listings/service/:listing_id",
+        method = "delete",
+        operation_id = "delete_service_listing"
+    )]
     pub async fn delete_service(
         &self,
         business_id: Path<Uuid>,

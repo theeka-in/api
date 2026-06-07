@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use crate::errors::DbError;
+use crate::modules::business::{BusinessAddressEntity, BusinessEntity};
 use crate::modules::listing::listing_entity::{
     BusinessListingEntity, ListingMediaEntity, ProductListingEntity, ServiceListingEntity,
 };
@@ -20,7 +23,16 @@ impl ListingRepository {
         latitude: f64,
         longitude: f64,
         query_embedding: pgvector::Vector,
-    ) -> Result<Vec<(BusinessListingEntity, ProductListingEntity)>, DbError> {
+    ) -> Result<
+        Vec<(
+            BusinessEntity,
+            BusinessAddressEntity,
+            BusinessListingEntity,
+            Vec<ListingMediaEntity>,
+            ProductListingEntity,
+        )>,
+        DbError,
+    > {
         let rows = sqlx::query!(
             r#"SELECT
                 business_listings.id,
@@ -34,9 +46,28 @@ impl ListingRepository {
                 business_listings.product_listing_id,
                 business_listings.service_listing_id,
                 business_listings.embedding AS "embedding: pgvector::Vector",
+
                 product_listings.id AS pl_id,
                 product_listings.price,
-                product_listings.stock
+                product_listings.stock,
+
+                businesses.phone_number AS b_phone_number,
+                businesses.is_closed AS b_is_closed,
+                businesses.title AS b_title,
+                businesses.logo AS b_logo,
+                businesses.description AS b_description,
+                businesses.created_at AS b_created_at,
+                businesses.owner_id AS b_owner_id,
+
+                business_addresses.address_line1,
+                business_addresses.address_line2,
+                business_addresses.landmark,
+                business_addresses.city,
+                business_addresses.state,
+                business_addresses.pincode,
+                business_addresses.radius,
+                ST_X(business_addresses.location::geometry) AS longitude,
+                ST_Y(business_addresses.location::geometry) AS latitude
                FROM listing.business_listings
                INNER JOIN listing.product_listings ON product_listings.id = business_listings.product_listing_id
                INNER JOIN business.businesses ON businesses.id = business_listings.business_id
@@ -48,19 +79,59 @@ impl ListingRepository {
                      ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
                      business_addresses.radius
                  )
-                AND 1 - (business_listings.embedding <=> $3) >= 0.4
-                ORDER BY business_listings.embedding <=> $3
-                LIMIT 100"#,
+                 AND 1 - (business_listings.embedding <=> $3) >= 0.4
+                 ORDER BY business_listings.embedding <=> $3
+               LIMIT 100"#,
             longitude,
             latitude,
-            query_embedding as _
+            query_embedding as _,
         )
         .fetch_all(&self.pg)
         .await?;
 
+        let listing_ids: Vec<Uuid> = rows.iter().map(|r| r.id).collect();
+
+        let all_media = sqlx::query_as!(
+            ListingMediaEntity,
+            r#"SELECT id, type AS "media_type: _", url, listing_id
+            FROM listing.listing_media WHERE listing_id = ANY($1)"#,
+            &listing_ids[..]
+        )
+        .fetch_all(&self.pg)
+        .await?;
+
+        let mut media_map: HashMap<uuid::Uuid, Vec<ListingMediaEntity>> = HashMap::new();
+        for media in all_media {
+            media_map.entry(media.listing_id).or_default().push(media);
+        }
+
         Ok(rows
             .into_iter()
             .map(|row| {
+                let business = BusinessEntity {
+                    id: row.business_id,
+                    phone_number: row.b_phone_number,
+                    is_closed: row.b_is_closed,
+                    title: row.b_title,
+                    logo: row.b_logo,
+                    description: row.b_description,
+                    created_at: row.b_created_at,
+                    owner_id: row.b_owner_id,
+                };
+
+                let address = BusinessAddressEntity {
+                    address_line1: row.address_line1,
+                    address_line2: row.address_line2,
+                    landmark: row.landmark,
+                    pincode: row.pincode,
+                    city: row.city,
+                    state: row.state,
+                    latitude: row.latitude.unwrap_or(0.0),
+                    longitude: row.longitude.unwrap_or(0.0),
+                    radius: row.radius,
+                    business_id: row.business_id,
+                };
+
                 let listing = BusinessListingEntity {
                     id: row.id,
                     title: row.title,
@@ -74,12 +145,16 @@ impl ListingRepository {
                     service_listing_id: row.service_listing_id,
                     embedding: row.embedding,
                 };
+
+                let media = media_map.remove(&row.id).unwrap_or_default();
+
                 let product = ProductListingEntity {
                     id: row.pl_id,
                     price: row.price,
                     stock: row.stock,
                 };
-                (listing, product)
+
+                (business, address, listing, media, product)
             })
             .collect())
     }
@@ -89,9 +164,19 @@ impl ListingRepository {
         latitude: f64,
         longitude: f64,
         query_embedding: pgvector::Vector,
-    ) -> Result<Vec<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+    ) -> Result<
+        Vec<(
+            BusinessEntity,
+            BusinessAddressEntity,
+            BusinessListingEntity,
+            Vec<ListingMediaEntity>,
+            ServiceListingEntity,
+        )>,
+        DbError,
+    > {
         let rows = sqlx::query!(
             r#"SELECT
+                -- Business Listing Properties
                 business_listings.id,
                 business_listings.title,
                 business_listings.description,
@@ -103,9 +188,31 @@ impl ListingRepository {
                 business_listings.product_listing_id,
                 business_listings.service_listing_id,
                 business_listings.embedding AS "embedding: pgvector::Vector",
+                
+                -- Service Listing Properties
                 service_listings.id AS sl_id,
                 service_listings.price,
-                service_listings.available
+                service_listings.available,
+        
+                -- Business Properties
+                businesses.phone_number AS b_phone_number,
+                businesses.is_closed AS b_is_closed,
+                businesses.title AS b_title,
+                businesses.logo AS b_logo,
+                businesses.description AS b_description,
+                businesses.created_at AS b_created_at,
+                businesses.owner_id AS b_owner_id,
+        
+                -- Business Address Properties
+                business_addresses.address_line1,
+                business_addresses.address_line2,
+                business_addresses.landmark,
+                business_addresses.city,
+                business_addresses.state,
+                business_addresses.pincode,
+                business_addresses.radius,
+                ST_X(business_addresses.location::geometry) AS longitude,
+                ST_Y(business_addresses.location::geometry) AS latitude
                FROM listing.business_listings
                INNER JOIN listing.service_listings ON service_listings.id = business_listings.service_listing_id
                INNER JOIN business.businesses ON businesses.id = business_listings.business_id
@@ -114,12 +221,12 @@ impl ListingRepository {
                  AND businesses.is_closed = false
                  AND ST_DWithin(
                      business_addresses.location,
-                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geometry,
                      business_addresses.radius
                  )
-                AND 1 - (business_listings.embedding <=> $3) >= 0.4
-                ORDER BY business_listings.embedding <=> $3
-                LIMIT 100"#,
+                 AND 1 - (business_listings.embedding <=> $3) >= 0.4
+               ORDER BY business_listings.embedding <=> $3
+               LIMIT 100"#,
             longitude,
             latitude,
             query_embedding as _
@@ -127,9 +234,49 @@ impl ListingRepository {
         .fetch_all(&self.pg)
         .await?;
 
+        let listing_ids: Vec<Uuid> = rows.iter().map(|r| r.id).collect();
+
+        let all_media = sqlx::query_as!(
+            ListingMediaEntity,
+            r#"SELECT id, type AS "media_type: _", url, listing_id
+            FROM listing.listing_media WHERE listing_id = ANY($1)"#,
+            &listing_ids[..]
+        )
+        .fetch_all(&self.pg)
+        .await?;
+
+        let mut media_map: HashMap<uuid::Uuid, Vec<ListingMediaEntity>> = HashMap::new();
+        for media in all_media {
+            media_map.entry(media.listing_id).or_default().push(media);
+        }
+
         Ok(rows
             .into_iter()
             .map(|row| {
+                let business = BusinessEntity {
+                    id: row.business_id,
+                    phone_number: row.b_phone_number,
+                    is_closed: row.b_is_closed,
+                    title: row.b_title,
+                    logo: row.b_logo,
+                    description: row.b_description,
+                    created_at: row.b_created_at,
+                    owner_id: row.b_owner_id,
+                };
+
+                let address = BusinessAddressEntity {
+                    address_line1: row.address_line1,
+                    address_line2: row.address_line2,
+                    landmark: row.landmark,
+                    pincode: row.pincode,
+                    city: row.city,
+                    state: row.state,
+                    latitude: row.latitude.unwrap_or(0.0),
+                    longitude: row.longitude.unwrap_or(0.0),
+                    radius: row.radius,
+                    business_id: row.business_id,
+                };
+
                 let listing = BusinessListingEntity {
                     id: row.id,
                     title: row.title,
@@ -143,12 +290,16 @@ impl ListingRepository {
                     service_listing_id: row.service_listing_id,
                     embedding: row.embedding,
                 };
+
+                let media = media_map.remove(&row.id).unwrap_or_default();
+
                 let service = ServiceListingEntity {
                     id: row.sl_id,
                     price: row.price,
                     available: row.available,
                 };
-                (listing, service)
+
+                (business, address, listing, media, service)
             })
             .collect())
     }

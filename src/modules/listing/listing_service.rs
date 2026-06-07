@@ -6,6 +6,7 @@ use crate::modules::listing::listing_dto::{
     ProductListingDto, ServiceListingDto, UpdateProductListingDto, UpdateServiceListingDto,
 };
 use crate::modules::listing::listing_repository::ListingRepository;
+use crate::modules::listing::{ExploreProductListingDto, ExploreServiceListingDto};
 use sqlx::query;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -32,10 +33,7 @@ impl ListingService {
     }
 
     fn embed_listing_properties(title: &str, description: Option<&str>, price: &str) -> String {
-        let mut return_value = format!(
-            "Title: {}\nPrice: {}",
-            title, price,
-        );
+        let mut return_value = format!("Title: {}\nPrice: {}", title, price,);
 
         if let Some(desc) = description {
             return_value.push_str(&format!("\nDescription: {}", desc));
@@ -49,7 +47,7 @@ impl ListingService {
         latitude: f64,
         longitude: f64,
         query: String,
-    ) -> Result<Vec<ProductListingDto>, ServiceError> {
+    ) -> Result<Vec<ExploreProductListingDto>, ServiceError> {
         let query_embedding = self.embedding.lock().await.embed(query).await?;
 
         let listings = self
@@ -57,7 +55,10 @@ impl ListingService {
             .explore_products_listings_nearby(latitude, longitude, query_embedding)
             .await?;
 
-        Ok(listings.into_iter().map(ProductListingDto::from).collect())
+        Ok(listings
+            .into_iter()
+            .map(ExploreProductListingDto::from)
+            .collect())
     }
 
     pub async fn explore_services_listings_nearby(
@@ -65,7 +66,7 @@ impl ListingService {
         latitude: f64,
         longitude: f64,
         query: String,
-    ) -> Result<Vec<ServiceListingDto>, ServiceError> {
+    ) -> Result<Vec<ExploreServiceListingDto>, ServiceError> {
         let query_embedding = self.embedding.lock().await.embed(query).await?;
 
         let listings = self
@@ -73,7 +74,10 @@ impl ListingService {
             .explore_services_listings_nearby(latitude, longitude, query_embedding)
             .await?;
 
-        Ok(listings.into_iter().map(ServiceListingDto::from).collect())
+        Ok(listings
+            .into_iter()
+            .map(ExploreServiceListingDto::from)
+            .collect())
     }
 
     pub async fn get_all_product_listings_by_business(
@@ -172,7 +176,7 @@ impl ListingService {
         listing_id: Uuid,
         body: UpdateProductListingDto,
     ) -> Result<ProductListingDto, ServiceError> {
-        let prev_listing = self
+        let prev_product_listing = self
             .get_product_listing_by_id_and_business_and_owner(owner_id, business_id, listing_id)
             .await?;
 
@@ -186,15 +190,15 @@ impl ListingService {
                     .embed(Self::embed_listing_properties(
                         match body.title.as_deref() {
                             Some(title) => title,
-                            None => &prev_listing.title,
+                            None => &prev_product_listing.listing.title,
                         },
                         match body.description.as_deref() {
                             Some(description) => Some(description),
-                            None => prev_listing.description.as_deref(),
+                            None => prev_product_listing.listing.description.as_deref(),
                         },
                         &(match body.price {
                             Some(price) => price,
-                            None => prev_listing.price,
+                            None => prev_product_listing.price,
                         })
                         .to_string(),
                     ))
@@ -339,11 +343,11 @@ impl ListingService {
                     .embed(Self::embed_listing_properties(
                         match body.title.as_deref() {
                             Some(title) => title,
-                            None => &prev_listing.title,
+                            None => &prev_listing.listing.title,
                         },
                         match body.description.as_deref() {
                             Some(description) => Some(description),
-                            None => prev_listing.description.as_deref(),
+                            None => prev_listing.listing.description.as_deref(),
                         },
                         match body.price.as_deref() {
                             Some(price) => price,

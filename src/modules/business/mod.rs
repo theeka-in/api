@@ -8,3 +8,4 @@ pub use business_controller::BusinessController;
 pub use business_dto::*;
 pub use business_repository::BusinessRepository;
 pub use business_service::BusinessService;
+pub use business_entity::*;

@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, type AS \"media_type: _\", url, listing_id\n            FROM listing.listing_media WHERE listing_id = ANY($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "media_type: _",
+        "type_info": {
+          "Custom": {
+            "name": "shared.media_type",
+            "kind": {
+              "Enum": [
+                "image",
+                "video"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "listing_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "197ec6f5bd727760646c614c9d1ea7f1b5a949ad57be9575f3fea97e45e60be2"
+}

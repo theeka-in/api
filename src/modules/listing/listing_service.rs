@@ -3,9 +3,11 @@ use crate::modules::database::DatabaseService;
 use crate::modules::embedding::EmbeddingService;
 use crate::modules::listing::listing_dto::{
     CreateListingMediaDto, CreateProductListingDto, CreateServiceListingDto, ListingMediaDto,
-    ProductListingDto, ServiceListingDto, UpdateProductListingDto, UpdateServiceListingDto,
+    ProductDto, ServiceDto, UpdateProductListingDto, UpdateServiceListingDto,
 };
-use crate::modules::listing::{ExploreProductListingDto, ExploreServiceListingDto};
+use crate::modules::listing::{
+    ExploreProductListingDto, ExploreServiceListingDto, ProductListingDto, ServiceListingDto,
+};
 use crate::shared::errors::{ErrorDto, ServiceError};
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -200,7 +202,7 @@ impl ListingService {
                         body.description
                             .as_deref()
                             .or(prev.listing.description.as_deref()),
-                        &body.price.unwrap_or(prev.price).to_string(),
+                        &body.price.unwrap_or(prev.product.price).to_string(),
                     ))
                     .await?,
             );
@@ -234,7 +236,10 @@ impl ListingService {
         self.get_product_listing_by_id_and_business_and_owner(owner_id, business_id, listing_id)
             .await?;
 
-        self.db.product_listing.delete(listing_id, business_id).await?;
+        self.db
+            .product_listing
+            .delete(listing_id, business_id)
+            .await?;
 
         Ok(())
     }
@@ -358,7 +363,7 @@ impl ListingService {
                         body.description
                             .as_deref()
                             .or(prev.listing.description.as_deref()),
-                        body.price.as_deref().unwrap_or(&prev.price),
+                        body.price.as_deref().unwrap_or(&prev.service.price),
                     ))
                     .await?,
             );
@@ -392,7 +397,10 @@ impl ListingService {
         self.get_service_listing_by_id_and_business_and_owner(owner_id, business_id, listing_id)
             .await?;
 
-        self.db.service_listing.delete(listing_id, business_id).await?;
+        self.db
+            .service_listing
+            .delete(listing_id, business_id)
+            .await?;
 
         Ok(())
     }

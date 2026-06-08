@@ -3,7 +3,9 @@ use crate::modules::business::business_dto::{
     BusinessAddressDto, BusinessDto, BusinessHourDto, BusinessMediaDto, CreateBusinessDto,
     CreateBusinessHourDto, CreateBusinessMediaDto, UpdateBusinessDto, UpdateBusinessHourDto,
 };
-use crate::modules::business::{CreateBusinessAddressDto, UpdateBusinessAddressDto};
+use crate::modules::business::{
+    BusinessWithOwnerAndAddressDto, CreateBusinessAddressDto, UpdateBusinessAddressDto,
+};
 use crate::modules::database::{BusinessHourType, DatabaseService, DayOfWeekType};
 use crate::modules::users::UsersService;
 use crate::shared::errors::{ErrorDto, ServiceError};
@@ -30,17 +32,20 @@ impl BusinessService {
         })
     }
 
-    pub async fn get_business_by_id(&self, business_id: Uuid) -> Result<BusinessDto, ServiceError> {
-        let business =
-            self.db
-                .business
-                .find_by_id(business_id)
-                .await?
-                .ok_or(ServiceError::NotFound(ErrorDto {
-                    message: "business not found".to_owned(),
-                }))?;
+    pub async fn get_business_by_id(
+        &self,
+        business_id: Uuid,
+    ) -> Result<BusinessWithOwnerAndAddressDto, ServiceError> {
+        let business = self
+            .db
+            .business
+            .find_by_id_with_address_and_owner(business_id)
+            .await?
+            .ok_or(ServiceError::NotFound(ErrorDto {
+                message: "business not found".to_owned(),
+            }))?;
 
-        Ok(BusinessDto::from(business))
+        Ok(BusinessWithOwnerAndAddressDto::from(business))
     }
 
     pub async fn get_business_by_id_and_owner(

@@ -3,7 +3,9 @@ use crate::modules::business::business_dto::{
     BusinessAddressDto, BusinessDto, BusinessHourDto, BusinessMediaDto, CreateBusinessDto,
     CreateBusinessHourDto, CreateBusinessMediaDto, UpdateBusinessDto, UpdateBusinessHourDto,
 };
-use crate::modules::business::{CreateBusinessAddressDto, UpdateBusinessAddressDto};
+use crate::modules::business::{
+    BusinessWithOwnerAndAddressDto, CreateBusinessAddressDto, UpdateBusinessAddressDto,
+};
 use crate::modules::database::DayOfWeekType;
 use crate::shared::errors::{ErrorDto, ServiceError};
 use crate::shared::guards::AuthGuard;
@@ -38,7 +40,7 @@ pub enum GetMyBusinessesResponse {
 #[derive(ApiResponse)]
 pub enum GetBusinessResponse {
     #[oai(status = 200)]
-    Ok(Json<BusinessDto>),
+    Ok(Json<BusinessWithOwnerAndAddressDto>),
     #[oai(status = 404)]
     NotFound(Json<ErrorDto>),
     #[oai(status = 500)]

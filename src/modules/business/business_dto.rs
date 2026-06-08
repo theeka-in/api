@@ -2,7 +2,13 @@ use poem_openapi::{Enum, Object};
 use sqlx::types::chrono::NaiveTime;
 use uuid::Uuid;
 
-use crate::modules::database::{BusinessAddressEntity, BusinessEntity, BusinessHourEntity, BusinessHourType, BusinessMediaEntity, DayOfWeekType};
+use crate::modules::{
+    database::{
+        BusinessAddressEntity, BusinessEntity, BusinessHourEntity, BusinessHourType,
+        BusinessMediaEntity, DayOfWeekType, UserEntity,
+    },
+    users::UserDto,
+};
 
 #[derive(Debug, Object)]
 pub struct BusinessDto {
@@ -14,7 +20,14 @@ pub struct BusinessDto {
     pub description: Option<String>,
     pub created_at: String,
     pub owner_id: Uuid,
-    pub address: Option<BusinessAddressDto>,
+}
+
+#[derive(Debug, Object)]
+pub struct BusinessWithOwnerAndAddressDto {
+    #[oai(flatten)]
+    pub business: BusinessDto,
+    pub owner: UserDto,
+    pub address: BusinessAddressDto,
 }
 
 #[derive(Debug, Object)]
@@ -76,9 +89,6 @@ pub struct UpdateBusinessAddressDto {
     pub longitude: Option<f64>,
     pub radius: Option<f64>,
 }
-
-const TIME_PATTERN: &str = r"^([01]\d|2[0-3]):[0-5]\d$";
-
 #[derive(Debug, Object)]
 pub struct BusinessHourDto {
     pub id: Uuid,
@@ -133,7 +143,6 @@ impl From<BusinessEntity> for BusinessDto {
             description: entity.description,
             created_at: entity.created_at.to_string(),
             owner_id: entity.owner_id,
-            address: None,
         }
     }
 }
@@ -175,6 +184,27 @@ impl From<BusinessAddressEntity> for BusinessAddressDto {
             longitude: entity.longitude,
             radius: entity.radius,
             business_id: entity.business_id,
+        }
+    }
+}
+
+impl From<(BusinessEntity, BusinessAddressEntity, UserEntity)> for BusinessWithOwnerAndAddressDto {
+    fn from(
+        (business, address, user): (BusinessEntity, BusinessAddressEntity, UserEntity),
+    ) -> Self {
+        Self {
+            business: BusinessDto {
+                id: business.id,
+                phone_number: business.phone_number,
+                is_closed: business.is_closed,
+                title: business.title,
+                logo: business.logo,
+                description: business.description,
+                owner_id: business.owner_id,
+                created_at: business.created_at.to_string(),
+            },
+            owner: user.into(),
+            address: address.into(),
         }
     }
 }

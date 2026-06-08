@@ -1,6 +1,7 @@
 use crate::{
     modules::database::{
-        BusinessAddressEntity, BusinessEntity, ListingMediaEntity, ProductListingEntity, ServiceListingEntity,
+        BusinessAddressEntity, BusinessEntity, ListingMediaEntity, ProductListingEntity,
+        ServiceListingEntity, UserEntity,
     },
     shared::errors::DbError,
 };
@@ -24,6 +25,26 @@ pub struct BusinessListingEntity {
 }
 
 #[derive(Debug)]
+pub struct ExploreProductListingEntity {
+    pub business: BusinessEntity,
+    pub business_address: BusinessAddressEntity,
+    pub listing: BusinessListingEntity,
+    pub listing_media: Vec<ListingMediaEntity>,
+    pub product: ProductListingEntity,
+    pub business_owner: UserEntity,
+}
+
+#[derive(Debug)]
+pub struct ExploreServiceListingEntity {
+    pub business: BusinessEntity,
+    pub business_address: BusinessAddressEntity,
+    pub listing: BusinessListingEntity,
+    pub listing_media: Vec<ListingMediaEntity>,
+    pub service: ServiceListingEntity,
+    pub business_owner: UserEntity,
+}
+
+#[derive(Debug)]
 pub struct BusinessListingRepo {
     pg: PgPool,
 }
@@ -38,16 +59,7 @@ impl BusinessListingRepo {
         latitude: f64,
         longitude: f64,
         query_embedding: pgvector::Vector,
-    ) -> Result<
-        Vec<(
-            BusinessEntity,
-            BusinessAddressEntity,
-            BusinessListingEntity,
-            Vec<ListingMediaEntity>,
-            ProductListingEntity,
-        )>,
-        DbError,
-    > {
+    ) -> Result<Vec<ExploreProductListingEntity>, DbError> {
         let rows = sqlx::query!(
             r#"SELECT
                 business_listings.id,
@@ -79,11 +91,16 @@ impl BusinessListingRepo {
                 business_addresses.pincode,
                 business_addresses.radius,
                 ST_X(business_addresses.location::geometry) AS longitude,
-                ST_Y(business_addresses.location::geometry) AS latitude
+                ST_Y(business_addresses.location::geometry) AS latitude,
+
+                owner.name AS owner_name,
+                owner.avatar AS owner_avatar,
+                owner.account_id AS owner_account_id
                FROM listing.business_listings
                INNER JOIN listing.product_listings ON product_listings.id = business_listings.product_listing_id
                INNER JOIN business.businesses ON businesses.id = business_listings.business_id
                INNER JOIN business.business_addresses ON business_addresses.business_id = businesses.id
+               INNER JOIN users.users AS owner ON owner.id = businesses.owner_id
                WHERE business_listings.is_active = true
                  AND businesses.is_closed = false
                  AND ST_DWithin(
@@ -160,7 +177,22 @@ impl BusinessListingRepo {
                     price: row.price,
                     stock: row.stock,
                 };
-                (business, address, listing, media, product)
+
+                let business_owner = UserEntity {
+                    id: row.b_owner_id,
+                    name: row.owner_name,
+                    avatar: row.owner_avatar,
+                    account_id: row.owner_account_id,
+                };
+
+                ExploreProductListingEntity {
+                    business,
+                    business_address: address,
+                    listing,
+                    listing_media: media,
+                    product,
+                    business_owner,
+                }
             })
             .collect())
     }
@@ -170,16 +202,7 @@ impl BusinessListingRepo {
         latitude: f64,
         longitude: f64,
         query_embedding: pgvector::Vector,
-    ) -> Result<
-        Vec<(
-            BusinessEntity,
-            BusinessAddressEntity,
-            BusinessListingEntity,
-            Vec<ListingMediaEntity>,
-            ServiceListingEntity,
-        )>,
-        DbError,
-    > {
+    ) -> Result<Vec<ExploreServiceListingEntity>, DbError> {
         let rows = sqlx::query!(
             r#"SELECT
                 business_listings.id,
@@ -211,11 +234,16 @@ impl BusinessListingRepo {
                 business_addresses.pincode,
                 business_addresses.radius,
                 ST_X(business_addresses.location::geometry) AS longitude,
-                ST_Y(business_addresses.location::geometry) AS latitude
+                ST_Y(business_addresses.location::geometry) AS latitude,
+
+                owner.name AS owner_name,
+                owner.avatar AS owner_avatar,
+                owner.account_id AS owner_account_id
                FROM listing.business_listings
                INNER JOIN listing.service_listings ON service_listings.id = business_listings.service_listing_id
                INNER JOIN business.businesses ON businesses.id = business_listings.business_id
                INNER JOIN business.business_addresses ON business_addresses.business_id = businesses.id
+               INNER JOIN users.users AS owner ON owner.id = businesses.owner_id
                WHERE business_listings.is_active = true
                  AND businesses.is_closed = false
                  AND ST_DWithin(
@@ -292,7 +320,21 @@ impl BusinessListingRepo {
                     price: row.price,
                     available: row.available,
                 };
-                (business, address, listing, media, service)
+                let business_owner = UserEntity {
+                    id: row.b_owner_id,
+                    name: row.owner_name,
+                    avatar: row.owner_avatar,
+                    account_id: row.owner_account_id,
+                };
+
+                ExploreServiceListingEntity {
+                    business,
+                    business_address: address,
+                    listing,
+                    listing_media: media,
+                    service,
+                    business_owner,
+                }
             })
             .collect())
     }

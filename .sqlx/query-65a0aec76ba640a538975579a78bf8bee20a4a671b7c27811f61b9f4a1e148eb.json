@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                business_listings.id,\n                business_listings.title,\n                business_listings.description,\n                business_listings.logo,\n                business_listings.is_active,\n                business_listings.created_at,\n                business_listings.updated_at,\n                business_listings.business_id,\n                business_listings.product_listing_id,\n                business_listings.service_listing_id,\n                business_listings.embedding AS \"embedding: pgvector::Vector\",\n                product_listings.id AS pl_id,\n                product_listings.price,\n                product_listings.stock,\n                businesses.phone_number AS b_phone_number,\n                businesses.is_closed AS b_is_closed,\n                businesses.title AS b_title,\n                businesses.logo AS b_logo,\n                businesses.description AS b_description,\n                businesses.created_at AS b_created_at,\n                businesses.owner_id AS b_owner_id,\n                business_addresses.address_line1,\n                business_addresses.address_line2,\n                business_addresses.landmark,\n                business_addresses.city,\n                business_addresses.state,\n                business_addresses.pincode,\n                business_addresses.radius,\n                ST_X(business_addresses.location::geometry) AS longitude,\n                ST_Y(business_addresses.location::geometry) AS latitude\n               FROM listing.business_listings\n               INNER JOIN listing.product_listings ON product_listings.id = business_listings.product_listing_id\n               INNER JOIN business.businesses ON businesses.id = business_listings.business_id\n               INNER JOIN business.business_addresses ON business_addresses.business_id = businesses.id\n               WHERE business_listings.is_active = true\n                 AND businesses.is_closed = false\n                 AND ST_DWithin(\n                     business_addresses.location,\n                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,\n                     business_addresses.radius\n                 )\n                 AND 1 - (business_listings.embedding <=> $3) >= 0.4\n               ORDER BY business_listings.embedding <=> $3\n               LIMIT 100",
+  "query": "SELECT\n                business_listings.id,\n                business_listings.title,\n                business_listings.description,\n                business_listings.logo,\n                business_listings.is_active,\n                business_listings.created_at,\n                business_listings.updated_at,\n                business_listings.business_id,\n                business_listings.product_listing_id,\n                business_listings.service_listing_id,\n                business_listings.embedding AS \"embedding: pgvector::Vector\",\n                service_listings.id AS sl_id,\n                service_listings.price,\n                service_listings.available,\n                businesses.phone_number AS b_phone_number,\n                businesses.is_closed AS b_is_closed,\n                businesses.title AS b_title,\n                businesses.logo AS b_logo,\n                businesses.description AS b_description,\n                businesses.created_at AS b_created_at,\n                businesses.owner_id AS b_owner_id,\n                business_addresses.address_line1,\n                business_addresses.address_line2,\n                business_addresses.landmark,\n                business_addresses.city,\n                business_addresses.state,\n                business_addresses.pincode,\n                business_addresses.radius,\n                ST_X(business_addresses.location::geometry) AS longitude,\n                ST_Y(business_addresses.location::geometry) AS latitude,\n\n                owner.name AS owner_name,\n                owner.avatar AS owner_avatar,\n                owner.account_id AS owner_account_id\n               FROM listing.business_listings\n               INNER JOIN listing.service_listings ON service_listings.id = business_listings.service_listing_id\n               INNER JOIN business.businesses ON businesses.id = business_listings.business_id\n               INNER JOIN business.business_addresses ON business_addresses.business_id = businesses.id\n               INNER JOIN users.users AS owner ON owner.id = businesses.owner_id\n               WHERE business_listings.is_active = true\n                 AND businesses.is_closed = false\n                 AND ST_DWithin(\n                     business_addresses.location,\n                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geometry,\n                     business_addresses.radius\n                 )\n                 AND 1 - (business_listings.embedding <=> $3) >= 0.4\n               ORDER BY business_listings.embedding <=> $3\n               LIMIT 100",
   "describe": {
     "columns": [
       {
@@ -65,18 +65,18 @@
       },
       {
         "ordinal": 11,
-        "name": "pl_id",
+        "name": "sl_id",
         "type_info": "Uuid"
       },
       {
         "ordinal": 12,
         "name": "price",
-        "type_info": "Float8"
+        "type_info": "Text"
       },
       {
         "ordinal": 13,
-        "name": "stock",
-        "type_info": "Int4"
+        "name": "available",
+        "type_info": "Bool"
       },
       {
         "ordinal": 14,
@@ -157,6 +157,21 @@
         "ordinal": 29,
         "name": "latitude",
         "type_info": "Float8"
+      },
+      {
+        "ordinal": 30,
+        "name": "owner_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 31,
+        "name": "owner_avatar",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 32,
+        "name": "owner_account_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -201,8 +216,11 @@
       false,
       false,
       null,
-      null
+      null,
+      false,
+      true,
+      false
     ]
   },
-  "hash": "c8d85187afb4753b44da0978a4b7d6acdbfbd083a498f2e8ee78b77c1175139f"
+  "hash": "65a0aec76ba640a538975579a78bf8bee20a4a671b7c27811f61b9f4a1e148eb"
 }

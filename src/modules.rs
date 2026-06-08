@@ -10,6 +10,7 @@ use crate::modules::{
     embedding::EmbeddingService,
     health::HealthController,
     listing::{ListingController, ListingService},
+    location::{LocationController, LocationService},
     review::{ReviewController, ReviewService},
     users::{UsersController, UsersService},
 };
@@ -21,6 +22,7 @@ pub mod database;
 pub mod embedding;
 pub mod health;
 pub mod listing;
+pub mod location;
 pub mod review;
 pub mod users;
 
@@ -37,6 +39,7 @@ pub struct ExposedControllers(
         ReviewController,
         AnalyticsController,
         HealthController,
+        LocationController,
     ),
 );
 
@@ -58,6 +61,7 @@ pub fn init(pg_pool: Pool<Postgres>, ollama_url: String) -> (ExposedServices, Ex
     );
     let review_service = ReviewService::new(database_service.clone());
     let analytics_service = AnalyticsService::new(database_service);
+    let location_service = LocationService::new();
 
     let health_controller = HealthController::new();
 
@@ -67,6 +71,7 @@ pub fn init(pg_pool: Pool<Postgres>, ollama_url: String) -> (ExposedServices, Ex
     let listing_controller = ListingController::new(listing_service);
     let review_controller = ReviewController::new(review_service);
     let analytics_controller = AnalyticsController::new(analytics_service);
+    let location_controller = LocationController::new(location_service);
 
     let exposed_services = ExposedServices { auth: auth_service };
 
@@ -78,6 +83,7 @@ pub fn init(pg_pool: Pool<Postgres>, ollama_url: String) -> (ExposedServices, Ex
         review_controller,
         analytics_controller,
         health_controller,
+        location_controller,
     ));
 
     (exposed_services, exposed_controllers)

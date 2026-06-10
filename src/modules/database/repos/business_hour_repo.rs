@@ -4,7 +4,7 @@ use sqlx::{FromRow, PgPool, types::chrono};
 use uuid::Uuid;
 
 #[derive(Debug, sqlx::Type, PartialEq, Enum)]
-#[sqlx(type_name = "business.day_of_week", rename_all = "snake_case")]
+#[sqlx(type_name = "day_of_week", rename_all = "snake_case")]
 pub enum DayOfWeekType {
     Monday,
     Tuesday,
@@ -16,7 +16,7 @@ pub enum DayOfWeekType {
 }
 
 #[derive(Debug, sqlx::Type, PartialEq, Enum)]
-#[sqlx(type_name = "business.business_hour_type", rename_all = "snake_case")]
+#[sqlx(type_name = "business_hour_type", rename_all = "snake_case")]
 pub enum BusinessHourType {
     Closed,
     #[sqlx(rename = "open_24_hours")]
@@ -48,7 +48,7 @@ impl BusinessHourRepo {
         let hours = sqlx::query_as!(
             BusinessHourEntity,
             r#"SELECT id, day AS "day: _", hours_type AS "hours_type: _", open_time, close_time, business_id
-               FROM business.business_hours WHERE business_id = $1"#,
+               FROM business_hours WHERE business_id = $1"#,
             business_id
         )
         .fetch_all(&self.pg)
@@ -73,8 +73,8 @@ impl BusinessHourRepo {
 
         let hour = sqlx::query_as!(
             BusinessHourEntity,
-            r#"INSERT INTO business.business_hours (id, business_id, day, hours_type, open_time, close_time)
-               VALUES (gen_random_uuid(), $1, $2::business.day_of_week, $3::business.business_hour_type, $4, $5)
+            r#"INSERT INTO business_hours (id, business_id, day, hours_type, open_time, close_time)
+               VALUES (gen_random_uuid(), $1, $2::day_of_week, $3::business_hour_type, $4, $5)
                RETURNING id, day AS "day: _", hours_type AS "hours_type: _", open_time, close_time, business_id"#,
             business_id,
             day as _,
@@ -104,11 +104,11 @@ impl BusinessHourRepo {
 
         let hour = sqlx::query_as!(
             BusinessHourEntity,
-            r#"UPDATE business.business_hours SET
-               hours_type = COALESCE($3::business.business_hour_type, hours_type),
+            r#"UPDATE business_hours SET
+               hours_type = COALESCE($3::business_hour_type, hours_type),
                open_time  = COALESCE($4, open_time),
                close_time = COALESCE($5, close_time)
-               WHERE business_id = $1 AND day = $2::business.day_of_week
+               WHERE business_id = $1 AND day = $2::day_of_week
                RETURNING id, day AS "day: _", hours_type AS "hours_type: _", open_time, close_time, business_id"#,
             business_id,
             day as _,
@@ -124,7 +124,7 @@ impl BusinessHourRepo {
 
     pub async fn delete(&self, business_id: Uuid, day: DayOfWeekType) -> Result<(), DbError> {
         sqlx::query!(
-            "DELETE FROM business.business_hours WHERE business_id = $1 AND day = $2::business.day_of_week",
+            "DELETE FROM business_hours WHERE business_id = $1 AND day = $2::day_of_week",
             business_id,
             day as _
         )

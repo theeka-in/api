@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO business_media (id, business_id, type, url)\n               VALUES (gen_random_uuid(), $1, $2::media_type, $3)\n               RETURNING id, type AS \"media_type: _\", url, business_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "media_type: _",
+        "type_info": {
+          "Custom": {
+            "name": "media_type",
+            "kind": {
+              "Enum": [
+                "image",
+                "video"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "business_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "media_type",
+            "kind": {
+              "Enum": [
+                "image",
+                "video"
+              ]
+            }
+          }
+        },
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e3df97b8e6bd6d30717172fa25aa3bbd25a048a4d9a5b7667d2acf6bdb2f9160"
+}

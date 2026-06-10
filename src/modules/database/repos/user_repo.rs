@@ -25,7 +25,7 @@ impl UserRepo {
         let user = sqlx::query_as!(
             UserEntity,
             r#"SELECT id, name, avatar, account_id
-               FROM users.users
+               FROM users
                WHERE account_id = $1"#,
             account_id
         )
@@ -39,7 +39,7 @@ impl UserRepo {
         let user = sqlx::query_as!(
             UserEntity,
             r#"SELECT id, name, avatar, account_id
-               FROM users.users
+               FROM users
                WHERE id = $1"#,
             id
         )
@@ -57,7 +57,7 @@ impl UserRepo {
     ) -> Result<UserEntity, DbError> {
         let user = sqlx::query_as!(
             UserEntity,
-            r#"INSERT INTO users.users (id, account_id, name, avatar)
+            r#"INSERT INTO users (id, account_id, name, avatar)
                VALUES (gen_random_uuid(), $1, $2, $3)
                RETURNING id, name, avatar, account_id"#,
             account_id,
@@ -78,7 +78,7 @@ impl UserRepo {
     ) -> Result<UserEntity, DbError> {
         let user = sqlx::query_as!(
             UserEntity,
-            r#"UPDATE users.users
+            r#"UPDATE users
                SET
                    name   = COALESCE($2, name),
                    avatar = COALESCE($3, avatar)
@@ -95,7 +95,7 @@ impl UserRepo {
     }
 
     pub async fn delete(&self, id: Uuid) -> Result<(), DbError> {
-        sqlx::query!(r#"DELETE FROM users.users WHERE id = $1"#, id)
+        sqlx::query!(r#"DELETE FROM users WHERE id = $1"#, id)
             .execute(&self.pg)
             .await?;
 

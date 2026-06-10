@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, name, avatar, account_id\n               FROM users\n               WHERE account_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "account_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "52b9d7f6adf2997695c811c041a553cb19c34626b2cd2e29258d5da390e087e0"
+}

@@ -66,14 +66,6 @@ impl UsersService {
         Ok(user.into())
     }
 
-    pub async fn delete(&self, account_id: Uuid) -> Result<(), ServiceError> {
-        let existing = self.get(account_id).await?;
-
-        self.db.user.delete(existing.id).await?;
-
-        Ok(())
-    }
-
     pub async fn get_addresses(
         &self,
         account_id: Uuid,

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM listing_media WHERE id = $1 AND listing_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f0e75d3b15dfc6359b443b3f741e4c7319b896f6454d03ac2808f20d353753ac"
+}

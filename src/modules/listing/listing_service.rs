@@ -170,8 +170,6 @@ impl ListingService {
                 body.logo,
                 body.price,
                 body.stock,
-                body.categories,
-                body.tags,
                 embedding,
             )
             .await?;
@@ -331,8 +329,6 @@ impl ListingService {
                 body.logo,
                 body.price,
                 body.available,
-                body.categories,
-                body.tags,
                 embedding,
             )
             .await?;

@@ -75,8 +75,6 @@ pub struct CreateProductListingDto {
     pub logo: Option<String>,
     pub price: f64,
     pub stock: i32,
-    pub categories: Option<Vec<String>>,
-    pub tags: Option<Vec<String>>,
 }
 
 #[derive(Debug, Object)]
@@ -87,8 +85,6 @@ pub struct CreateServiceListingDto {
     pub logo: Option<String>,
     pub price: String,
     pub available: bool,
-    pub categories: Option<Vec<String>>,
-    pub tags: Option<Vec<String>>,
 }
 
 #[derive(Debug, Object)]

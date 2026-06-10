@@ -112,18 +112,6 @@ impl UsersController {
         }
     }
 
-    #[oai(path = "/me", method = "delete", operation_id = "delete_myself")]
-    pub async fn delete_myself(&self, auth: AuthGuard) -> DeleteMeResponse {
-        let account_id = auth.0.account_id;
-
-        match self.service.delete(account_id).await {
-            Ok(_) => DeleteMeResponse::NoContent,
-            Err(_) => DeleteMeResponse::InternalError(Json(ErrorDto {
-                message: "internal server error".to_owned(),
-            })),
-        }
-    }
-
     #[oai(
         path = "/me/addresses",
         method = "get",

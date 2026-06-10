@@ -1,0 +1,108 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO business_hours (id, business_id, day, hours_type, open_time, close_time)\n               VALUES (gen_random_uuid(), $1, $2::day_of_week, $3::business_hour_type, $4, $5)\n               RETURNING id, day AS \"day: _\", hours_type AS \"hours_type: _\", open_time, close_time, business_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "day: _",
+        "type_info": {
+          "Custom": {
+            "name": "day_of_week",
+            "kind": {
+              "Enum": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "hours_type: _",
+        "type_info": {
+          "Custom": {
+            "name": "business_hour_type",
+            "kind": {
+              "Enum": [
+                "closed",
+                "open_24_hours",
+                "custom_range"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "open_time",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 4,
+        "name": "close_time",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 5,
+        "name": "business_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "day_of_week",
+            "kind": {
+              "Enum": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "business_hour_type",
+            "kind": {
+              "Enum": [
+                "closed",
+                "open_24_hours",
+                "custom_range"
+              ]
+            }
+          }
+        },
+        "Time",
+        "Time"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "1214fc5bd71dc67ae78e115105be83240df979497c7d38223e2e82676ef079ae"
+}

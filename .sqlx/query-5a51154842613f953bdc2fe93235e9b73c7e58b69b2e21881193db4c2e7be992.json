@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM business_hours WHERE business_id = $1 AND day = $2::day_of_week",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "day_of_week",
+            "kind": {
+              "Enum": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5a51154842613f953bdc2fe93235e9b73c7e58b69b2e21881193db4c2e7be992"
+}

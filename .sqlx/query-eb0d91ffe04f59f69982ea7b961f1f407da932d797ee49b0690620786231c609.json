@@ -1,0 +1,105 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                bl.embedding AS \"embedding: pgvector::Vector\",\n                pl.id as pl_id, pl.price, pl.stock\n               FROM business_listings bl\n               INNER JOIN product_listings pl ON pl.id = bl.product_listing_id\n               WHERE bl.business_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "logo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "business_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "product_listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 9,
+        "name": "service_listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "embedding: pgvector::Vector",
+        "type_info": {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "pl_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 12,
+        "name": "price",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 13,
+        "name": "stock",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "eb0d91ffe04f59f69982ea7b961f1f407da932d797ee49b0690620786231c609"
+}

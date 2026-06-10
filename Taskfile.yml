@@ -1,10 +1,15 @@
 version: "3"
 
 tasks:
-    dev:
-        desc: Start dev docker + cargo watch
+    dev:start-compose:
+        desc: Start ollama and pg containers via docker-compose.dev.yml
         cmds:
             - docker compose -f docker-compose.dev.yml up -d
+
+    dev:
+        desc: Start dev docker + cargo watch
+        deps: [dev:start-compose]
+        cmds:
             - cargo watch -x run
 
     dev:build:
@@ -38,22 +43,34 @@ tasks:
 
     db:migrate:
         desc: Run pending migrations
+        deps: [dev:start-compose]
         cmds:
             - sqlx migrate run
 
     db:add:
         desc: "Create new migration (usage: task db:add -- migration_name)"
+        deps: [dev:start-compose]
         cmds:
             - sqlx migrate add {{.CLI_ARGS}}
 
-    db:reset:
+    db:revert:
         desc: Revert all migrations and re-run from scratch
+        deps: [dev:start-compose]
         cmds:
             - sqlx migrate revert --target-version 0
             - sqlx migrate run
 
+    db:reset:
+        desc: Reset the db and run all migrations from scratch
+        deps: [dev:start-compose]
+        cmds:
+            - sqlx database drop
+            - sqlx database create
+            - sqlx migrate run
+
     db:status:
         desc: Show applied and pending migration status
+        deps: [dev:start-compose]
         cmds:
             - sqlx migrate info
 
@@ -71,6 +88,7 @@ tasks:
 
     prepare:
         desc: Generate sqlx-data.json for offline query checking
+        deps: [dev:start-compose]
         cmds:
             - cargo sqlx prepare
 

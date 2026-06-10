@@ -1,0 +1,98 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE business_listings SET\n               title = COALESCE($3, title),\n               description = COALESCE($4, description),\n               logo = COALESCE($5, logo),\n               is_active = COALESCE($6, is_active),\n               embedding = COALESCE($7, embedding),\n               updated_at = now()\n               WHERE id = $1 AND business_id = $2\n               RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                         business_id, product_listing_id, service_listing_id,\n                         embedding AS \"embedding: pgvector::Vector\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "logo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "business_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "product_listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 9,
+        "name": "service_listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "embedding: pgvector::Vector",
+        "type_info": {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "17158838b57e917ca4870ab598c1ed14f5a0c9e5c20f5146f130ff691a377748"
+}

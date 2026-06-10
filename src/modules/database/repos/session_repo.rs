@@ -33,7 +33,7 @@ impl SessionRepo {
     ) -> Result<SessionEntity, DbError> {
         let session = sqlx::query_as!(
             SessionEntity,
-            r#"INSERT INTO auth.sessions (token, account_id, user_id, user_agent, ip_address)
+            r#"INSERT INTO sessions (token, account_id, user_id, user_agent, ip_address)
                VALUES ($1, $2, $3, $4, $5)
                RETURNING token, account_id, user_id, user_agent, ip_address, created_at"#,
             token,
@@ -52,7 +52,7 @@ impl SessionRepo {
         let sessions = sqlx::query_as!(
             SessionEntity,
             r#"SELECT token, account_id, user_id, user_agent, ip_address, created_at
-               FROM auth.sessions
+               FROM sessions
                WHERE account_id = $1"#,
             account_id,
         )
@@ -66,7 +66,7 @@ impl SessionRepo {
         let session = sqlx::query_as!(
             SessionEntity,
             r#"SELECT token, account_id, user_id, user_agent, ip_address, created_at
-               FROM auth.sessions
+               FROM sessions
                WHERE token = $1"#,
             token,
         )
@@ -92,8 +92,8 @@ impl SessionRepo {
                    session.created_at   AS session_created_at,
                    session.account_id   AS session_account_id,
                    session.user_id      AS session_user_id
-               FROM auth.sessions session
-               JOIN auth.accounts account ON account.id = session.account_id
+               FROM sessions session
+               JOIN accounts account ON account.id = session.account_id
                WHERE session.token = $1"#,
             token,
         )
@@ -121,7 +121,7 @@ impl SessionRepo {
     }
 
     pub async fn delete(&self, token: String) -> Result<(), DbError> {
-        sqlx::query!(r#"DELETE FROM auth.sessions WHERE token = $1"#, token)
+        sqlx::query!(r#"DELETE FROM sessions WHERE token = $1"#, token)
             .execute(&self.pg)
             .await?;
 

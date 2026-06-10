@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users\n               SET\n                   name   = COALESCE($2, name),\n                   avatar = COALESCE($3, avatar)\n               WHERE id = $1\n               RETURNING id, name, avatar, account_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "account_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "b01eaca2f2c38e657328db3d6bca8c52e584ddee0700a4eecb5b65fda7220bcd"
+}

@@ -96,11 +96,11 @@ impl BusinessListingRepo {
                 owner.name AS owner_name,
                 owner.avatar AS owner_avatar,
                 owner.account_id AS owner_account_id
-               FROM listing.business_listings
-               INNER JOIN listing.product_listings ON product_listings.id = business_listings.product_listing_id
-               INNER JOIN business.businesses ON businesses.id = business_listings.business_id
-               INNER JOIN business.business_addresses ON business_addresses.business_id = businesses.id
-               INNER JOIN users.users AS owner ON owner.id = businesses.owner_id
+               FROM business_listings
+               INNER JOIN product_listings ON product_listings.id = business_listings.product_listing_id
+               INNER JOIN businesses ON businesses.id = business_listings.business_id
+               INNER JOIN business_addresses ON business_addresses.business_id = businesses.id
+               INNER JOIN users AS owner ON owner.id = businesses.owner_id
                WHERE business_listings.is_active = true
                  AND businesses.is_closed = false
                  AND ST_DWithin(
@@ -122,7 +122,7 @@ impl BusinessListingRepo {
         let all_media = sqlx::query_as!(
             ListingMediaEntity,
             r#"SELECT id, type AS "media_type: _", url, listing_id
-               FROM listing.listing_media WHERE listing_id = ANY($1)"#,
+               FROM listing_media WHERE listing_id = ANY($1)"#,
             &listing_ids[..]
         )
         .fetch_all(&self.pg)
@@ -239,11 +239,11 @@ impl BusinessListingRepo {
                 owner.name AS owner_name,
                 owner.avatar AS owner_avatar,
                 owner.account_id AS owner_account_id
-               FROM listing.business_listings
-               INNER JOIN listing.service_listings ON service_listings.id = business_listings.service_listing_id
-               INNER JOIN business.businesses ON businesses.id = business_listings.business_id
-               INNER JOIN business.business_addresses ON business_addresses.business_id = businesses.id
-               INNER JOIN users.users AS owner ON owner.id = businesses.owner_id
+               FROM business_listings
+               INNER JOIN service_listings ON service_listings.id = business_listings.service_listing_id
+               INNER JOIN businesses ON businesses.id = business_listings.business_id
+               INNER JOIN business_addresses ON business_addresses.business_id = businesses.id
+               INNER JOIN users AS owner ON owner.id = businesses.owner_id
                WHERE business_listings.is_active = true
                  AND businesses.is_closed = false
                  AND ST_DWithin(
@@ -265,7 +265,7 @@ impl BusinessListingRepo {
         let all_media = sqlx::query_as!(
             ListingMediaEntity,
             r#"SELECT id, type AS "media_type: _", url, listing_id
-               FROM listing.listing_media WHERE listing_id = ANY($1)"#,
+               FROM listing_media WHERE listing_id = ANY($1)"#,
             &listing_ids[..]
         )
         .fetch_all(&self.pg)

@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO service_listings (id, price, available)\n               VALUES (gen_random_uuid(), $1, $2)\n               RETURNING id, price, available",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "price",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "available",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6d93d15d7f62f7d94b31b6728a26f247a025872acfd8d3d6719b3d0254742b31"
+}

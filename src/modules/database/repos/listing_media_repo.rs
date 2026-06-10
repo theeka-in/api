@@ -31,7 +31,7 @@ impl ListingMediaRepo {
         let media = sqlx::query_as!(
             ListingMediaEntity,
             r#"SELECT id, type AS "media_type: _", url, listing_id
-               FROM listing.listing_media WHERE listing_id = $1"#,
+               FROM listing_media WHERE listing_id = $1"#,
             listing_id
         )
         .fetch_all(&self.pg)
@@ -48,8 +48,8 @@ impl ListingMediaRepo {
     ) -> Result<ListingMediaEntity, DbError> {
         let media = sqlx::query_as!(
             ListingMediaEntity,
-            r#"INSERT INTO listing.listing_media (id, listing_id, type, url)
-               VALUES (gen_random_uuid(), $1, $2::shared.media_type, $3)
+            r#"INSERT INTO listing_media (id, listing_id, type, url)
+               VALUES (gen_random_uuid(), $1, $2::media_type, $3)
                RETURNING id, type AS "media_type: _", url, listing_id"#,
             listing_id, media_type as _, url
         )
@@ -61,7 +61,7 @@ impl ListingMediaRepo {
 
     pub async fn delete(&self, id: Uuid, listing_id: Uuid) -> Result<(), DbError> {
         sqlx::query!(
-            "DELETE FROM listing.listing_media WHERE id = $1 AND listing_id = $2",
+            "DELETE FROM listing_media WHERE id = $1 AND listing_id = $2",
             id, listing_id
         )
         .execute(&self.pg)

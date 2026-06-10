@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT account.id, account.phone, account.password, account.created_at\n               FROM accounts account\n               INNER JOIN users u ON u.account_id = account.id\n               WHERE u.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "phone",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "password",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bc8ff87fa6df7d76ba6063910cb2dfa642c62d8bdc504c85aa01a4e1ef1c1e18"
+}

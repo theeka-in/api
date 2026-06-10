@@ -28,7 +28,7 @@ impl AccountRepo {
     ) -> Result<AccountEntity, DbError> {
         let account = sqlx::query_as!(
             AccountEntity,
-            r#"INSERT INTO auth.accounts (id, phone, password)
+            r#"INSERT INTO accounts (id, phone, password)
                VALUES (gen_random_uuid(), $1, $2)
                RETURNING id, phone, password, created_at"#,
             phone,
@@ -44,7 +44,7 @@ impl AccountRepo {
         let account = sqlx::query_as!(
             AccountEntity,
             r#"SELECT id, phone, password, created_at
-               FROM auth.accounts
+               FROM accounts
                WHERE phone = $1"#,
             phone,
         )
@@ -58,7 +58,7 @@ impl AccountRepo {
         let account = sqlx::query_as!(
             AccountEntity,
             r#"SELECT id, phone, password, created_at
-               FROM auth.accounts
+               FROM accounts
                WHERE id = $1"#,
             id,
         )
@@ -72,8 +72,8 @@ impl AccountRepo {
         let account = sqlx::query_as!(
             AccountEntity,
             r#"SELECT account.id, account.phone, account.password, account.created_at
-               FROM auth.accounts account
-               INNER JOIN users.users u ON u.account_id = account.id
+               FROM accounts account
+               INNER JOIN users u ON u.account_id = account.id
                WHERE u.id = $1"#,
             user_id,
         )

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/migrations/20260609194330_create_categories,_sub_categories_and_services.sql" value="088711f2-3350-4bde-8566-4963906f117e" />
+    <file url="file://$USER_HOME$/Downloads/seed.sql" value="088711f2-3350-4bde-8566-4963906f117e" />
+  </component>
+</project>

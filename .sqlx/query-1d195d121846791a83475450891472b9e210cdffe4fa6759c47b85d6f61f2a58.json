@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, type AS \"media_type: _\", url, business_id\n               FROM business_media WHERE business_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "media_type: _",
+        "type_info": {
+          "Custom": {
+            "name": "media_type",
+            "kind": {
+              "Enum": [
+                "image",
+                "video"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "business_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1d195d121846791a83475450891472b9e210cdffe4fa6759c47b85d6f61f2a58"
+}

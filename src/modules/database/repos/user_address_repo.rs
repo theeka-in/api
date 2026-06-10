@@ -30,7 +30,7 @@ impl UserAddressRepo {
         let addresses = sqlx::query_as!(
             UserAddressEntity,
             r#"SELECT id, name, complete_address, city, state, pincode, latitude, longitude, user_id
-               FROM users.user_addresses
+               FROM user_addresses
                WHERE user_id = $1"#,
             user_id
         )
@@ -53,7 +53,7 @@ impl UserAddressRepo {
     ) -> Result<UserAddressEntity, DbError> {
         let address = sqlx::query_as!(
             UserAddressEntity,
-            r#"INSERT INTO users.user_addresses
+            r#"INSERT INTO user_addresses
                    (id, user_id, name, complete_address, city, state, pincode, latitude, longitude)
                VALUES
                    (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8)
@@ -87,7 +87,7 @@ impl UserAddressRepo {
     ) -> Result<UserAddressEntity, DbError> {
         let address = sqlx::query_as!(
             UserAddressEntity,
-            r#"UPDATE users.user_addresses
+            r#"UPDATE user_addresses
                SET
                    name             = COALESCE($3, name),
                    complete_address = COALESCE($4, complete_address),
@@ -116,7 +116,7 @@ impl UserAddressRepo {
 
     pub async fn delete(&self, id: Uuid, user_id: Uuid) -> Result<(), DbError> {
         sqlx::query!(
-            r#"DELETE FROM users.user_addresses WHERE id = $1 AND user_id = $2"#,
+            r#"DELETE FROM user_addresses WHERE id = $1 AND user_id = $2"#,
             id,
             user_id
         )

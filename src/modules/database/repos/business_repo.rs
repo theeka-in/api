@@ -31,7 +31,7 @@ impl BusinessRepo {
         let business = sqlx::query_as!(
             BusinessEntity,
             r#"SELECT id, phone_number, is_closed, title, logo, description, created_at, owner_id
-               FROM business.businesses WHERE id = $1"#,
+               FROM businesses WHERE id = $1"#,
             id
         )
         .fetch_optional(&self.pg)
@@ -66,9 +66,9 @@ impl BusinessRepo {
                 u.name AS owner_name, 
                 u.avatar AS owner_avatar, 
                 u.account_id AS owner_account_id
-               FROM business.businesses b
-               INNER JOIN business.business_addresses a ON a.business_id = b.id
-               INNER JOIN users.users u ON u.id = b.owner_id
+               FROM businesses b
+               INNER JOIN business_addresses a ON a.business_id = b.id
+               INNER JOIN users u ON u.id = b.owner_id
                WHERE b.id = $1"#,
             id
         )
@@ -116,7 +116,7 @@ impl BusinessRepo {
         let business = sqlx::query_as!(
             BusinessEntity,
             r#"SELECT id, phone_number, is_closed, title, logo, description, created_at, owner_id
-               FROM business.businesses WHERE id = $1 AND owner_id = $2"#,
+               FROM businesses WHERE id = $1 AND owner_id = $2"#,
             id,
             owner_id
         )
@@ -130,7 +130,7 @@ impl BusinessRepo {
         let businesses = sqlx::query_as!(
             BusinessEntity,
             r#"SELECT id, phone_number, is_closed, title, logo, description, created_at, owner_id
-               FROM business.businesses WHERE owner_id = $1"#,
+               FROM businesses WHERE owner_id = $1"#,
             owner_id
         )
         .fetch_all(&self.pg)
@@ -149,7 +149,7 @@ impl BusinessRepo {
     ) -> Result<BusinessEntity, DbError> {
         let business = sqlx::query_as!(
             BusinessEntity,
-            r#"INSERT INTO business.businesses (id, owner_id, phone_number, title, logo, description)
+            r#"INSERT INTO businesses (id, owner_id, phone_number, title, logo, description)
                VALUES (gen_random_uuid(), $1, $2, $3, $4, $5)
                RETURNING id, phone_number, is_closed, title, logo, description, created_at, owner_id"#,
             owner_id,
@@ -176,7 +176,7 @@ impl BusinessRepo {
     ) -> Result<BusinessEntity, DbError> {
         let business = sqlx::query_as!(
             BusinessEntity,
-            r#"UPDATE business.businesses SET
+            r#"UPDATE businesses SET
                phone_number = COALESCE($3, phone_number),
                title        = COALESCE($4, title),
                logo         = COALESCE($5, logo),
@@ -200,7 +200,7 @@ impl BusinessRepo {
 
     pub async fn delete(&self, id: Uuid, owner_id: Uuid) -> Result<(), DbError> {
         sqlx::query!(
-            "DELETE FROM business.businesses WHERE id = $1 AND owner_id = $2",
+            "DELETE FROM businesses WHERE id = $1 AND owner_id = $2",
             id,
             owner_id
         )

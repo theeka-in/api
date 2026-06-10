@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM business_addresses WHERE business_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc0f8edc6362bb0ee051b508e921abed988cf0c59c3c37b9c88cb96665bdb689"
+}

@@ -33,7 +33,7 @@ impl BusinessAddressRepo {
                       ST_Y(location::geometry) AS "latitude!",
                       ST_X(location::geometry) AS "longitude!",
                       business_id
-               FROM business.business_addresses WHERE business_id = $1"#,
+               FROM business_addresses WHERE business_id = $1"#,
             business_id
         )
         .fetch_optional(&self.pg)
@@ -57,7 +57,7 @@ impl BusinessAddressRepo {
     ) -> Result<BusinessAddressEntity, DbError> {
         let address = sqlx::query_as!(
             BusinessAddressEntity,
-            r#"INSERT INTO business.business_addresses
+            r#"INSERT INTO business_addresses
                    (business_id, address_line1, address_line2, landmark, pincode, city, state, location, radius)
                VALUES ($1, $2, $3, $4, $5, $6, $7, ST_SetSRID(ST_MakePoint($8, $9), 4326), $10)
                ON CONFLICT (business_id) DO UPDATE SET
@@ -105,7 +105,7 @@ impl BusinessAddressRepo {
     ) -> Result<BusinessAddressEntity, DbError> {
         let address = sqlx::query_as!(
             BusinessAddressEntity,
-            r#"UPDATE business.business_addresses SET
+            r#"UPDATE business_addresses SET
                    address_line1 = COALESCE($2, address_line1),
                    address_line2 = COALESCE($3, address_line2),
                    landmark      = COALESCE($4, landmark),
@@ -142,7 +142,7 @@ impl BusinessAddressRepo {
 
     pub async fn delete(&self, business_id: Uuid) -> Result<(), DbError> {
         sqlx::query!(
-            "DELETE FROM business.business_addresses WHERE business_id = $1",
+            "DELETE FROM business_addresses WHERE business_id = $1",
             business_id
         )
         .execute(&self.pg)

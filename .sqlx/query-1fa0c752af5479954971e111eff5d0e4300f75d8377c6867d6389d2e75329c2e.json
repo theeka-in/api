@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE service_listings SET\n               price = COALESCE($2, price),\n               available = COALESCE($3, available)\n               WHERE id = $1\n               RETURNING id, price, available",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "price",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "available",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1fa0c752af5479954971e111eff5d0e4300f75d8377c6867d6389d2e75329c2e"
+}

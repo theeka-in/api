@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT token, account_id, user_id, user_agent, ip_address, created_at\n               FROM sessions\n               WHERE token = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "token",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "account_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "user_agent",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "ip_address",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "35535316779b8d124e7e0cf4351da8590ecd5c717369abfa1b4d73c18608a8f8"
+}

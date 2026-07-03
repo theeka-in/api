@@ -1,5 +1,7 @@
 use poem_openapi::{Object, OpenApi, payload::Json};
 
+use crate::shared::guards::AdminGuard;
+
 #[derive(Debug, Object)]
 pub struct HealthCheckResponse {
     pub status: String,

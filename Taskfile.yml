@@ -76,6 +76,7 @@ tasks:
 
     check:
         desc: Check compilation
+        deps: [dev:start-compose]
         cmds:
             - cargo check
 

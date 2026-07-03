@@ -7,7 +7,6 @@ use theeka_api::api;
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     dotenvy::dotenv().ok();
-
     let the_port = env::var("PORT").unwrap_or("404".to_owned());
     let the_address = format!("0.0.0.0:{the_port}");
 
@@ -31,7 +30,6 @@ async fn main() -> Result<(), std::io::Error> {
     }
 
     let ollama_url = std::env::var("OLLAMA_URL").expect("OLLAMA_URL not found");
-
     let (the_api, _) = api::init(pg_pool, &the_port, ollama_url).await;
 
     Server::new(TcpListener::bind(the_address))

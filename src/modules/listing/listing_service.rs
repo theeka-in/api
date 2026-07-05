@@ -1,9 +1,8 @@
 use crate::modules::business::BusinessService;
 use crate::modules::database::DatabaseService;
-use crate::modules::embedding::EmbeddingService;
 use crate::modules::listing::listing_dto::{
-    CreateListingMediaDto, CreateProductListingDto, CreateServiceListingDto, ListingMediaDto,
-    ProductDto, ServiceDto, UpdateProductListingDto, UpdateServiceListingDto,
+    CreateListingMediaDto, CreateProductListingDto, CreateServiceListingDto, ListingMediaDto
+    , UpdateProductListingDto, UpdateServiceListingDto,
 };
 use crate::modules::listing::{
     ExploreProductListingDto, ExploreServiceListingDto, ProductListingDto, ServiceListingDto,
@@ -17,44 +16,31 @@ use uuid::Uuid;
 pub struct ListingService {
     db: Arc<DatabaseService>,
     business: Arc<BusinessService>,
-    embedding: Arc<Mutex<EmbeddingService>>,
 }
 
 impl ListingService {
     pub fn new(
         db: Arc<DatabaseService>,
         business_service: Arc<BusinessService>,
-        embedding_service: Arc<Mutex<EmbeddingService>>,
     ) -> Arc<Self> {
         Arc::new(Self {
             db,
             business: business_service,
-            embedding: embedding_service,
         })
     }
 
-    fn embed_listing_properties(title: &str, description: Option<&str>, price: &str) -> String {
-        let mut return_value = format!("Title: {}\nPrice: {}", title, price);
-
-        if let Some(desc) = description {
-            return_value.push_str(&format!("\nDescription: {}", desc));
-        }
-
-        return_value
-    }
-
+    // TODO: no rank strategy yet for product explore (embedding dropped). `query`
+    // currently unused — kept in signature so callers/API don't break.
     pub async fn explore_products_listings_nearby(
         &self,
         latitude: f64,
         longitude: f64,
-        query: String,
+        _query: String,
     ) -> Result<Vec<ExploreProductListingDto>, ServiceError> {
-        let query_embedding = self.embedding.lock().await.embed(query).await?;
-
         let listings = self
             .db
             .business_listing
-            .explore_products_nearby(latitude, longitude, query_embedding)
+            .explore_products_nearby(latitude, longitude)
             .await?;
 
         Ok(listings
@@ -69,12 +55,10 @@ impl ListingService {
         longitude: f64,
         query: String,
     ) -> Result<Vec<ExploreServiceListingDto>, ServiceError> {
-        let query_embedding = self.embedding.lock().await.embed(query).await?;
-
         let listings = self
             .db
             .business_listing
-            .explore_services_nearby(latitude, longitude, query_embedding)
+            .explore_services_nearby(latitude, longitude, &query)
             .await?;
 
         Ok(listings
@@ -149,17 +133,6 @@ impl ListingService {
             .get_business_by_id_and_owner(business_id, owner_id)
             .await?;
 
-        let embedding = self
-            .embedding
-            .lock()
-            .await
-            .embed(Self::embed_listing_properties(
-                &body.title,
-                body.description.as_deref(),
-                &body.price.to_string(),
-            ))
-            .await?;
-
         let listing = self
             .db
             .product_listing
@@ -170,7 +143,6 @@ impl ListingService {
                 body.logo,
                 body.price,
                 body.stock,
-                embedding,
             )
             .await?;
 
@@ -184,27 +156,8 @@ impl ListingService {
         listing_id: Uuid,
         body: UpdateProductListingDto,
     ) -> Result<ProductListingDto, ServiceError> {
-        let prev = self
-            .get_product_listing_by_id_and_business_and_owner(owner_id, business_id, listing_id)
+        self.get_product_listing_by_id_and_business_and_owner(owner_id, business_id, listing_id)
             .await?;
-
-        let mut embedding: Option<pgvector::Vector> = None;
-
-        if body.title.is_some() || body.description.is_some() || body.price.is_some() {
-            embedding = Some(
-                self.embedding
-                    .lock()
-                    .await
-                    .embed(Self::embed_listing_properties(
-                        body.title.as_deref().unwrap_or(&prev.listing.title),
-                        body.description
-                            .as_deref()
-                            .or(prev.listing.description.as_deref()),
-                        &body.price.unwrap_or(prev.product.price).to_string(),
-                    ))
-                    .await?,
-            );
-        }
 
         let updated = self
             .db
@@ -218,7 +171,6 @@ impl ListingService {
                 body.is_active,
                 body.price,
                 body.stock,
-                embedding,
             )
             .await?;
 
@@ -308,28 +260,17 @@ impl ListingService {
             .get_business_by_id_and_owner(business_id, owner_id)
             .await?;
 
-        let embedding = self
-            .embedding
-            .lock()
-            .await
-            .embed(Self::embed_listing_properties(
-                &body.title,
-                body.description.as_deref(),
-                &body.price,
-            ))
-            .await?;
-
         let listing = self
             .db
             .service_listing
             .create(
                 business_id,
+                body.service_listing_type_id,
                 body.title,
                 body.description,
                 body.logo,
                 body.price,
                 body.available,
-                embedding,
             )
             .await?;
 
@@ -343,27 +284,8 @@ impl ListingService {
         listing_id: Uuid,
         body: UpdateServiceListingDto,
     ) -> Result<ServiceListingDto, ServiceError> {
-        let prev = self
-            .get_service_listing_by_id_and_business_and_owner(owner_id, business_id, listing_id)
+        self.get_service_listing_by_id_and_business_and_owner(owner_id, business_id, listing_id)
             .await?;
-
-        let mut embedding: Option<pgvector::Vector> = None;
-
-        if body.title.is_some() || body.description.is_some() || body.price.is_some() {
-            embedding = Some(
-                self.embedding
-                    .lock()
-                    .await
-                    .embed(Self::embed_listing_properties(
-                        body.title.as_deref().unwrap_or(&prev.listing.title),
-                        body.description
-                            .as_deref()
-                            .or(prev.listing.description.as_deref()),
-                        body.price.as_deref().unwrap_or(&prev.service.price),
-                    ))
-                    .await?,
-            );
-        }
 
         let updated = self
             .db
@@ -371,13 +293,13 @@ impl ListingService {
             .update(
                 listing_id,
                 business_id,
+                body.service_listing_type_id,
                 body.title,
                 body.description,
                 body.logo,
                 body.is_active,
                 body.price,
                 body.available,
-                embedding,
             )
             .await?;
 

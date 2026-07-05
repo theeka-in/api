@@ -1,0 +1,209 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n                listing.id,\n                listing.title,\n                listing.description,\n                listing.logo,\n                listing.is_active,\n                listing.created_at,\n                listing.updated_at,\n                listing.business_id,\n                listing.product_listing_id,\n                listing.service_listing_id,\n                product_listings.id AS pl_id,\n                product_listings.price,\n                product_listings.stock,\n                businesses.phone_number AS b_phone_number,\n                businesses.is_closed AS b_is_closed,\n                businesses.title AS b_title,\n                businesses.logo AS b_logo,\n                businesses.description AS b_description,\n                businesses.created_at AS b_created_at,\n                businesses.owner_id AS b_owner_id,\n                business_addresses.address_line1,\n                business_addresses.address_line2,\n                business_addresses.landmark,\n                business_addresses.city,\n                business_addresses.state,\n                business_addresses.pincode,\n                business_addresses.radius,\n                ST_X(business_addresses.location::geometry) AS longitude,\n                ST_Y(business_addresses.location::geometry) AS latitude,\n\n                owner.name AS owner_name,\n                owner.avatar AS owner_avatar,\n                owner.account_id AS owner_account_id\n               FROM listings AS listing\n               INNER JOIN product_listings ON product_listings.id = listing.product_listing_id\n               INNER JOIN businesses ON businesses.id = listing.business_id\n               INNER JOIN business_addresses ON business_addresses.business_id = businesses.id\n               INNER JOIN users AS owner ON owner.id = businesses.owner_id\n               WHERE listing.is_active = true\n                 AND businesses.is_closed = false\n                 AND ST_DWithin(\n                     business_addresses.location,\n                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,\n                     business_addresses.radius\n                 )\n               LIMIT 100",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "logo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_active",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "business_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "product_listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 9,
+        "name": "service_listing_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "pl_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "price",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 12,
+        "name": "stock",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "b_phone_number",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 14,
+        "name": "b_is_closed",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 15,
+        "name": "b_title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 16,
+        "name": "b_logo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 17,
+        "name": "b_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 18,
+        "name": "b_created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 19,
+        "name": "b_owner_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 20,
+        "name": "address_line1",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 21,
+        "name": "address_line2",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 22,
+        "name": "landmark",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 23,
+        "name": "city",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 24,
+        "name": "state",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 25,
+        "name": "pincode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 26,
+        "name": "radius",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 27,
+        "name": "longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 28,
+        "name": "latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 29,
+        "name": "owner_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 30,
+        "name": "owner_avatar",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 31,
+        "name": "owner_account_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "2fb187972020e8cb5bcc2c3e2760877ca572f0a8f46e6391d64610f0ddd2534d"
+}

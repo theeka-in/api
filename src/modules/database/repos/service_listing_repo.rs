@@ -1,4 +1,4 @@
-use crate::{modules::database::BusinessListingEntity, shared::errors::DbError};
+use crate::{modules::database::ListingEntity, shared::errors::DbError};
 use sqlx::{FromRow, PgPool};
 use uuid::Uuid;
 
@@ -7,6 +7,7 @@ pub struct ServiceListingEntity {
     pub id: Uuid,
     pub price: String,
     pub available: bool,
+    pub service_listings_type_id: Uuid,
 }
 
 #[derive(Debug)]
@@ -22,27 +23,39 @@ impl ServiceListingRepo {
     pub async fn find_all_by_business(
         &self,
         business_id: Uuid,
-    ) -> Result<Vec<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+    ) -> Result<Vec<(ListingEntity, ServiceListingEntity)>, DbError> {
         let rows = sqlx::query!(
-            r#"SELECT
-                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
-                bl.created_at, bl.updated_at, bl.business_id,
-                bl.product_listing_id, bl.service_listing_id,
-                bl.embedding AS "embedding: pgvector::Vector",
-                sl.id as sl_id, sl.price, sl.available
-               FROM business_listings bl
-               INNER JOIN service_listings sl ON sl.id = bl.service_listing_id
-               WHERE bl.business_id = $1"#,
+            r#"
+            SELECT
+                listing.id,
+                listing.title,
+                listing.description,
+                listing.logo,
+                listing.is_active,
+                listing.created_at,
+                listing.updated_at,
+                listing.business_id,
+                listing.product_listing_id,
+                listing.service_listing_id,
+                service_listing.id                       AS service_listing_id_alias,
+                service_listing.price,
+                service_listing.available,
+                service_listing.service_listings_type_id
+            FROM listings AS listing
+            INNER JOIN service_listings AS service_listing
+                ON service_listing.id = listing.service_listing_id
+            WHERE listing.business_id = $1
+            "#,
             business_id
         )
-        .fetch_all(&self.pg)
-        .await?;
+            .fetch_all(&self.pg)
+            .await?;
 
         Ok(rows
             .into_iter()
             .map(|row| {
                 (
-                    BusinessListingEntity {
+                    ListingEntity {
                         id: row.id,
                         title: row.title,
                         description: row.description,
@@ -53,12 +66,12 @@ impl ServiceListingRepo {
                         business_id: row.business_id,
                         product_listing_id: row.product_listing_id,
                         service_listing_id: row.service_listing_id,
-                        embedding: row.embedding,
                     },
                     ServiceListingEntity {
-                        id: row.sl_id,
+                        id: row.service_listing_id_alias,
                         price: row.price,
                         available: row.available,
+                        service_listings_type_id: row.service_listings_type_id,
                     },
                 )
             })
@@ -69,26 +82,38 @@ impl ServiceListingRepo {
         &self,
         id: Uuid,
         business_id: Uuid,
-    ) -> Result<Option<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+    ) -> Result<Option<(ListingEntity, ServiceListingEntity)>, DbError> {
         let row = sqlx::query!(
-            r#"SELECT
-                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
-                bl.created_at, bl.updated_at, bl.business_id,
-                bl.product_listing_id, bl.service_listing_id,
-                bl.embedding AS "embedding: pgvector::Vector",
-                sl.id as sl_id, sl.price, sl.available
-               FROM business_listings bl
-               INNER JOIN service_listings sl ON sl.id = bl.service_listing_id
-               WHERE bl.id = $1 AND bl.business_id = $2"#,
+            r#"
+            SELECT
+                listing.id,
+                listing.title,
+                listing.description,
+                listing.logo,
+                listing.is_active,
+                listing.created_at,
+                listing.updated_at,
+                listing.business_id,
+                listing.product_listing_id,
+                listing.service_listing_id,
+                service_listing.id AS service_listing_id_alias,
+                service_listing.price,
+                service_listing.available,
+                service_listing.service_listings_type_id
+            FROM listings AS listing
+            INNER JOIN service_listings AS service_listing
+                ON service_listing.id = listing.service_listing_id
+            WHERE listing.id = $1 AND listing.business_id = $2
+            "#,
             id,
             business_id
         )
-        .fetch_optional(&self.pg)
-        .await?;
+            .fetch_optional(&self.pg)
+            .await?;
 
         Ok(row.map(|row| {
             (
-                BusinessListingEntity {
+                ListingEntity {
                     id: row.id,
                     title: row.title,
                     description: row.description,
@@ -99,12 +124,12 @@ impl ServiceListingRepo {
                     business_id: row.business_id,
                     product_listing_id: row.product_listing_id,
                     service_listing_id: row.service_listing_id,
-                    embedding: row.embedding,
                 },
                 ServiceListingEntity {
-                    id: row.sl_id,
+                    id: row.service_listing_id_alias,
                     price: row.price,
                     available: row.available,
+                    service_listings_type_id: row.service_listings_type_id,
                 },
             )
         }))
@@ -115,28 +140,41 @@ impl ServiceListingRepo {
         id: Uuid,
         business_id: Uuid,
         owner_id: Uuid,
-    ) -> Result<Option<(BusinessListingEntity, ServiceListingEntity)>, DbError> {
+    ) -> Result<Option<(ListingEntity, ServiceListingEntity)>, DbError> {
         let row = sqlx::query!(
-            r#"SELECT
-                bl.id, bl.title, bl.description, bl.logo, bl.is_active,
-                bl.created_at, bl.updated_at, bl.business_id,
-                bl.product_listing_id, bl.service_listing_id,
-                bl.embedding AS "embedding: pgvector::Vector",
-                sl.id as sl_id, sl.price, sl.available
-               FROM business_listings bl
-               INNER JOIN service_listings sl ON sl.id = bl.service_listing_id
-               INNER JOIN businesses bb ON bb.id = bl.business_id
-               WHERE bl.id = $1 AND bl.business_id = $2 AND bb.owner_id = $3"#,
+            r#"
+            SELECT
+                listing.id,
+                listing.title,
+                listing.description,
+                listing.logo,
+                listing.is_active,
+                listing.created_at,
+                listing.updated_at,
+                listing.business_id,
+                listing.product_listing_id,
+                listing.service_listing_id,
+                service_listing.id AS service_listing_id_alias,
+                service_listing.price,
+                service_listing.available,
+                service_listing.service_listings_type_id
+            FROM listings AS listing
+            INNER JOIN service_listings AS service_listing
+                ON service_listing.id = listing.service_listing_id
+            INNER JOIN businesses AS business
+                ON business.id = listing.business_id
+            WHERE listing.id = $1 AND listing.business_id = $2 AND business.owner_id = $3
+            "#,
             id,
             business_id,
             owner_id
         )
-        .fetch_optional(&self.pg)
-        .await?;
+            .fetch_optional(&self.pg)
+            .await?;
 
         Ok(row.map(|row| {
             (
-                BusinessListingEntity {
+                ListingEntity {
                     id: row.id,
                     title: row.title,
                     description: row.description,
@@ -147,12 +185,12 @@ impl ServiceListingRepo {
                     business_id: row.business_id,
                     product_listing_id: row.product_listing_id,
                     service_listing_id: row.service_listing_id,
-                    embedding: row.embedding,
                 },
                 ServiceListingEntity {
-                    id: row.sl_id,
+                    id: row.service_listing_id_alias,
                     price: row.price,
                     available: row.available,
+                    service_listings_type_id: row.service_listings_type_id,
                 },
             )
         }))
@@ -161,38 +199,46 @@ impl ServiceListingRepo {
     pub async fn create(
         &self,
         business_id: Uuid,
+        service_listing_type_id: Uuid,
         title: String,
         description: Option<String>,
         logo: Option<String>,
         price: String,
         available: bool,
-        embedding: pgvector::Vector,
-    ) -> Result<(BusinessListingEntity, ServiceListingEntity), DbError> {
+    ) -> Result<(ListingEntity, ServiceListingEntity), DbError> {
         let mut tx = self.pg.begin().await?;
 
         let service = sqlx::query_as!(
             ServiceListingEntity,
-            r#"INSERT INTO service_listings (id, price, available)
-               VALUES (gen_random_uuid(), $1, $2)
-               RETURNING id, price, available"#,
+            r#"
+            INSERT INTO service_listings (id, price, available, service_listings_type_id)
+            VALUES (gen_random_uuid(), $1, $2, $3)
+            RETURNING id, price, available, service_listings_type_id
+            "#,
             price,
-            available
+            available,
+            service_listing_type_id
         )
-        .fetch_one(&mut *tx)
-        .await?;
+            .fetch_one(&mut *tx)
+            .await?;
 
         let listing = sqlx::query_as!(
-            BusinessListingEntity,
-            r#"INSERT INTO business_listings
-                   (id, business_id, title, description, logo, service_listing_id, updated_at, embedding)
-               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now(), $6)
-               RETURNING id, title, description, logo, is_active, created_at, updated_at,
-                         business_id, product_listing_id, service_listing_id,
-                         embedding AS "embedding: pgvector::Vector""#,
-            business_id, title, description, logo, service.id, embedding as _,
+            ListingEntity,
+            r#"
+            INSERT INTO listings
+                (id, business_id, title, description, logo, service_listing_id, updated_at)
+            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now())
+            RETURNING id, title, description, logo, is_active, created_at, updated_at,
+                      business_id, product_listing_id, service_listing_id
+            "#,
+            business_id,
+            title,
+            description,
+            logo,
+            service.id,
         )
-        .fetch_one(&mut *tx)
-        .await?;
+            .fetch_one(&mut *tx)
+            .await?;
 
         tx.commit().await?;
         Ok((listing, service))
@@ -202,53 +248,56 @@ impl ServiceListingRepo {
         &self,
         listing_id: Uuid,
         business_id: Uuid,
+        service_listing_type_id: Option<Uuid>,
         title: Option<String>,
         description: Option<String>,
         logo: Option<String>,
         is_active: Option<bool>,
         price: Option<String>,
         available: Option<bool>,
-        embedding: Option<pgvector::Vector>,
-    ) -> Result<(BusinessListingEntity, ServiceListingEntity), DbError> {
+    ) -> Result<(ListingEntity, ServiceListingEntity), DbError> {
         let mut tx = self.pg.begin().await?;
 
         let listing = sqlx::query_as!(
-            BusinessListingEntity,
-            r#"UPDATE business_listings SET
-               title = COALESCE($3, title),
-               description = COALESCE($4, description),
-               logo = COALESCE($5, logo),
-               is_active = COALESCE($6, is_active),
-               embedding = COALESCE($7, embedding),
-               updated_at = now()
-               WHERE id = $1 AND business_id = $2
-               RETURNING id, title, description, logo, is_active, created_at, updated_at,
-                         business_id, product_listing_id, service_listing_id,
-                         embedding AS "embedding: pgvector::Vector""#,
+            ListingEntity,
+            r#"
+            UPDATE listings SET
+                title       = COALESCE($3, title),
+                description = COALESCE($4, description),
+                logo        = COALESCE($5, logo),
+                is_active   = COALESCE($6, is_active),
+                updated_at  = now()
+            WHERE id = $1 AND business_id = $2
+            RETURNING id, title, description, logo, is_active, created_at, updated_at,
+                      business_id, product_listing_id, service_listing_id
+            "#,
             listing_id,
             business_id,
             title,
             description,
             logo,
             is_active,
-            embedding as _,
         )
-        .fetch_one(&mut *tx)
-        .await?;
+            .fetch_one(&mut *tx)
+            .await?;
 
         let service = sqlx::query_as!(
             ServiceListingEntity,
-            r#"UPDATE service_listings SET
-               price = COALESCE($2, price),
-               available = COALESCE($3, available)
-               WHERE id = $1
-               RETURNING id, price, available"#,
+            r#"
+            UPDATE service_listings SET
+                price                    = COALESCE($2, price),
+                available                = COALESCE($3, available),
+                service_listings_type_id  = COALESCE($4, service_listings_type_id)
+            WHERE id = $1
+            RETURNING id, price, available, service_listings_type_id
+            "#,
             listing.service_listing_id,
             price,
-            available
+            available,
+            service_listing_type_id
         )
-        .fetch_one(&mut *tx)
-        .await?;
+            .fetch_one(&mut *tx)
+            .await?;
 
         tx.commit().await?;
         Ok((listing, service))
@@ -256,11 +305,15 @@ impl ServiceListingRepo {
 
     pub async fn delete(&self, id: Uuid, business_id: Uuid) -> Result<(), DbError> {
         sqlx::query!(
-            "DELETE FROM business_listings WHERE id = $1 AND business_id = $2 AND service_listing_id IS NOT NULL",
-            id, business_id
+            r#"
+            DELETE FROM listings
+            WHERE id = $1 AND business_id = $2 AND service_listing_id IS NOT NULL
+            "#,
+            id,
+            business_id
         )
-        .execute(&self.pg)
-        .await?;
+            .execute(&self.pg)
+            .await?;
 
         Ok(())
     }

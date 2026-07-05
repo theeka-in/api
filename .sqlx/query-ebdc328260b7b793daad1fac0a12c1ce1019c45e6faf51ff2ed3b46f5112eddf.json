@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                bl.embedding AS \"embedding: pgvector::Vector\",\n                pl.id as pl_id, pl.price, pl.stock\n               FROM business_listings bl\n               INNER JOIN product_listings pl ON pl.id = bl.product_listing_id\n               WHERE bl.id = $1 AND bl.business_id = $2",
+  "query": "\n            INSERT INTO listings\n                (id, business_id, title, description, logo, service_listing_id, updated_at)\n            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now())\n            RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                      business_id, product_listing_id, service_listing_id\n            ",
   "describe": {
     "columns": [
       {
@@ -52,36 +52,14 @@
         "ordinal": 9,
         "name": "service_listing_id",
         "type_info": "Uuid"
-      },
-      {
-        "ordinal": 10,
-        "name": "embedding: pgvector::Vector",
-        "type_info": {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
-      },
-      {
-        "ordinal": 11,
-        "name": "pl_id",
-        "type_info": "Uuid"
-      },
-      {
-        "ordinal": 12,
-        "name": "price",
-        "type_info": "Float8"
-      },
-      {
-        "ordinal": 13,
-        "name": "stock",
-        "type_info": "Int4"
       }
     ],
     "parameters": {
       "Left": [
         "Uuid",
+        "Text",
+        "Text",
+        "Text",
         "Uuid"
       ]
     },
@@ -95,12 +73,8 @@
       false,
       false,
       true,
-      true,
-      false,
-      false,
-      false,
-      false
+      true
     ]
   },
-  "hash": "4a2df7b205638081e25b6467e574976dda59530eb07218fa981a018760c8af9c"
+  "hash": "ebdc328260b7b793daad1fac0a12c1ce1019c45e6faf51ff2ed3b46f5112eddf"
 }

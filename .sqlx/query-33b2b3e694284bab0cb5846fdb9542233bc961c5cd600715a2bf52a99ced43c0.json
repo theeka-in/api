@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                business_listings.id,\n                business_listings.title,\n                business_listings.description,\n                business_listings.logo,\n                business_listings.is_active,\n                business_listings.created_at,\n                business_listings.updated_at,\n                business_listings.business_id,\n                business_listings.product_listing_id,\n                business_listings.service_listing_id,\n                business_listings.embedding AS \"embedding: pgvector::Vector\",\n                product_listings.id AS pl_id,\n                product_listings.price,\n                product_listings.stock,\n                businesses.phone_number AS b_phone_number,\n                businesses.is_closed AS b_is_closed,\n                businesses.title AS b_title,\n                businesses.logo AS b_logo,\n                businesses.description AS b_description,\n                businesses.created_at AS b_created_at,\n                businesses.owner_id AS b_owner_id,\n                business_addresses.address_line1,\n                business_addresses.address_line2,\n                business_addresses.landmark,\n                business_addresses.city,\n                business_addresses.state,\n                business_addresses.pincode,\n                business_addresses.radius,\n                ST_X(business_addresses.location::geometry) AS longitude,\n                ST_Y(business_addresses.location::geometry) AS latitude,\n\n                owner.name AS owner_name,\n                owner.avatar AS owner_avatar,\n                owner.account_id AS owner_account_id\n               FROM business_listings\n               INNER JOIN product_listings ON product_listings.id = business_listings.product_listing_id\n               INNER JOIN businesses ON businesses.id = business_listings.business_id\n               INNER JOIN business_addresses ON business_addresses.business_id = businesses.id\n               INNER JOIN users AS owner ON owner.id = businesses.owner_id\n               WHERE business_listings.is_active = true\n                 AND businesses.is_closed = false\n                 AND ST_DWithin(\n                     business_addresses.location,\n                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,\n                     business_addresses.radius\n                 )\n                 AND 1 - (business_listings.embedding <=> $3) >= 0.4\n               ORDER BY business_listings.embedding <=> $3\n               LIMIT 100",
+  "query": "SELECT\n                listing.id,\n                listing.title,\n                listing.description,\n                listing.logo,\n                listing.is_active,\n                listing.created_at,\n                listing.updated_at,\n                listing.business_id,\n                listing.product_listing_id,\n                listing.service_listing_id,\n                service_listings.id AS sl_id,\n                service_listings.price,\n                service_listings.available,\n                service_listings.service_listings_type_id,\n                businesses.phone_number AS b_phone_number,\n                businesses.is_closed AS b_is_closed,\n                businesses.title AS b_title,\n                businesses.logo AS b_logo,\n                businesses.description AS b_description,\n                businesses.created_at AS b_created_at,\n                businesses.owner_id AS b_owner_id,\n                business_addresses.address_line1,\n                business_addresses.address_line2,\n                business_addresses.landmark,\n                business_addresses.city,\n                business_addresses.state,\n                business_addresses.pincode,\n                business_addresses.radius,\n                ST_X(business_addresses.location::geometry) AS longitude,\n                ST_Y(business_addresses.location::geometry) AS latitude,\n\n                owner.name AS owner_name,\n                owner.avatar AS owner_avatar,\n                owner.account_id AS owner_account_id\n               FROM listings AS listing\n               INNER JOIN service_listings ON service_listings.id = listing.service_listing_id\n               INNER JOIN service_listings_type ON service_listings_type.id = service_listings.service_listings_type_id\n               INNER JOIN businesses ON businesses.id = listing.business_id\n               INNER JOIN business_addresses ON business_addresses.business_id = businesses.id\n               INNER JOIN users AS owner ON owner.id = businesses.owner_id\n               WHERE listing.is_active = true\n                 AND businesses.is_closed = false\n                 AND ST_DWithin(\n                     business_addresses.location,\n                     ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,\n                     business_addresses.radius\n                 )\n                 AND to_tsvector('english', service_listings_type.name) @@ plainto_tsquery('english', $3)\n               ORDER BY ts_rank(\n                   to_tsvector('english', service_listings_type.name),\n                   plainto_tsquery('english', $3)\n               ) DESC\n               LIMIT 100",
   "describe": {
     "columns": [
       {
@@ -55,28 +55,23 @@
       },
       {
         "ordinal": 10,
-        "name": "embedding: pgvector::Vector",
-        "type_info": {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
-      },
-      {
-        "ordinal": 11,
-        "name": "pl_id",
+        "name": "sl_id",
         "type_info": "Uuid"
       },
       {
-        "ordinal": 12,
+        "ordinal": 11,
         "name": "price",
-        "type_info": "Float8"
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 12,
+        "name": "available",
+        "type_info": "Bool"
       },
       {
         "ordinal": 13,
-        "name": "stock",
-        "type_info": "Int4"
+        "name": "service_listings_type_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 14,
@@ -178,12 +173,7 @@
       "Left": [
         "Float8",
         "Float8",
-        {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
+        "Text"
       ]
     },
     "nullable": [
@@ -222,5 +212,5 @@
       false
     ]
   },
-  "hash": "b651daa861ed8a055c3d61a6423ccf7b1210a00b428be3d5ce9e37a35fe26513"
+  "hash": "33b2b3e694284bab0cb5846fdb9542233bc961c5cd600715a2bf52a99ced43c0"
 }

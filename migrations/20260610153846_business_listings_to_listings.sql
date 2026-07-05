@@ -1,0 +1,9 @@
+ALTER TABLE business_listings RENAME TO listings;
+ 
+ALTER TABLE listings RENAME CONSTRAINT business_listings_pkey TO listings_pkey;
+ALTER TABLE listings RENAME CONSTRAINT business_listings_business_id_fkey TO listings_business_id_fkey;
+ALTER TABLE listings RENAME CONSTRAINT business_listings_product_listing_id_fkey TO listings_product_listing_id_fkey;
+ALTER TABLE listings RENAME CONSTRAINT business_listings_service_listing_id_fkey TO listings_service_listing_id_fkey;
+ 
+ALTER INDEX business_listings_product_listing_id_key RENAME TO listings_product_listing_id_key;
+ALTER INDEX business_listings_service_listing_id_key RENAME TO listings_service_listing_id_key;

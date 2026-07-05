@@ -1,6 +1,6 @@
 use poem::{
-    EndpointExt, Route,
-    middleware::{Cors, CorsEndpoint},
+    middleware::{Cors, CorsEndpoint}, EndpointExt,
+    Route,
 };
 use poem_openapi::OpenApiService;
 use reqwest::Method;

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE product_listings SET\n               price = COALESCE($2, price),\n               stock = COALESCE($3, stock)\n               WHERE id = $1\n               RETURNING id, price, stock",
+  "query": "\n            INSERT INTO product_listings (id, price, stock)\n            VALUES (gen_random_uuid(), $1, $2)\n            RETURNING id, price, stock\n            ",
   "describe": {
     "columns": [
       {
@@ -21,7 +21,6 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Float8",
         "Int4"
       ]
@@ -32,5 +31,5 @@
       false
     ]
   },
-  "hash": "50894eea81de992fd6e367fdbaf93c4d0cabbd90fda97a41014258797f50a266"
+  "hash": "c2f025201b891b0a03c52831c790aea312197c8616f0b5b248b78b530340b739"
 }

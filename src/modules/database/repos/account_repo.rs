@@ -1,7 +1,7 @@
 use crate::shared::errors::DbError;
-use sqlx::{PgPool, prelude::FromRow};
-use uuid::Uuid;
 use sqlx::types::chrono;
+use sqlx::{prelude::FromRow, PgPool};
+use uuid::Uuid;
 
 #[derive(Debug, FromRow)]
 pub struct AccountEntity {
@@ -21,11 +21,7 @@ impl AccountRepo {
         Self { pg }
     }
 
-    pub async fn create(
-        &self,
-        phone: i64,
-        password: String,
-    ) -> Result<AccountEntity, DbError> {
+    pub async fn create(&self, phone: i64, password: String) -> Result<AccountEntity, DbError> {
         let account = sqlx::query_as!(
             AccountEntity,
             r#"INSERT INTO accounts (id, phone, password)

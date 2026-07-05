@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                bl.embedding AS \"embedding: pgvector::Vector\",\n                pl.id as pl_id, pl.price, pl.stock\n               FROM business_listings bl\n               INNER JOIN product_listings pl ON pl.id = bl.product_listing_id\n               INNER JOIN businesses bb ON bb.id = bl.business_id\n               WHERE bl.id = $1 AND bl.business_id = $2 AND bb.owner_id = $3",
+  "query": "\n            SELECT\n                listing.id,\n                listing.title,\n                listing.description,\n                listing.logo,\n                listing.is_active,\n                listing.created_at,\n                listing.updated_at,\n                listing.business_id,\n                listing.product_listing_id,\n                listing.service_listing_id,\n                product_listing.id AS product_listing_id_alias,\n                product_listing.price,\n                product_listing.stock\n            FROM listings AS listing\n            INNER JOIN product_listings AS product_listing\n                ON product_listing.id = listing.product_listing_id\n            INNER JOIN businesses AS business\n                ON business.id = listing.business_id\n            WHERE listing.id = $1 AND listing.business_id = $2 AND business.owner_id = $3\n            ",
   "describe": {
     "columns": [
       {
@@ -55,26 +55,16 @@
       },
       {
         "ordinal": 10,
-        "name": "embedding: pgvector::Vector",
-        "type_info": {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
-      },
-      {
-        "ordinal": 11,
-        "name": "pl_id",
+        "name": "product_listing_id_alias",
         "type_info": "Uuid"
       },
       {
-        "ordinal": 12,
+        "ordinal": 11,
         "name": "price",
         "type_info": "Float8"
       },
       {
-        "ordinal": 13,
+        "ordinal": 12,
         "name": "stock",
         "type_info": "Int4"
       }
@@ -99,9 +89,8 @@
       true,
       false,
       false,
-      false,
       false
     ]
   },
-  "hash": "b628c71d9910652da9822a19f1b2c5ad67ac42d5828b288c2c441cafd174fd07"
+  "hash": "004da339e6c5f521aa12fa4bf99aaf1aa15a9f523145d2fbe00ad41ee9805cf3"
 }

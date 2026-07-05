@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO business_listings\n                   (id, business_id, title, description, logo, product_listing_id, updated_at, embedding)\n               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now(), $6)\n               RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                         business_id, product_listing_id, service_listing_id,\n                         embedding AS \"embedding: pgvector::Vector\"",
+  "query": "\n            SELECT\n                listing.id,\n                listing.title,\n                listing.description,\n                listing.logo,\n                listing.is_active,\n                listing.created_at,\n                listing.updated_at,\n                listing.business_id,\n                listing.product_listing_id,\n                listing.service_listing_id,\n                product_listing.id AS product_listing_id_alias,\n                product_listing.price,\n                product_listing.stock\n            FROM listings AS listing\n            INNER JOIN product_listings AS product_listing\n                ON product_listing.id = listing.product_listing_id\n            WHERE listing.id = $1 AND listing.business_id = $2\n            ",
   "describe": {
     "columns": [
       {
@@ -55,28 +55,24 @@
       },
       {
         "ordinal": 10,
-        "name": "embedding: pgvector::Vector",
-        "type_info": {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
+        "name": "product_listing_id_alias",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "price",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 12,
+        "name": "stock",
+        "type_info": "Int4"
       }
     ],
     "parameters": {
       "Left": [
         "Uuid",
-        "Text",
-        "Text",
-        "Text",
-        "Uuid",
-        {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
+        "Uuid"
       ]
     },
     "nullable": [
@@ -90,8 +86,10 @@
       false,
       true,
       true,
+      false,
+      false,
       false
     ]
   },
-  "hash": "de7e57c17e8f132eac658dee1a70a17cc7341e678c0401fc6d083599f320e2ea"
+  "hash": "65f03d9b0b3b3017a92428aa076ebc90caee48b536a7b8286b0ac9e81b6ee6f3"
 }

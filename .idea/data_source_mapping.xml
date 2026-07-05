@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/migrations/20260610153826_create_accounts.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153827_create_users.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153828_create_sessions.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153829_create_user_addresses.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153830_create_businesses.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153831_create_business_addresses.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153832_create_business_hours.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153833_create_business_media.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153834_create_product_listings.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153835_create_service_listings.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153836_create_business_listings.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153838_create_listing_product_specs.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153839_create_listing_media.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153840_create_reviews.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153841_create_review_media.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153842_create_views.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153843_create_listing_categories.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153844_create_listing_sub_categories.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153845_create_listing_services.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153846_business_listings_to_listings.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153847_listing_services_to_service_listing_type.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153848_connect_service_listing_to_service_listing_type.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+    <file url="file://$PROJECT_DIR$/migrations/20260610153849_drop_embeddings.sql" value="bb180d7b-0a00-4748-83c5-76bb34c67458" />
+  </component>
+</project>

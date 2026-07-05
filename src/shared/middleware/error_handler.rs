@@ -1,5 +1,3 @@
-use crate::shared::errors::ErrorDto;
-use poem::http::StatusCode;
 use poem::{Endpoint, IntoResponse, Middleware, Request, Response, Result};
 use serde_json::json;
 

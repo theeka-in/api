@@ -4,6 +4,8 @@ use sqlx::postgres::PgPoolOptions;
 
 use theeka_api::api;
 
+mod push_services_list;
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();

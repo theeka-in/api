@@ -2,10 +2,10 @@ use poem_openapi::Object;
 use uuid::Uuid;
 
 use crate::modules::{
-    business::{BusinessDto, BusinessWithOwnerAndAddressDto},
+    business::BusinessWithOwnerAndAddressDto,
     database::{
-        BusinessAddressEntity, BusinessEntity, BusinessListingEntity, ExploreProductListingEntity,
-        ExploreServiceListingEntity, ListingMediaEntity, ProductListingEntity,
+        ExploreProductListingEntity, ExploreServiceListingEntity,
+        ListingEntity, ListingMediaEntity, ProductListingEntity,
         ServiceListingEntity,
     },
 };
@@ -85,6 +85,7 @@ pub struct CreateServiceListingDto {
     pub logo: Option<String>,
     pub price: String,
     pub available: bool,
+    pub service_listing_type_id: Uuid,
 }
 
 #[derive(Debug, Object)]
@@ -107,6 +108,7 @@ pub struct UpdateServiceListingDto {
     pub is_active: Option<bool>,
     pub price: Option<String>,
     pub available: Option<bool>,
+    pub service_listing_type_id: Option<Uuid>,
 }
 
 #[derive(Debug, Object)]
@@ -123,8 +125,8 @@ pub struct CreateListingMediaDto {
     pub url: String,
 }
 
-impl From<(BusinessListingEntity, ProductListingEntity)> for ProductListingDto {
-    fn from((listing, product): (BusinessListingEntity, ProductListingEntity)) -> Self {
+impl From<(ListingEntity, ProductListingEntity)> for ProductListingDto {
+    fn from((listing, product): (ListingEntity, ProductListingEntity)) -> Self {
         Self {
             product: ProductDto {
                 id: product.id,
@@ -144,8 +146,8 @@ impl From<(BusinessListingEntity, ProductListingEntity)> for ProductListingDto {
     }
 }
 
-impl From<(BusinessListingEntity, ServiceListingEntity)> for ServiceListingDto {
-    fn from((listing, service): (BusinessListingEntity, ServiceListingEntity)) -> Self {
+impl From<(ListingEntity, ServiceListingEntity)> for ServiceListingDto {
+    fn from((listing, service): (ListingEntity, ServiceListingEntity)) -> Self {
         Self {
             service: ServiceDto {
                 id: service.id,

@@ -1,0 +1,5 @@
+ALTER TABLE listing_services RENAME TO service_listings_type;
+ 
+ALTER TABLE service_listings_type RENAME CONSTRAINT listing_services_pkey TO service_listings_type_pkey;
+ALTER TABLE service_listings_type RENAME CONSTRAINT listing_services_sub_category_id_fkey TO service_listings_type_sub_category_id_fkey;
+ALTER INDEX listing_services_name_key RENAME TO service_listings_type_name_key;

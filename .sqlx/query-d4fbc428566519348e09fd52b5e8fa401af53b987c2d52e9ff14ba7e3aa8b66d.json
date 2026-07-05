@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO business_listings\n                   (id, business_id, title, description, logo, service_listing_id, updated_at, embedding)\n               VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now(), $6)\n               RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                         business_id, product_listing_id, service_listing_id,\n                         embedding AS \"embedding: pgvector::Vector\"",
+  "query": "\n            UPDATE listings SET\n                title       = COALESCE($3, title),\n                description = COALESCE($4, description),\n                logo        = COALESCE($5, logo),\n                is_active   = COALESCE($6, is_active),\n                updated_at  = now()\n            WHERE id = $1 AND business_id = $2\n            RETURNING id, title, description, logo, is_active, created_at, updated_at,\n                      business_id, product_listing_id, service_listing_id\n            ",
   "describe": {
     "columns": [
       {
@@ -52,31 +52,16 @@
         "ordinal": 9,
         "name": "service_listing_id",
         "type_info": "Uuid"
-      },
-      {
-        "ordinal": 10,
-        "name": "embedding: pgvector::Vector",
-        "type_info": {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
       }
     ],
     "parameters": {
       "Left": [
         "Uuid",
-        "Text",
-        "Text",
-        "Text",
         "Uuid",
-        {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
+        "Text",
+        "Text",
+        "Text",
+        "Bool"
       ]
     },
     "nullable": [
@@ -89,9 +74,8 @@
       false,
       false,
       true,
-      true,
-      false
+      true
     ]
   },
-  "hash": "4d039b7bc172f23509cb2a975d1e0cd6ad04e0866a667058f92b394e2e492fc3"
+  "hash": "d4fbc428566519348e09fd52b5e8fa401af53b987c2d52e9ff14ba7e3aa8b66d"
 }

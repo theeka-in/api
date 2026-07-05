@@ -1,16 +1,5 @@
-use std::sync::Arc;
-
 use poem::Request;
-use poem_openapi::{
-    SecurityScheme,
-    auth::{Basic, Bearer},
-};
-use sqlx::encode::IsNull::No;
-
-use crate::{
-    modules::auth::{AuthService, SessionDto},
-    shared::guards::admin_guard,
-};
+use poem_openapi::{auth::Basic, SecurityScheme};
 
 #[derive(SecurityScheme)]
 #[oai(ty = "basic", checker = "verify_admin")]

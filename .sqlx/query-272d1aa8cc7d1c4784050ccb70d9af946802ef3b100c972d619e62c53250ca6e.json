@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                bl.id, bl.title, bl.description, bl.logo, bl.is_active,\n                bl.created_at, bl.updated_at, bl.business_id,\n                bl.product_listing_id, bl.service_listing_id,\n                bl.embedding AS \"embedding: pgvector::Vector\",\n                sl.id as sl_id, sl.price, sl.available\n               FROM business_listings bl\n               INNER JOIN service_listings sl ON sl.id = bl.service_listing_id\n               WHERE bl.business_id = $1",
+  "query": "\n            SELECT\n                listing.id,\n                listing.title,\n                listing.description,\n                listing.logo,\n                listing.is_active,\n                listing.created_at,\n                listing.updated_at,\n                listing.business_id,\n                listing.product_listing_id,\n                listing.service_listing_id,\n                service_listing.id AS service_listing_id_alias,\n                service_listing.price,\n                service_listing.available,\n                service_listing.service_listings_type_id\n            FROM listings AS listing\n            INNER JOIN service_listings AS service_listing\n                ON service_listing.id = listing.service_listing_id\n            WHERE listing.id = $1 AND listing.business_id = $2\n            ",
   "describe": {
     "columns": [
       {
@@ -55,32 +55,28 @@
       },
       {
         "ordinal": 10,
-        "name": "embedding: pgvector::Vector",
-        "type_info": {
-          "Custom": {
-            "name": "vector",
-            "kind": "Simple"
-          }
-        }
-      },
-      {
-        "ordinal": 11,
-        "name": "sl_id",
+        "name": "service_listing_id_alias",
         "type_info": "Uuid"
       },
       {
-        "ordinal": 12,
+        "ordinal": 11,
         "name": "price",
         "type_info": "Text"
       },
       {
-        "ordinal": 13,
+        "ordinal": 12,
         "name": "available",
         "type_info": "Bool"
+      },
+      {
+        "ordinal": 13,
+        "name": "service_listings_type_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid"
       ]
     },
@@ -101,5 +97,5 @@
       false
     ]
   },
-  "hash": "52200db86c69710fdf343486bd91a8948fb8b4416acec8fc7278574bec08c6b6"
+  "hash": "272d1aa8cc7d1c4784050ccb70d9af946802ef3b100c972d619e62c53250ca6e"
 }
